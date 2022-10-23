@@ -2,12 +2,14 @@
 @import url('css/main/file_info.css');
 @import url('css/main/folder.css');
 @import url('css/main/header.css');
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&family=Ubuntu&display=swap');
+@import url('css/main/form.css');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&family=Ubuntu:wght@400;500;700&display=swap');
 
 *{
     margin: 0;
     padding: 0;
     font-family: 'Roboto', sans-serif;
+    font-weight: 400;
 }
 
 body, html { 
@@ -23,4 +25,5 @@ a{
 
 h1, h2, h3, h4, h5, h6{
     font-family: 'Ubuntu', sans-serif;
+    
 }

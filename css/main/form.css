@@ -1,0 +1,80 @@
+/* BLOCK */
+.form{
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    padding-bottom: 35px;
+    box-shadow: 0px 10px 135px rgba(0, 87, 184, 0.25);
+}
+/* ELEMS */
+.form__header{
+    
+    width: 100%;
+    background-color: #0057B8;
+    padding: 21px 0;
+    border-bottom: 3px solid #B6B2B1;
+}
+.form__header-label{
+    color: #fff;
+    font-size: 24px;
+}
+.form__header-label{
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: 3px;
+}
+.form__inputs{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 20px 40px;
+}
+
+.form__input{
+    display: flex;
+    gap: 20px;
+    justify-content: flex-end;
+    align-items: center;
+}
+.form__input-field{
+    outline: none;
+    box-shadow: inset 0px 0px 8px rgba(0, 87, 184, 0.2);
+    border: none;
+    width: 200px;
+    padding: 5px 10px;
+}
+.form__input-label{
+    text-align: end;   
+    font-weight: 500;
+}
+.form__submit{
+    display: flex;
+    justify-content: center;
+    padding: 15px 0;
+    
+}
+.form__submit .form__input-label{
+    background-color: #003FB8;
+    color: #fff;
+    padding: 10px 20px; 
+    cursor: pointer;
+    font-family: 'Ubuntu';
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
+}
+
+.form__link,
+.form__link a{
+    font-family: 'Ubuntu';
+}
+
+.form__link{
+    padding-top: 10px;
+    text-align: center;
+    color: #6D6D6D;
+}
+.form__link a{
+    color: #0388D4;
+    
+}
+
+/* MODIFICATORS */
