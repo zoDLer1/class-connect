@@ -5,6 +5,7 @@
     background-color: #fff;
     padding-bottom: 35px;
     box-shadow: 0px 10px 135px rgba(0, 87, 184, 0.25);
+    border-radius: 0 0 10px 10px;
 }
 /* ELEMS */
 .form__header{
@@ -59,6 +60,8 @@
     color: #fff;
     padding: 10px 40px; 
     cursor: pointer;
+    font-weight: 500;
+    font-size: 16px;
     font-family: 'Ubuntu';
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
 }

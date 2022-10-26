@@ -1,0 +1,24 @@
+/* BLOCK */
+.directories{
+    display: flex;
+    align-items: center;
+}
+
+/* ELEMS */
+.directories__text{
+    color: #000;
+    font-weight: 700;
+    font-size: 24px;
+    padding: 5px;
+}
+.directories__directory .directories__text:hover{
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+
+/* MODIFICATORS */
+.directories--separator{
+    color: #B6B2B1;
+    font-size: 20px;
+}

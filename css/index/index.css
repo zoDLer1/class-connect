@@ -6,4 +6,5 @@ body{
     background-size: cover;
     background-position: 80% 20%;
     background-attachment: fixed;
+    display: block;
 }
