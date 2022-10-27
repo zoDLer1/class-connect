@@ -57,10 +57,11 @@
 .info__component-label{
     font-weight: 500;
     width: 160px;
+    font-size: 18px;
 }
 .info__component-value{
     font-weight: 400;
-    font-size: 15px;
+    font-size: 16px;
     display: flex;
     align-items: center;
     
@@ -74,4 +75,15 @@
 }
 .info__item-field:checked ~ .info__components{
     display: block;
+}
+.info__item-header-body .info__item-icon path{
+    fill: #0057B8;
+}
+.info__upload{
+
+}
+.info__upload-item{
+    padding: 20px;
+    display: flex;
+    border: ;
 }
