@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "Practice_web": {
+    "PracticeWeb": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

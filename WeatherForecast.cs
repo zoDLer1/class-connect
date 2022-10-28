@@ -1,4 +1,4 @@
-namespace Practice_web;
+namespace PracticeWeb;
 
 public class WeatherForecast
 {
