@@ -67,6 +67,7 @@
     
 
 }
+
 .info__item-field:checked + .info__item-header{
     border-color: #0057B8;
 }
@@ -79,11 +80,75 @@
 .info__item-header-body .info__item-icon path{
     fill: #0057B8;
 }
+.info__item-icon{
+    width: 28px;
+}
 .info__upload{
 
+}
+.info__upload-label{
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 200px;
 }
 .info__upload-item{
     padding: 20px;
     display: flex;
-    border: ;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    align-items: center;
+    justify-content: space-between;
+    
+
+}
+.info__upload-body{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px 35px;
+    padding: 25px 0;  
+    max-height: 192px;
+    overflow: auto; 
+}
+.info__upload-btns{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    
+    
+}
+.info__upload-btns .info__button{
+    
+    border-radius: 10px;
+    width: 200px;
+}
+.info__button-body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 0;
+    gap: 10px;
+    cursor: pointer;
+    
+}
+
+
+.info__button label{
+    font-weight: 500;
+    font-family: 'Ubuntu';
+}
+
+.info__upload-add_file{
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: #0057B8;   
+}
+.info__upload-submit_work{
+    color: #fff;
+    background-color: #0057B8;
+}
+.info__textarea{
+    height: 300px;
+    padding: 25px 0;
+    overflow: auto;
 }
