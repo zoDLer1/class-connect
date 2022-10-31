@@ -50,7 +50,7 @@ public class FilesystemController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<Folder?> GetFolderAsync(string? path)
+    public async Task<Folder> GetFolderAsync(string? path)
     {
         return await Task.Run(() => {
             if (path == null)
@@ -84,5 +84,34 @@ public class FilesystemController : ControllerBase
                 Items = items,
             };
         });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UploadFile(string? path, IFormFile uploadedFile)
+    {
+        if (uploadedFile == null)
+            return BadRequest();
+
+        if (path == null)
+            path = "";
+        if (path.StartsWith("/")) 
+            path = path.TrimStart('/');
+        if (path.EndsWith("/")) 
+            path = path.TrimEnd('/');
+
+        if (!Directory.Exists(_filesystemPath))
+            CreateDirectory(_filesystemPath);
+
+        var currentPath = MakePath(path);
+        if (HasReturns(currentPath) || !Directory.Exists(currentPath))
+            return BadRequest();
+
+        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadedFile.FileName);
+        using (var fileStream = new FileStream(Path.Combine(currentPath, fileName), FileMode.Create))
+        {
+           await uploadedFile.CopyToAsync(fileStream);
+        }
+
+        return Ok();
     }
 }
