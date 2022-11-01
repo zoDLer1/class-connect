@@ -9,5 +9,6 @@ public interface IFileSystemService
     Task CreateFile(string path, IFormFile file);
     Task CreateFolder(string path, string name);
     Task Rename(string path, string newName);
-    Task Remove(string path);
+    Task RemoveFile(string path);
+    Task RemoveFolder(string path);
 }

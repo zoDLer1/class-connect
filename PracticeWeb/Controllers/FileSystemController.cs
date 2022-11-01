@@ -92,4 +92,27 @@ public class FileSystemController : ControllerBase
 
         return Ok();
     }
+
+    [HttpDelete]
+    public async Task<IActionResult> DeleteFile(string? path)
+    {
+        if (path == null)
+            return BadRequest();
+        
+        if (path.StartsWith("/")) 
+            path = path.TrimStart('/');
+        if (path.EndsWith("/")) 
+            path = path.TrimEnd('/');
+
+        try
+        {
+            await _fileSystemService.RemoveFile(path);
+        }
+        catch (PracticeWeb.Exceptions.FileNotFoundException)
+        {
+            return NotFound();
+        }
+
+        return Ok();
+    }
 }
