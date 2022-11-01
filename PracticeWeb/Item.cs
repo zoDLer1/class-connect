@@ -9,6 +9,7 @@ public enum ItemTypes
 public class Item 
 {
     public string Name { get; set; } = null!;
+    public string Path { get; set; } = null!;
     public ItemTypes Type { get; set; }
     public DateTime CreationTime { get; set; }
 }
