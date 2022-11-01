@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
-using PracticeWeb.Exceltions;
+using PracticeWeb.Exceptions;
 
 namespace PracticeWeb.Services.FileSystemServices;
 
@@ -54,7 +54,18 @@ public class FileSystemService : IFileSystemService
 
     public async Task<FileResult> GetFile(string path)
     {
-        throw new NotImplementedException();
+        return await Task.Run(() => 
+        {
+            CreateFileSystemIfNotExists();
+
+            var fullPath = MakePath(path);
+            if (HasReturns(fullPath) || !File.Exists(fullPath))
+                throw new PracticeWeb.Exceptions.FileNotFoundException();
+
+            var name = Path.GetFileName(fullPath);
+            var type = MimeTypes.GetMimeType(fullPath);
+            return new PhysicalFileResult(fullPath, type);
+        });
     }
 
     public async Task<Folder> GetFolderInfo(string path)

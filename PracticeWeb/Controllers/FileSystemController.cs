@@ -1,6 +1,5 @@
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
-using PracticeWeb.Exceltions;
+using PracticeWeb.Exceptions;
 using PracticeWeb.Services.FileSystemServices;
 
 namespace PracticeWeb.Controllers;
@@ -38,7 +37,13 @@ public class FileSystemController : ControllerBase
         }
         catch (FolderNotFoundException)
         {
-            return NotFound();
+            try {
+                return await _fileSystemService.GetFile(path);
+            }
+            catch (PracticeWeb.Exceptions.FileNotFoundException)
+            {
+                return NotFound();
+            }
         }
     }
 
