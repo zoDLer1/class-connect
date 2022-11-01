@@ -64,4 +64,27 @@ public class FileSystemController : ControllerBase
 
         return Ok();
     }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateFolder(string? path, string name)
+    {
+        if (path == null)
+            return BadRequest();
+        
+        if (path.StartsWith("/")) 
+            path = path.TrimStart('/');
+        if (path.EndsWith("/")) 
+            path = path.TrimEnd('/');
+
+        try
+        {
+            await _fileSystemService.CreateFolder(path, name);
+        }
+        catch (FolderNotFoundException)
+        {
+            return NotFound();
+        }
+
+        return Ok();
+    }
 }

@@ -94,10 +94,18 @@ public class FileSystemService : IFileSystemService
         }
     }
 
-    public async Task CreateFolder(string path)
+    public async Task CreateFolder(string path, string name)
     {
-        CreateFileSystemIfNotExists();
-        throw new NotImplementedException();
+        await Task.Run(() => 
+        {
+            CreateFileSystemIfNotExists();
+
+            var fullPath = MakePath(path);
+            if (IsPathValid(fullPath))
+                throw new FolderNotFoundException();
+
+            CreateDirectory(Path.Combine(fullPath, Guid.NewGuid().ToString()));
+        });
     }
 
     public async Task Rename(string path, string newName)
