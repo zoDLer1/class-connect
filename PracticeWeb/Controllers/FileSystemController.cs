@@ -20,16 +20,29 @@ public class FileSystemController : ControllerBase
         Directory.CreateDirectory(path);
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetFolderAsync(string? path)
+    private string PreparePath(string? path)
     {
         if (path == null)
-            return BadRequest();
+            throw new NullReferenceException();
         
         if (path.StartsWith("/")) 
             path = path.TrimStart('/');
         if (path.EndsWith("/")) 
             path = path.TrimEnd('/');
+        return path;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAsync(string? path)
+    {
+        try
+        {
+            path = PreparePath(path);
+        }
+        catch (NullReferenceException)
+        {
+            return BadRequest();
+        }
 
         try
         {
@@ -48,15 +61,19 @@ public class FileSystemController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> UploadFile(string? path, IFormFile uploadedFile)
+    public async Task<IActionResult> UploadFileAsync(string? path, IFormFile uploadedFile)
     {
-        if (path == null || uploadedFile == null)
+        if (uploadedFile == null)
             return BadRequest();
         
-        if (path.StartsWith("/")) 
-            path = path.TrimStart('/');
-        if (path.EndsWith("/")) 
-            path = path.TrimEnd('/');
+        try
+        {
+            path = PreparePath(path);
+        }
+        catch (NullReferenceException)
+        {
+            return BadRequest();
+        }
 
         try
         {
@@ -71,15 +88,16 @@ public class FileSystemController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateFolder(string? path, string name)
+    public async Task<IActionResult> CreateFolderAsync(string? path, string name)
     {
-        if (path == null)
+        try
+        {
+            path = PreparePath(path);
+        }
+        catch (NullReferenceException)
+        {
             return BadRequest();
-        
-        if (path.StartsWith("/")) 
-            path = path.TrimStart('/');
-        if (path.EndsWith("/")) 
-            path = path.TrimEnd('/');
+        }
 
         try
         {
@@ -94,23 +112,31 @@ public class FileSystemController : ControllerBase
     }
 
     [HttpDelete]
-    public async Task<IActionResult> DeleteFile(string? path)
+    public async Task<IActionResult> DeleteFileAsync(string? path)
     {
-        if (path == null)
+        try
+        {
+            path = PreparePath(path);
+        }
+        catch (NullReferenceException)
+        {
             return BadRequest();
-        
-        if (path.StartsWith("/")) 
-            path = path.TrimStart('/');
-        if (path.EndsWith("/")) 
-            path = path.TrimEnd('/');
+        }
 
         try
         {
-            await _fileSystemService.RemoveFile(path);
+            await _fileSystemService.RemoveFolder(path);
         }
-        catch (PracticeWeb.Exceptions.FileNotFoundException)
+        catch (FolderNotFoundException)
         {
-            return NotFound();
+            try
+            {
+                await _fileSystemService.RemoveFile(path);
+            }
+            catch (PracticeWeb.Exceptions.FileNotFoundException)
+            {
+                return NotFound();
+            }
         }
 
         return Ok();

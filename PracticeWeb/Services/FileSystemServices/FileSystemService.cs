@@ -140,6 +140,10 @@ public class FileSystemService : IFileSystemService
 
     public async Task RemoveFolder(string path)
     {
-        throw new NotImplementedException();
+        await Task.Run(() => 
+        {
+            var fullPath = PreparePathForFolder(path);
+            Directory.Delete(fullPath, true);
+        });
     }
 }
