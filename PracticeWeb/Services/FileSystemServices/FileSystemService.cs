@@ -66,12 +66,16 @@ public class FileSystemService : IFileSystemService
         foreach (var item in items) 
         {
             var isFolder = System.IO.File.GetAttributes(item) == FileAttributes.Directory;
+            var fileName = Path.GetFileName(item) ?? "";
             result.Add(new Item() 
             {
-                Name = Path.GetFileName(item) ?? "",
+                Name = fileName,
                 Path = item.Replace(_fileSystemPath, "").TrimStart('/'),
+                Guid = (isFolder ? fileName : fileName.Replace(Path.GetExtension(fileName), "")),
                 Type = (isFolder ? ItemTypes.Folder : ItemTypes.File),
+                MimeType = (isFolder ? null : MimeTypes.GetMimeType(item)),
                 CreationTime = System.IO.File.GetCreationTime(item),
+                CreatorName = "testName",
             });
         }
         return result;
@@ -93,14 +97,17 @@ public class FileSystemService : IFileSystemService
         return await Task.Run(() => 
         {
             var fullPath = PreparePathForFolder(path);
+            var name = Path.GetFileName(fullPath) ?? "";
             var items = ParseItems(GetItems(fullPath));
             var shortPath = fullPath.Replace(_fileSystemPath, "").TrimStart('/');
-
             return new Folder() 
             { 
-                Name = Path.GetFileName(fullPath) ?? "", 
+                Name = name, 
                 Path = shortPath, 
+                Guid = name,
                 Items = items,
+                CreationTime = System.IO.File.GetCreationTime(fullPath),
+                CreatorName = "testName",
             };
         });
     }
