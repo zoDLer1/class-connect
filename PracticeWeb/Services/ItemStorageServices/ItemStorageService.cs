@@ -24,7 +24,7 @@ public class ItemStorageService : IItemStorageService
     public async Task<List<Item>> GetAllAsync() =>
         await _common.GetAllAsync(_context.Items);
 
-    public async Task<ItemType?> GetItemType(int id) =>
+    public async Task<ItemType?> GetItemTypeAsync(int id) =>
         await _context.ItemTypes.FirstOrDefaultAsync(t => t.Id == id);
 
     public async Task UpdateAsync(string id, Item entity) =>

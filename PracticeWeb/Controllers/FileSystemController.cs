@@ -46,12 +46,12 @@ public class FileSystemController : ControllerBase
 
         try
         {
-            return new JsonResult(await _fileSystemService.GetFolderInfo(path));
+            return new JsonResult(await _fileSystemService.GetFolderInfoAsync(path));
         }
         catch (FolderNotFoundException)
         {
             try {
-                return await _fileSystemService.GetFile(path);
+                return await _fileSystemService.GetFileAsync(path);
             }
             catch (PracticeWeb.Exceptions.FileNotFoundException)
             {
@@ -77,7 +77,7 @@ public class FileSystemController : ControllerBase
 
         try
         {
-            await _fileSystemService.CreateFile(path, uploadedFile);
+            await _fileSystemService.CreateFileAsync(path, uploadedFile);
         }
         catch (FolderNotFoundException)
         {
@@ -101,7 +101,7 @@ public class FileSystemController : ControllerBase
 
         try
         {
-            await _fileSystemService.CreateFolder(path, name);
+            await _fileSystemService.CreateFolderAsync(path, name);
         }
         catch (FolderNotFoundException)
         {
@@ -131,7 +131,7 @@ public class FileSystemController : ControllerBase
         {
             try
             {
-                await _fileSystemService.RemoveFile(path);
+                await _fileSystemService.RemoveFileAsync(path);
             }
             catch (PracticeWeb.Exceptions.FileNotFoundException)
             {

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PracticeWeb.Models;
 using PracticeWeb.Services.FileSystemServices;
 using PracticeWeb.Services.GroupStorageServices;
+using PracticeWeb.Services.ItemStorageServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddTransient<IFileSystemService, FileSystemService>();
 builder.Services.AddTransient<IGroupStorageService, GroupStorageService>();
+builder.Services.AddTransient<IItemStorageService, ItemStorageService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

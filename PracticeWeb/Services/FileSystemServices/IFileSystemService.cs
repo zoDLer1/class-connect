@@ -4,11 +4,11 @@ namespace PracticeWeb.Services.FileSystemServices;
 
 public interface IFileSystemService
 {
-    Task<FileResult> GetFile(string path);
-    Task<Folder> GetFolderInfo(string path);
-    Task CreateFile(string path, IFormFile file);
-    Task CreateFolder(string path, string name);
-    Task Rename(string path, string newName);
-    Task RemoveFile(string path);
+    Task<FileResult> GetFileAsync(string path);
+    Task<Folder> GetFolderInfoAsync(string path);
+    Task CreateFileAsync(string path, IFormFile file);
+    Task CreateFolderAsync(string path, string name);
+    Task RenameAsync(string path, string newName);
+    Task RemoveFileAsync(string path);
     Task RemoveFolder(string path);
 }

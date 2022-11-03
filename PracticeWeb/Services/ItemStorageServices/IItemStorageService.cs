@@ -4,5 +4,5 @@ namespace PracticeWeb.Services.ItemStorageServices;
 
 public interface IItemStorageService : IDataService<Item>
 {
-    Task<ItemType?> GetItemType(int id);
+    Task<ItemType?> GetItemTypeAsync(int id);
 }
