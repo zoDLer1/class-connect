@@ -1,10 +1,6 @@
-namespace PracticeWeb;
+using PracticeWeb.Models;
 
-public enum ItemTypes 
-{
-    Folder,
-    File
-}
+namespace PracticeWeb;
 
 public class Item 
 {
@@ -12,7 +8,7 @@ public class Item
     public string Path { get; set; } = null!;
     public string Guid { get; set; } = null!;
 
-    public ItemTypes Type { get; set; }
+    public ItemType Type { get; set; } = null!;
     public string? MimeType { get; set; }
 
     public DateTime CreationTime { get; set; }
