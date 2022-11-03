@@ -24,10 +24,10 @@ public class CommonQueries<T> where T : CommonModel
     }
 
     public async Task<T?> GetAsync(string id, IQueryable<T> collection) => 
-            await collection.FirstOrDefaultAsync(e => e.Id == id);
+        await collection.FirstOrDefaultAsync(e => e.Id == id);
 
     public async Task<List<T>> GetAllAsync(IQueryable<T> collection) =>
-            await collection.ToListAsync();
+        await collection.ToListAsync();
 
     public async Task UpdateAsync(string id, T entity)
     {
