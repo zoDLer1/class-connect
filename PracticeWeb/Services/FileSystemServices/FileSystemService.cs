@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using PracticeWeb.Exceptions;
+using PracticeWeb.Models;
 using PracticeWeb.Services.GroupStorageServices;
 
 namespace PracticeWeb.Services.FileSystemServices;
@@ -73,19 +74,19 @@ public class FileSystemService : IFileSystemService
     private IEnumerable<string> GetItems(string path) => 
         Directory.EnumerateFileSystemEntries(path, "*");
 
-    private IEnumerable<Item> ParseItems(IEnumerable<string> items)
+    private IEnumerable<FolderItem> ParseItems(IEnumerable<string> items)
     {
-        var result = new List<Item>();
+        var result = new List<FolderItem>();
         foreach (var item in items) 
         {
             var isFolder = System.IO.File.GetAttributes(item) == FileAttributes.Directory;
             var fileName = Path.GetFileName(item) ?? "";
-            result.Add(new Item() 
+            result.Add(new FolderItem() 
             {
                 Name = fileName,
                 Path = item.Replace(_fileSystemPath, "").TrimStart('/'),
                 Guid = (isFolder ? fileName : fileName.Replace(Path.GetExtension(fileName), "")),
-                Type = (isFolder ? ItemTypes.Folder : ItemTypes.File),
+                Type = new ItemType { Id = 0, Name = "Folder" }, //(isFolder ? ItemType.Folder : ItemType.File),
                 MimeType = (isFolder ? null : MimeTypes.GetMimeType(item)),
                 CreationTime = System.IO.File.GetCreationTime(item),
                 CreatorName = "testName",
