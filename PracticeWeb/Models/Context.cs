@@ -19,13 +19,13 @@ public class Context : DbContext
         base.OnModelCreating(builder);
 
         builder.Entity<ItemType>().HasData(
-            new ItemType { Id = 0, Name = "Folder" },
-            new ItemType { Id = 1, Name = "File" }
+            new ItemType { Id = 1, Name = "Folder" },
+            new ItemType { Id = 2, Name = "File" }
         );
 
         builder.Entity<Item>().HasData(
-            new Item { Id = "25aba956-b6c8-473f-b114-8ed881adf6c5", TypeId = 0, Name = "ИСП-564" },
-            new Item { Id = "7989dbf3-35a0-4efa-9a2f-5fe40e4b7c27", TypeId = 0, Name = "Группа 1" }
+            new Item { Id = "25aba956-b6c8-473f-b114-8ed881adf6c5", TypeId = 1, Name = "ИСП-564" },
+            new Item { Id = "7989dbf3-35a0-4efa-9a2f-5fe40e4b7c27", TypeId = 1, Name = "Группа 1" }
         );
 
         builder.Entity<Group>().HasData(
