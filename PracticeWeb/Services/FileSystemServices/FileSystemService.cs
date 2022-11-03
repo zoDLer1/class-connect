@@ -1,18 +1,21 @@
+using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using PracticeWeb.Exceptions;
+using PracticeWeb.Services.GroupStorageServices;
 
 namespace PracticeWeb.Services.FileSystemServices;
 
 public class FileSystemService : IFileSystemService
 {
     private string _fileSystemPath;
+    private IGroupStorageService _groupStorageService;
     private Regex ReturnPattern = new Regex(@"\/\.\.(?![^\/])");
 
-    public FileSystemService(IHostEnvironment env)
+    public FileSystemService(IHostEnvironment env, IGroupStorageService groupStorageService)
     {
         _fileSystemPath = Path.Combine(env.ContentRootPath, "Filesystem");
-        CreateFileSystemIfNotExists();
+        _groupStorageService = groupStorageService;
     }
 
     private void CreateDirectory(string path) 
@@ -20,10 +23,21 @@ public class FileSystemService : IFileSystemService
         Directory.CreateDirectory(path);
     }
 
-    private void CreateFileSystemIfNotExists() 
+    private async Task CreateFileSystem()
+    {
+        CreateDirectory(_fileSystemPath);
+
+        var groups = await _groupStorageService.GetAllAsync();
+        foreach (var group in groups)
+        {
+            CreateDirectory(Path.Combine(_fileSystemPath, group.Id));
+        }
+    }
+
+    private async Task CreateFileSystemIfNotExists() 
     {
         if (!Directory.Exists(_fileSystemPath))
-            CreateDirectory(_fileSystemPath);
+            await CreateFileSystem();
     }
 
     private string MakePath(string path) => Path.Combine(_fileSystemPath, path);
@@ -32,12 +46,11 @@ public class FileSystemService : IFileSystemService
 
     private bool IsPathValidForFile(string path) => HasReturns(path) || !File.Exists(path);
 
-
     private bool IsPathValidForFolder(string path) => HasReturns(path) || !Directory.Exists(path);
 
-    private string PreparePathForFile(string path)
+    private async Task<string> PreparePathForFile(string path)
     {
-        CreateFileSystemIfNotExists();
+        await CreateFileSystemIfNotExists();
 
         var fullPath = MakePath(path);
         if (IsPathValidForFile(fullPath))
@@ -46,9 +59,9 @@ public class FileSystemService : IFileSystemService
         return fullPath;
     }
 
-    private string PreparePathForFolder(string path)
+    private async Task<string> PreparePathForFolder(string path)
     {
-        CreateFileSystemIfNotExists();
+        await CreateFileSystemIfNotExists();
 
         var fullPath = MakePath(path);
         if (IsPathValidForFolder(fullPath))
@@ -83,9 +96,9 @@ public class FileSystemService : IFileSystemService
 
     public async Task<FileResult> GetFile(string path)
     {
-        return await Task.Run(() => 
+        return await Task.Run(async () => 
         {
-            var fullPath = PreparePathForFile(path);
+            var fullPath = await PreparePathForFile(path);
             var name = Path.GetFileName(fullPath);
             var type = MimeTypes.GetMimeType(fullPath);
             return new PhysicalFileResult(fullPath, type);
@@ -94,9 +107,9 @@ public class FileSystemService : IFileSystemService
 
     public async Task<Folder> GetFolderInfo(string path)
     {
-        return await Task.Run(() => 
+        return await Task.Run(async () => 
         {
-            var fullPath = PreparePathForFolder(path);
+            var fullPath = await PreparePathForFolder(path);
             var name = Path.GetFileName(fullPath) ?? "";
             var items = ParseItems(GetItems(fullPath));
             var shortPath = fullPath.Replace(_fileSystemPath, "").TrimStart('/');
@@ -114,19 +127,22 @@ public class FileSystemService : IFileSystemService
 
     public async Task CreateFile(string path, IFormFile file)
     {
-        var fullPath = PreparePathForFolder(path);
-        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-        using (var fileStream = new FileStream(Path.Combine(fullPath, fileName), FileMode.Create))
+        await Task.Run(async () => 
         {
-            await file.CopyToAsync(fileStream);
-        }
+            var fullPath = await PreparePathForFolder(path);
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            using (var fileStream = new FileStream(Path.Combine(fullPath, fileName), FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            } 
+        });
     }
 
     public async Task CreateFolder(string path, string name)
     {
-        await Task.Run(() => 
+        await Task.Run(async () => 
         {
-            var fullPath = PreparePathForFolder(path);
+            var fullPath = await PreparePathForFolder(path);
             CreateDirectory(Path.Combine(fullPath, Guid.NewGuid().ToString()));
         });
     }
@@ -138,18 +154,18 @@ public class FileSystemService : IFileSystemService
 
     public async Task RemoveFile(string path)
     {
-        await Task.Run(() => 
+        await Task.Run(async () => 
         {
-            var fullPath = PreparePathForFile(path);
+            var fullPath = await PreparePathForFile(path);
             File.Delete(fullPath);
         });
     }
 
     public async Task RemoveFolder(string path)
     {
-        await Task.Run(() => 
+        await Task.Run(async () => 
         {
-            var fullPath = PreparePathForFolder(path);
+            var fullPath = await PreparePathForFolder(path);
             Directory.Delete(fullPath, true);
         });
     }
