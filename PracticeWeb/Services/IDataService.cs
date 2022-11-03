@@ -11,39 +11,34 @@ public interface IDataService<T>
     /// Добавить сущность
     /// </summary>
     /// <param name="entity">Сущность</param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<T> CreateAsync(T entity, CancellationToken cancellationToken);
+    Task<T> CreateAsync(T entity);
 
     /// <summary>
     /// Получить сущность
     /// </summary>
     /// <param name="id">ИД сущности</param>
-    /// <param name="cancellationToken"></param>
     /// <returns>Сущность</returns>
-    Task<T?> GetAsync(int id, CancellationToken cancellationToken);
+    Task<T?> GetAsync(string id);
 
     /// <summary>
     /// Получить все сущности
     /// </summary>
-    /// <param name="cancellationToken"></param>
     /// <returns>Список сущностей</returns>
-    Task<List<T>> GetAllAsync(CancellationToken cancellationToken);
+    Task<List<T>> GetAllAsync();
 
     /// <summary>
     /// Обновить сущность
     /// </summary>
     /// <param name="id">ИД сущности</param>
     /// <param name="entity">Сущность</param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task UpdateAsync(int id, T entity, CancellationToken cancellationToken);
+    Task UpdateAsync(string id, T entity);
 
     /// <summary>
     /// Удалить сущность
     /// </summary>
     /// <param name="id">ИД сущности</param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task DeleteAsync(int id, CancellationToken cancellationToken);
+    Task DeleteAsync(string id);
 }
