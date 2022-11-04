@@ -33,7 +33,33 @@ public class ItemStorageService : IItemStorageService
     public async Task DeleteAsync(string id) =>
         await _common.DeleteAsync(id);
 
+    public async Task CreateConnectionAsync(Connection connection)
+    {
+        await _context.Connections.AddAsync(connection);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task GetConnectionsByParentAsync(string parentId) =>
+        await Task.Run(() => IncludeConnectionValues().Select(c => c.ParentId == parentId));
+
+    public async Task GetConnectionByChildAsync(string childId) =>
+        await IncludeConnectionValues().FirstOrDefaultAsync(c => c.ChildId == childId);
+
+    public async Task DeleteConnectionAsync(string parentId, string childId)
+    {
+        var connection = GetConnectionsByParentAsync(parentId);
+        if (connection == null)
+            throw new NullReferenceException();
+        _context.Remove(connection);
+        await _context.SaveChangesAsync();
+    }
+
     private IQueryable<Item> IncludeValues() =>
         _context.Items
             .Include(e => e.Type);
+
+    private IQueryable<Connection> IncludeConnectionValues() =>
+        _context.Connections
+            .Include(c => c.Child)
+            .Include(c => c.Parent);
 }
