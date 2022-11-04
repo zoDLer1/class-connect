@@ -8,6 +8,7 @@ public class Context : DbContext
     public DbSet<Group> Groups { get; set; } = null!;
     public DbSet<ItemType> ItemTypes { get; set; } = null!;
     public DbSet<Item> Items { get; set; } = null!;
+    public DbSet<Connection> Connections { get; set; } = null!;
 
     public Context(DbContextOptions<Context> options) : base(options)
     {
@@ -17,6 +18,10 @@ public class Context : DbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<Connection>().HasKey(t => new {
+            t.ParentId, t.ChildId
+        });
 
         builder.Entity<ItemType>().HasData(
             new ItemType { Id = 1, Name = "Folder" },
