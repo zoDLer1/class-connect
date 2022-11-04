@@ -19,10 +19,10 @@ public class ItemStorageService : IItemStorageService
         await _common.CreateAsync(entity);
 
     public async Task<Item?> GetAsync(string id) =>
-        await _common.GetAsync(id, _context.Items);
+        await _common.GetAsync(id, IncludeValues());
 
     public async Task<List<Item>> GetAllAsync() =>
-        await _common.GetAllAsync(_context.Items);
+        await _common.GetAllAsync(IncludeValues());
 
     public async Task<ItemType?> GetItemTypeAsync(int id) =>
         await _context.ItemTypes.FirstOrDefaultAsync(t => t.Id == id);
@@ -32,4 +32,8 @@ public class ItemStorageService : IItemStorageService
 
     public async Task DeleteAsync(string id) =>
         await _common.DeleteAsync(id);
+
+    private IQueryable<Item> IncludeValues() =>
+        _context.Items
+            .Include(e => e.Type);
 }
