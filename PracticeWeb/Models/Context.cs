@@ -31,8 +31,8 @@ public class Context : DbContext
         );
 
         builder.Entity<Item>().HasData(
-            new Item { Id = "25aba956-b6c8-473f-b114-8ed881adf6c5", TypeId = 3, Name = "ИСП-564" },
-            new Item { Id = "7989dbf3-35a0-4efa-9a2f-5fe40e4b7c27", TypeId = 3, Name = "Группа 1" }
+            new Item { Id = "25aba956-b6c8-473f-b114-8ed881adf6c5", TypeId = 3, Name = "ИСП-564", CreationTime = DateTime.Now },
+            new Item { Id = "7989dbf3-35a0-4efa-9a2f-5fe40e4b7c27", TypeId = 3, Name = "Группа 1", CreationTime = DateTime.Now }
         );
 
         builder.Entity<Group>().HasData(
