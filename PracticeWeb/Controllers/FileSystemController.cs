@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using PracticeWeb.Exceptions;
 using PracticeWeb.Services.FileSystemServices;
+using PracticeWeb.Services.GroupStorageServices;
+using PracticeWeb.Services.ItemStorageServices;
 
 namespace PracticeWeb.Controllers;
 
@@ -9,10 +11,17 @@ namespace PracticeWeb.Controllers;
 public class FileSystemController : ControllerBase
 {
     private IFileSystemService _fileSystemService;
+    private IGroupStorageService _groupStorageService;
+    private IItemStorageService _itemStorageService;
 
-    public FileSystemController(IFileSystemService fileSystemService)
+    public FileSystemController(
+        IFileSystemService fileSystemService, 
+        IGroupStorageService groupStorageService,
+        IItemStorageService itemStorageService)
     {
         _fileSystemService = fileSystemService;
+        _groupStorageService = groupStorageService;
+        _itemStorageService = itemStorageService;
     }
 
     private void CreateDirectory(string path) 
@@ -30,6 +39,32 @@ public class FileSystemController : ControllerBase
         if (path.EndsWith("/")) 
             path = path.TrimEnd('/');
         return path;
+    }
+
+    [HttpGet("group")]
+    public async Task<IActionResult> GetByGroup(string? group)
+    {
+        if (group == null)
+            return BadRequest();
+
+        var groupInfo = await _groupStorageService.GetByGroupNameAsync(group);
+        if (groupInfo == null)
+            return BadRequest();
+
+        var item = await _itemStorageService.GetAsync(groupInfo.Id);
+        if (item == null)
+            return BadRequest();
+
+        var folder = new Folder 
+        {
+            Name = item.Name, 
+            Path = item.Name, 
+            Guid = item.Id,
+            Items = new List<FolderItem>(),
+            CreationTime = item.CreationTime,
+            CreatorName = "testName",
+        };
+        return new JsonResult(folder);
     }
 
     [HttpGet]
