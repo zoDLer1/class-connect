@@ -158,9 +158,16 @@ public class FileSystemService : IFileSystemService
         });
     }
 
-    public async Task RenameAsync(string path, string newName)
+    public async Task RenameAsync(string id, string newName)
     {
-        throw new NotImplementedException();
+        await Task.Run(async () => 
+        {
+            var item = await _itemStorageService.GetAsync(id);
+            if (item == null)
+                throw new ItemNotFoundException();
+            item.Name = newName;
+            await _itemStorageService.UpdateAsync(id, item);
+        });
     }
 
     public async Task RemoveFileAsync(string path)

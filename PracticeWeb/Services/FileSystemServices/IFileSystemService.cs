@@ -8,7 +8,7 @@ public interface IFileSystemService
     Task<Folder> GetFolderInfoAsync(string path);
     Task CreateFileAsync(string path, IFormFile file);
     Task CreateFolderAsync(string path, string name);
-    Task RenameAsync(string path, string newName);
+    Task RenameAsync(string id, string newName);
     Task RemoveFileAsync(string path);
     Task RemoveFolder(string path);
 }

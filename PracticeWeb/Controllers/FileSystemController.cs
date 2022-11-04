@@ -111,8 +111,18 @@ public class FileSystemController : ControllerBase
         return Ok();
     }
 
+    [HttpPatch]
+    public async Task<IActionResult> RenameAsync(string? id, string? name)
+    {
+        if (id == null || name == null)
+            return BadRequest();
+
+        await _fileSystemService.RenameAsync(id, name);
+        return Ok();
+    }
+
     [HttpDelete]
-    public async Task<IActionResult> DeleteFileAsync(string? path)
+    public async Task<IActionResult> DeleteAsync(string? path)
     {
         try
         {
