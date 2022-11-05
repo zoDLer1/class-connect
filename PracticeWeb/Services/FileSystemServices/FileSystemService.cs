@@ -30,13 +30,37 @@ public class FileSystemService : IFileSystemService
         Directory.CreateDirectory(path);
     }
 
+    private async Task<string> CreateRoot()
+    {
+        var rootGuid = Guid.NewGuid().ToString();
+        var path = Path.Combine(_fileSystemPath, rootGuid);
+        CreateDirectory(path);
+        var item = new Item 
+        {
+            Id = rootGuid,
+            TypeId = 1,
+            Name = "Корень",
+            CreationTime = DateTime.Now
+        };
+        await _itemStorageService.CreateAsync(item);
+        return rootGuid;
+    }
+
     private async Task CreateFileSystemAsync()
     {
         CreateDirectory(_fileSystemPath);
-
+        var rootGuid = await CreateRoot();
+        _fileSystemPath = Path.Combine(_fileSystemPath, rootGuid);
+        
         var groups = await _groupStorageService.GetAllAsync();
         foreach (var group in groups)
         {
+            var connection = new Connection
+            {
+                ParentId = rootGuid,
+                ChildId = group.Id,
+            };
+            await _itemStorageService.CreateConnectionAsync(connection);
             CreateDirectory(Path.Combine(_fileSystemPath, group.Id));
         }
     }
@@ -139,6 +163,8 @@ public class FileSystemService : IFileSystemService
 
     public async Task<Folder> GetFolderInfoAsync(string id)
     {
+        await CreateFileSystemIfNotExistsAsync();
+
         var item = await _itemStorageService.GetAsync(id);
         if (item == null)
             throw new ItemNotFoundException();
