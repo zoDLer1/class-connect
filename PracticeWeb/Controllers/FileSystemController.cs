@@ -54,26 +54,79 @@ public class FileSystemController : ControllerBase
         return result;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetAsync(string? path)
+    private async Task<string> ParsePath(List<string> ids)
     {
-        try
+        var result = new List<string>();
+        Console.WriteLine(ids.Count());
+        foreach (var id in ids)
         {
-            path = PreparePath(path);
+            var item = await _itemStorageService.GetAsync(id);
+            if (item == null)
+                continue;
+            result.Add(item.Name);
         }
-        catch (NullReferenceException)
+        return string.Join(Path.DirectorySeparatorChar, result);
+    }
+
+    private async Task<List<FolderItem>> PrepareItemsAsync(List<string> itemIds)
+    {
+        var result = new List<FolderItem>();
+        foreach (var id in itemIds)
         {
+            var item = await _itemStorageService.GetAsync(id);
+            if (item == null)
+                continue;
+            var fullPath = await MakeFullPathAsync(item.Id);
+            var path = string.Join(Path.DirectorySeparatorChar, fullPath);
+            result.Add(new FolderItem() 
+            {
+                Name = item.Name,
+                Path = await ParsePath(fullPath),
+                Guid = item.Id,
+                Type = item.Type,
+                MimeType = (item.Type.Name == "File" ? MimeTypes.GetMimeType(path) : null),
+                CreationTime = item.CreationTime,
+                CreatorName = "testName",
+            });
+        }
+        return result;
+    }
+
+    private async Task<Folder> GetFolderInfoAsync(string id)
+    {
+        var item = await _itemStorageService.GetAsync(id);
+        if (item == null)
+            throw new ItemNotFoundException();
+
+        var items = await _itemStorageService.GetConnectionsByParentAsync(item.Id);
+        var fullPath = await MakeFullPathAsync(item.Id);
+        var folder = new Folder 
+        {
+            Name = item.Name, 
+            Path = await ParsePath(fullPath),
+            FullPath = string.Join(Path.DirectorySeparatorChar, fullPath),
+            Guid = item.Id,
+            Items = await PrepareItemsAsync(items.Select(i => i.ChildId).ToList()),
+            CreationTime = item.CreationTime,
+            CreatorName = "testName",
+        };
+        return folder;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAsync(string? id)
+    {
+        if (id == null)
             return BadRequest();
-        }
 
         try
         {
-            return new JsonResult(await _fileSystemService.GetFolderInfoAsync(path));
+            return new JsonResult(await GetFolderInfoAsync(id));
         }
-        catch (FolderNotFoundException)
+        catch (ItemNotFoundException)
         {
             try {
-                return await _fileSystemService.GetFileAsync(path);
+                return await _fileSystemService.GetFileAsync(id);
             }
             catch (PracticeWeb.Exceptions.FileNotFoundException)
             {
