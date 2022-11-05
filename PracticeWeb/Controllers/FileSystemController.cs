@@ -54,32 +54,6 @@ public class FileSystemController : ControllerBase
         return result;
     }
 
-    [HttpGet("group")]
-    public async Task<IActionResult> GetByGroup(string? group)
-    {
-        if (group == null)
-            return BadRequest();
-
-        var groupInfo = await _groupStorageService.GetByGroupNameAsync(group);
-        if (groupInfo == null)
-            return BadRequest();
-
-        var item = await _itemStorageService.GetAsync(groupInfo.Id);
-        if (item == null)
-            return BadRequest();
-
-        var folder = new Folder 
-        {
-            Name = item.Name, 
-            Path = item.Name, 
-            Guid = item.Id,
-            Items = new List<FolderItem>(),
-            CreationTime = item.CreationTime,
-            CreatorName = "testName",
-        };
-        return new JsonResult(folder);
-    }
-
     [HttpGet]
     public async Task<IActionResult> GetAsync(string? path)
     {
