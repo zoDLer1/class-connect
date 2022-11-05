@@ -8,6 +8,7 @@ public class Context : DbContext
     public DbSet<Group> Groups { get; set; } = null!;
     public DbSet<ItemType> ItemTypes { get; set; } = null!;
     public DbSet<Item> Items { get; set; } = null!;
+    public DbSet<FileEntity> Files { get; set; } = null!;
     public DbSet<Connection> Connections { get; set; } = null!;
 
     public Context(DbContextOptions<Context> options) : base(options)
