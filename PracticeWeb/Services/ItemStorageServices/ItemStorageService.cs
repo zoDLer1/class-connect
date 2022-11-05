@@ -8,11 +8,13 @@ public class ItemStorageService : IItemStorageService
 {
     private Context _context;
     private CommonQueries<Item> _common;
+    private CommonQueries<FileEntity> _commonFile;
 
     public ItemStorageService(Context context)
     {
         _context = context;
         _common = new CommonQueries<Item>(_context);
+        _commonFile = new CommonQueries<FileEntity>(_context);
     }
 
     public async Task<Item> CreateAsync(Item entity) =>
@@ -33,9 +35,18 @@ public class ItemStorageService : IItemStorageService
     public async Task DeleteAsync(string id) =>
         await _common.DeleteAsync(id);
 
-    public async Task CreateConnectionAsync(Connection connection)
+    public async Task CreateFileAsync(FileEntity entity) =>
+        await _commonFile.CreateAsync(entity);
+
+    public async Task<FileEntity?> GetFileAsync(string id) =>
+        await _commonFile.GetAsync(id, _context.Files);
+
+    public async Task DeleteFileAsync(string id) =>
+        await _commonFile.DeleteAsync(id);
+
+    public async Task CreateConnectionAsync(Connection entity)
     {
-        await _context.Connections.AddAsync(connection);
+        await _context.Connections.AddAsync(entity);
         await _context.SaveChangesAsync();
     }
 
