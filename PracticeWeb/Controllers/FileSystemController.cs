@@ -1,5 +1,7 @@
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using PracticeWeb.Exceptions;
+using PracticeWeb.Models;
 using PracticeWeb.Services.FileSystemServices;
 using PracticeWeb.Services.GroupStorageServices;
 using PracticeWeb.Services.ItemStorageServices;
@@ -39,6 +41,17 @@ public class FileSystemController : ControllerBase
         if (path.EndsWith("/")) 
             path = path.TrimEnd('/');
         return path;
+    }
+
+    private async Task<List<string>> MakeFullPathAsync(string childId)
+    {
+        var connection = await _itemStorageService.GetConnectionByChildAsync(childId);
+        if (connection == null)
+            return new List<string>() { childId };
+
+        var result = await MakeFullPathAsync(connection.ParentId);
+        result.Add(connection.ChildId);
+        return result;
     }
 
     [HttpGet("group")]
@@ -123,25 +136,29 @@ public class FileSystemController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateFolderAsync(string? path, string name)
+    public async Task<IActionResult> CreateFolderAsync(string? parentId, string? name)
     {
-        try
-        {
-            path = PreparePath(path);
-        }
-        catch (NullReferenceException)
-        {
+        if (parentId == null || await _itemStorageService.GetAsync(parentId) == null || name == null)
             return BadRequest();
-        }
 
-        try
+        var item = new Item 
         {
-            await _fileSystemService.CreateFolderAsync(path, name);
-        }
-        catch (FolderNotFoundException)
+            Id = Guid.NewGuid().ToString(),
+            TypeId = 1,
+            Name = name,
+            CreationTime = DateTime.Now
+        };
+        var connection = new Connection
         {
-            return NotFound();
-        }
+            ParentId = parentId,
+            ChildId = item.Id,
+        };
+        await _itemStorageService.CreateAsync(item);
+        await _itemStorageService.CreateConnectionAsync(connection);
+
+        var pathItems = await MakeFullPathAsync(item.Id);
+        var path = string.Join(Path.DirectorySeparatorChar, pathItems.Take(pathItems.Count() - 1));
+        await _fileSystemService.CreateFolderAsync(path, pathItems.Last());
 
         return Ok();
     }

@@ -154,7 +154,9 @@ public class FileSystemService : IFileSystemService
         await Task.Run(async () => 
         {
             var fullPath = await PreparePathForFolderAsync(path);
-            CreateDirectory(Path.Combine(fullPath, Guid.NewGuid().ToString()));
+            Console.WriteLine(fullPath);
+            CreateDirectory(Path.Combine(fullPath, name));
+            
         });
     }
 
