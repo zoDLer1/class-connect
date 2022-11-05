@@ -43,76 +43,6 @@ public class FileSystemController : ControllerBase
         return path;
     }
 
-    private async Task<List<string>> MakeFullPathAsync(string childId)
-    {
-        var connection = await _itemStorageService.GetConnectionByChildAsync(childId);
-        if (connection == null)
-            return new List<string>() { childId };
-
-        var result = await MakeFullPathAsync(connection.ParentId);
-        result.Add(connection.ChildId);
-        return result;
-    }
-
-    private async Task<string> ParsePath(List<string> ids)
-    {
-        var result = new List<string>();
-        Console.WriteLine(ids.Count());
-        foreach (var id in ids)
-        {
-            var item = await _itemStorageService.GetAsync(id);
-            if (item == null)
-                continue;
-            result.Add(item.Name);
-        }
-        return string.Join(Path.DirectorySeparatorChar, result);
-    }
-
-    private async Task<List<FolderItem>> PrepareItemsAsync(List<string> itemIds)
-    {
-        var result = new List<FolderItem>();
-        foreach (var id in itemIds)
-        {
-            var item = await _itemStorageService.GetAsync(id);
-            if (item == null)
-                continue;
-            var fullPath = await MakeFullPathAsync(item.Id);
-            var path = string.Join(Path.DirectorySeparatorChar, fullPath);
-            result.Add(new FolderItem() 
-            {
-                Name = item.Name,
-                Path = await ParsePath(fullPath),
-                Guid = item.Id,
-                Type = item.Type,
-                MimeType = (item.Type.Name == "File" ? MimeTypes.GetMimeType(path) : null),
-                CreationTime = item.CreationTime,
-                CreatorName = "testName",
-            });
-        }
-        return result;
-    }
-
-    private async Task<Folder> GetFolderInfoAsync(string id)
-    {
-        var item = await _itemStorageService.GetAsync(id);
-        if (item == null)
-            throw new ItemNotFoundException();
-
-        var items = await _itemStorageService.GetConnectionsByParentAsync(item.Id);
-        var fullPath = await MakeFullPathAsync(item.Id);
-        var folder = new Folder 
-        {
-            Name = item.Name, 
-            Path = await ParsePath(fullPath),
-            FullPath = string.Join(Path.DirectorySeparatorChar, fullPath),
-            Guid = item.Id,
-            Items = await PrepareItemsAsync(items.Select(i => i.ChildId).ToList()),
-            CreationTime = item.CreationTime,
-            CreatorName = "testName",
-        };
-        return folder;
-    }
-
     [HttpGet]
     public async Task<IActionResult> GetAsync(string? id)
     {
@@ -121,7 +51,7 @@ public class FileSystemController : ControllerBase
 
         try
         {
-            return new JsonResult(await GetFolderInfoAsync(id));
+            return new JsonResult(await _fileSystemService.GetFolderInfoAsync(id));
         }
         catch (ItemNotFoundException)
         {
@@ -168,25 +98,7 @@ public class FileSystemController : ControllerBase
         if (parentId == null || await _itemStorageService.GetAsync(parentId) == null || name == null)
             return BadRequest();
 
-        var item = new Item 
-        {
-            Id = Guid.NewGuid().ToString(),
-            TypeId = 1,
-            Name = name,
-            CreationTime = DateTime.Now
-        };
-        var connection = new Connection
-        {
-            ParentId = parentId,
-            ChildId = item.Id,
-        };
-        await _itemStorageService.CreateAsync(item);
-        await _itemStorageService.CreateConnectionAsync(connection);
-
-        var pathItems = await MakeFullPathAsync(item.Id);
-        var path = string.Join(Path.DirectorySeparatorChar, pathItems.Take(pathItems.Count() - 1));
-        await _fileSystemService.CreateFolderAsync(path, pathItems.Last());
-
+        await _fileSystemService.CreateFolderAsync(parentId, name);
         return Ok();
     }
 

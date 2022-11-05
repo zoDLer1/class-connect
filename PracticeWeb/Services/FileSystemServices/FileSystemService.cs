@@ -77,34 +77,6 @@ public class FileSystemService : IFileSystemService
         return fullPath;
     }
 
-    private IEnumerable<string> GetItems(string path) => 
-        Directory.EnumerateFileSystemEntries(path, "*");
-
-    private async Task<IEnumerable<FolderItem>> ParseItemsAsync(IEnumerable<string> items)
-    {
-        var result = new List<FolderItem>();
-        foreach (var itemPath in items) 
-        {
-            var isFolder = System.IO.File.GetAttributes(itemPath) == FileAttributes.Directory;
-            var fileName = Path.GetFileName(itemPath) ?? "";
-            var guid = (isFolder ? fileName : fileName.Replace(Path.GetExtension(fileName), ""));
-            var item = await _itemStorageService.GetAsync(guid);
-            if (item == null)
-                continue;
-            result.Add(new FolderItem() 
-            {
-                Name = item.Name,
-                Path = item.Name,
-                Guid = guid,
-                Type = item.Type, //(isFolder ? ItemType.Folder : ItemType.File),
-                MimeType = (isFolder ? null : MimeTypes.GetMimeType(itemPath)),
-                CreationTime = System.IO.File.GetCreationTime(itemPath),
-                CreatorName = "testName",
-            });
-        }
-        return result;
-    }
-
     public async Task<FileResult> GetFileAsync(string path)
     {
         return await Task.Run(async () => 
@@ -116,24 +88,75 @@ public class FileSystemService : IFileSystemService
         });
     }
 
-    public async Task<Folder> GetFolderInfoAsync(string path)
+    private async Task<List<string>> MakeFullPathAsync(string childId)
     {
-        return await Task.Run(async () => 
+        var connection = await _itemStorageService.GetConnectionByChildAsync(childId);
+        if (connection == null)
+            return new List<string>() { childId };
+
+        var result = await MakeFullPathAsync(connection.ParentId);
+        result.Add(connection.ChildId);
+        return result;
+    }
+
+    private async Task<string> ParsePath(List<string> ids)
+    {
+        var result = new List<string>();
+        Console.WriteLine(ids.Count());
+        foreach (var id in ids)
         {
-            var fullPath = await PreparePathForFolderAsync(path);
-            var name = Path.GetFileName(fullPath) ?? "";
-            var items = await ParseItemsAsync(GetItems(fullPath));
-            var shortPath = fullPath.Replace(_fileSystemPath, "").TrimStart('/');
-            return new Folder() 
-            { 
-                Name = name, 
-                Path = shortPath, 
-                Guid = name,
-                Items = items,
-                CreationTime = System.IO.File.GetCreationTime(fullPath),
+            var item = await _itemStorageService.GetAsync(id);
+            if (item == null)
+                continue;
+            result.Add(item.Name);
+        }
+        return string.Join(Path.DirectorySeparatorChar, result);
+    }
+
+    private async Task<List<FolderItem>> PrepareItemsAsync(List<string> itemIds)
+    {
+        var result = new List<FolderItem>();
+        foreach (var id in itemIds)
+        {
+            var item = await _itemStorageService.GetAsync(id);
+            if (item == null)
+                continue;
+            var fullPath = await MakeFullPathAsync(item.Id);
+            var path = string.Join(Path.DirectorySeparatorChar, fullPath);
+            result.Add(new FolderItem() 
+            {
+                Name = item.Name,
+                Path = await ParsePath(fullPath),
+                Guid = item.Id,
+                Type = item.Type,
+                MimeType = (item.Type.Name == "File" ? MimeTypes.GetMimeType(path) : null),
+                CreationTime = item.CreationTime,
                 CreatorName = "testName",
-            };
-        });
+            });
+        }
+        return result;
+    }
+
+    public async Task<Folder> GetFolderInfoAsync(string id)
+    {
+        var item = await _itemStorageService.GetAsync(id);
+        if (item == null)
+            throw new ItemNotFoundException();
+
+        var items = await _itemStorageService.GetConnectionsByParentAsync(item.Id);
+        var fullPath = await MakeFullPathAsync(item.Id);
+        var folder = new Folder 
+        {
+            Name = item.Name, 
+            Type = item.Type,
+            Path = await ParsePath(fullPath),
+            RealPath = string.Join(Path.DirectorySeparatorChar, fullPath),
+            Guid = item.Id,
+            Items = await PrepareItemsAsync(items.Select(i => i.ChildId).ToList()),
+            CreationTime = item.CreationTime,
+            CreatorName = "testName",
+        };
+        return folder;
     }
 
     public async Task CreateFileAsync(string path, IFormFile file)
@@ -149,14 +172,29 @@ public class FileSystemService : IFileSystemService
         });
     }
 
-    public async Task CreateFolderAsync(string path, string name)
+    public async Task CreateFolderAsync(string parentId, string name)
     {
         await Task.Run(async () => 
         {
+            var item = new Item 
+            {
+                Id = Guid.NewGuid().ToString(),
+                TypeId = 1,
+                Name = name,
+                CreationTime = DateTime.Now
+            };
+            var connection = new Connection
+            {
+                ParentId = parentId,
+                ChildId = item.Id,
+            };
+            await _itemStorageService.CreateAsync(item);
+            await _itemStorageService.CreateConnectionAsync(connection);
+
+            var pathItems = await MakeFullPathAsync(item.Id);
+            var path = string.Join(Path.DirectorySeparatorChar, pathItems.Take(pathItems.Count() - 1));
             var fullPath = await PreparePathForFolderAsync(path);
-            Console.WriteLine(fullPath);
             CreateDirectory(Path.Combine(fullPath, name));
-            
         });
     }
 
