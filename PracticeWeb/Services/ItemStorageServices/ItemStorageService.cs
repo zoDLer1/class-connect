@@ -39,10 +39,10 @@ public class ItemStorageService : IItemStorageService
         await _context.SaveChangesAsync();
     }
 
-    public async Task GetConnectionsByParentAsync(string parentId) =>
-        await Task.Run(() => IncludeConnectionValues().Select(c => c.ParentId == parentId));
+    public async Task<IEnumerable<Connection?>> GetConnectionsByParentAsync(string parentId) =>
+        await IncludeConnectionValues().Where(c => c.ParentId == parentId).ToListAsync();
 
-    public async Task GetConnectionByChildAsync(string childId) =>
+    public async Task<Connection?> GetConnectionByChildAsync(string childId) =>
         await IncludeConnectionValues().FirstOrDefaultAsync(c => c.ChildId == childId);
 
     public async Task DeleteConnectionAsync(string parentId, string childId)
