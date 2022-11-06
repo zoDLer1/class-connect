@@ -110,6 +110,7 @@ public class FileSystemService : IFileSystemService
         
         return item;
     }
+
     private async Task<List<string>> GeneratePathAsync(string childId)
     {
         var connection = await _itemStorageService.GetConnectionByChildAsync(childId);
@@ -159,29 +160,34 @@ public class FileSystemService : IFileSystemService
         return result;
     }
 
-    public async Task<FileResult> GetFileAsync(string path)
+    public async Task<FileResult> GetFileAsync(string id)
     {
-        return await Task.Run(async () => 
-        {
-            var fullPath = await PreparePathForFileAsync(path);
-            var name = Path.GetFileName(fullPath);
-            var type = MimeTypes.GetMimeType(fullPath);
-            return new PhysicalFileResult(fullPath, type);
-        });
+        var item = await TryGetItemAsync(id);
+        if (item.Type.Name != "File")
+            throw new ItemTypeException();
+        
+        var fileEntity = await _itemStorageService.GetFileAsync(item.Id);
+        if (fileEntity == null)
+            throw new ItemNotFoundException();
+        
+        var pathItems = await GeneratePathAsync(item.Id);
+        var path = Path.Combine(_fileSystemPath, string.Join(Path.DirectorySeparatorChar, pathItems));
+        return new PhysicalFileResult(path, fileEntity.MimeType);
     }
-
 
     public async Task<Folder> GetFolderInfoAsync(string id)
     {
         var item = await TryGetItemAsync(id);
+        if (item.Type.Name == "File")
+            throw new ItemTypeException();
         var items = await _itemStorageService.GetConnectionsByParentAsync(item.Id);
-        var fullPath = await GeneratePathAsync(item.Id);
+        var pathItems = await GeneratePathAsync(item.Id);
         var folder = new Folder 
         {
             Name = item.Name, 
             Type = item.Type,
-            Path = await MakePathFromNames(fullPath),
-            RealPath = string.Join(Path.DirectorySeparatorChar, fullPath),
+            Path = await MakePathFromNames(pathItems),
+            RealPath = string.Join(Path.DirectorySeparatorChar, pathItems),
             Guid = item.Id,
             Items = await PrepareItemsAsync(items.Select(i => i.ChildId).ToList()),
             CreationTime = item.CreationTime,

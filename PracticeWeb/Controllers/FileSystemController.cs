@@ -53,14 +53,18 @@ public class FileSystemController : ControllerBase
         {
             return new JsonResult(await _fileSystemService.GetFolderInfoAsync(id));
         }
-        catch (ItemNotFoundException)
+        catch (ItemTypeException)
         {
             try {
                 return await _fileSystemService.GetFileAsync(id);
             }
-            catch (PracticeWeb.Exceptions.FileNotFoundException)
+            catch (ItemNotFoundException)
             {
                 return NotFound();
+            }
+            catch (ItemTypeException)
+            {
+                return BadRequest();
             }
         }
     }
