@@ -86,10 +86,17 @@ public class FileSystemController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateFolderAsync(string? parentId, string? name)
     {
-        if (parentId == null || await _itemStorageService.GetAsync(parentId) == null || name == null)
+        if (parentId == null || name == null)
             return BadRequest();
 
-        await _fileSystemService.CreateFolderAsync(parentId, name);
+        try
+        {
+            await _fileSystemService.CreateFolderAsync(parentId, name);
+        }
+        catch (ItemNotFoundException)
+        {
+            return NotFound();
+        }
         return Ok();
     }
 

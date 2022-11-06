@@ -70,20 +70,20 @@ public class FileSystemService : IFileSystemService
             await CreateFileSystemAsync();
     }
 
-    private string MakePath(string path) => Path.Combine(_fileSystemPath, path);
+    private string MakeFullPath(string path) => Path.Combine(_fileSystemPath, path);
 
     private bool HasReturns(string path) => ReturnPattern.IsMatch(path);
 
-    private bool IsPathValidForFile(string path) => HasReturns(path) || !File.Exists(path);
+    private bool IsFilePathValid(string path) => !HasReturns(path) || File.Exists(path);
 
-    private bool IsPathValidForFolder(string path) => HasReturns(path) || !Directory.Exists(path);
+    private bool IsFolderPathValid(string path) => !HasReturns(path) || Directory.Exists(path);
 
     private async Task<string> PreparePathForFileAsync(string path)
     {
         await CreateFileSystemIfNotExistsAsync();
 
-        var fullPath = MakePath(path);
-        if (IsPathValidForFile(fullPath))
+        var fullPath = MakeFullPath(path);
+        if (!IsFilePathValid(fullPath))
             throw new PracticeWeb.Exceptions.FileNotFoundException();
 
         return fullPath;
@@ -93,39 +93,37 @@ public class FileSystemService : IFileSystemService
     {
         await CreateFileSystemIfNotExistsAsync();
 
-        var fullPath = MakePath(path);
-        if (IsPathValidForFolder(fullPath))
+        var fullPath = MakeFullPath(path);
+        if (!IsFolderPathValid(fullPath))
             throw new FolderNotFoundException();
 
         return fullPath;
     }
 
-    public async Task<FileResult> GetFileAsync(string path)
+    public async Task<Item> TryGetItemAsync(string id)
     {
-        return await Task.Run(async () => 
-        {
-            var fullPath = await PreparePathForFileAsync(path);
-            var name = Path.GetFileName(fullPath);
-            var type = MimeTypes.GetMimeType(fullPath);
-            return new PhysicalFileResult(fullPath, type);
-        });
-    }
+        await CreateFileSystemIfNotExistsAsync();
 
-    private async Task<List<string>> MakeFullPathAsync(string childId)
+        var item = await _itemStorageService.GetAsync(id);
+        if (item == null)
+            throw new ItemNotFoundException();
+        
+        return item;
+    }
+    private async Task<List<string>> GeneratePathAsync(string childId)
     {
         var connection = await _itemStorageService.GetConnectionByChildAsync(childId);
         if (connection == null)
             return new List<string>() { childId };
 
-        var result = await MakeFullPathAsync(connection.ParentId);
+        var result = await GeneratePathAsync(connection.ParentId);
         result.Add(connection.ChildId);
         return result;
     }
 
-    private async Task<string> ParsePath(List<string> ids)
+    private async Task<string> MakePathFromNames(List<string> ids)
     {
         var result = new List<string>();
-        Console.WriteLine(ids.Count());
         foreach (var id in ids)
         {
             var item = await _itemStorageService.GetAsync(id);
@@ -144,15 +142,16 @@ public class FileSystemService : IFileSystemService
             var item = await _itemStorageService.GetAsync(id);
             if (item == null)
                 continue;
-            var fullPath = await MakeFullPathAsync(item.Id);
+            var fullPath = await GeneratePathAsync(item.Id);
             var path = string.Join(Path.DirectorySeparatorChar, fullPath);
+            var file = await _itemStorageService.GetFileAsync(item.Id);
             result.Add(new FolderItem() 
             {
                 Name = item.Name,
-                Path = await ParsePath(fullPath),
+                Path = await MakePathFromNames(fullPath),
                 Guid = item.Id,
                 Type = item.Type,
-                MimeType = (item.Type.Name == "File" ? MimeTypes.GetMimeType(path) : null),
+                MimeType = file?.MimeType,
                 CreationTime = item.CreationTime,
                 CreatorName = "testName",
             });
@@ -160,21 +159,28 @@ public class FileSystemService : IFileSystemService
         return result;
     }
 
+    public async Task<FileResult> GetFileAsync(string path)
+    {
+        return await Task.Run(async () => 
+        {
+            var fullPath = await PreparePathForFileAsync(path);
+            var name = Path.GetFileName(fullPath);
+            var type = MimeTypes.GetMimeType(fullPath);
+            return new PhysicalFileResult(fullPath, type);
+        });
+    }
+
+
     public async Task<Folder> GetFolderInfoAsync(string id)
     {
-        await CreateFileSystemIfNotExistsAsync();
-
-        var item = await _itemStorageService.GetAsync(id);
-        if (item == null)
-            throw new ItemNotFoundException();
-
+        var item = await TryGetItemAsync(id);
         var items = await _itemStorageService.GetConnectionsByParentAsync(item.Id);
-        var fullPath = await MakeFullPathAsync(item.Id);
+        var fullPath = await GeneratePathAsync(item.Id);
         var folder = new Folder 
         {
             Name = item.Name, 
             Type = item.Type,
-            Path = await ParsePath(fullPath),
+            Path = await MakePathFromNames(fullPath),
             RealPath = string.Join(Path.DirectorySeparatorChar, fullPath),
             Guid = item.Id,
             Items = await PrepareItemsAsync(items.Select(i => i.ChildId).ToList()),
@@ -186,100 +192,81 @@ public class FileSystemService : IFileSystemService
 
     public async Task CreateFileAsync(string parentId, IFormFile file)
     {
-        await Task.Run(async () => 
+        var parent = await TryGetItemAsync(parentId);
+        var item = new Item 
         {
-            await CreateFileSystemIfNotExistsAsync();
+            Id = Guid.NewGuid().ToString(),
+            TypeId = 2,
+            Name = file.FileName,
+            CreationTime = DateTime.Now
+        };
+        var connection = new Connection
+        {
+            ParentId = parent.Id,
+            ChildId = item.Id,
+        };
+        var fileEntity = new FileEntity
+        {
+            Id = item.Id,
+            Extension = Path.GetExtension(item.Name),
+            MimeType = MimeTypes.GetMimeType(item.Name)
+        };
 
-            var parent = await _itemStorageService.GetAsync(parentId);
-            if (parent == null)
-                throw new ItemNotFoundException();
+        var pathItems = await GeneratePathAsync(parent.Id);
+        var path = Path.Combine(_fileSystemPath, string.Join(Path.DirectorySeparatorChar, pathItems));
+        if (!IsFolderPathValid(path))
+            throw new FolderNotFoundException();
+        
+        using (var fileStream = new FileStream(Path.Combine(path, item.Id), FileMode.Create))
+            await file.CopyToAsync(fileStream);
 
-            var item = new Item 
-            {
-                Id = Guid.NewGuid().ToString(),
-                TypeId = 2,
-                Name = file.FileName,
-                CreationTime = DateTime.Now
-            };
-            var connection = new Connection
-            {
-                ParentId = parentId,
-                ChildId = item.Id,
-            };
-            var fileEntity = new FileEntity
-            {
-                Id = item.Id,
-                Extension = Path.GetExtension(item.Name),
-                MimeType = MimeTypes.GetMimeType(item.Name)
-            };
-
-            await _itemStorageService.CreateAsync(item);
-            await _itemStorageService.CreateConnectionAsync(connection);
-            await _itemStorageService.CreateFileAsync(fileEntity);
-
-            var pathItems = await MakeFullPathAsync(item.Id);
-            var path = string.Join(Path.DirectorySeparatorChar, pathItems);
-            var fullPath = Path.Combine(_fileSystemPath, path);
-            using (var fileStream = new FileStream(fullPath, FileMode.Create))
-            {
-                await file.CopyToAsync(fileStream);
-            } 
-        });
+        await _itemStorageService.CreateAsync(item);
+        await _itemStorageService.CreateConnectionAsync(connection);
+        await _itemStorageService.CreateFileAsync(fileEntity);
     }
 
     public async Task CreateFolderAsync(string parentId, string name)
     {
-        await Task.Run(async () => 
+        var parent = await TryGetItemAsync(parentId);
+        var item = new Item 
         {
-            var item = new Item 
-            {
-                Id = Guid.NewGuid().ToString(),
-                TypeId = 1,
-                Name = name,
-                CreationTime = DateTime.Now
-            };
-            var connection = new Connection
-            {
-                ParentId = parentId,
-                ChildId = item.Id,
-            };
-            await _itemStorageService.CreateAsync(item);
-            await _itemStorageService.CreateConnectionAsync(connection);
+            Id = Guid.NewGuid().ToString(),
+            TypeId = 1,
+            Name = name,
+            CreationTime = DateTime.Now
+        };
+        var connection = new Connection
+        {
+            ParentId = parentId,
+            ChildId = item.Id,
+        };
 
-            var pathItems = await MakeFullPathAsync(item.Id);
-            var path = string.Join(Path.DirectorySeparatorChar, pathItems.Take(pathItems.Count() - 1));
-            var fullPath = await PreparePathForFolderAsync(path);
-            CreateDirectory(Path.Combine(fullPath, item.Id));
-        });
+        var pathItems = await GeneratePathAsync(parent.Id);
+        var path = Path.Combine(_fileSystemPath, string.Join(Path.DirectorySeparatorChar, pathItems));
+        if (!IsFolderPathValid(path))
+            throw new FolderNotFoundException();
+
+        CreateDirectory(Path.Combine(path, item.Id));
+        await _itemStorageService.CreateAsync(item);
+        await _itemStorageService.CreateConnectionAsync(connection);
     }
 
     public async Task RenameAsync(string id, string newName)
     {
-        await Task.Run(async () => 
-        {
-            var item = await _itemStorageService.GetAsync(id);
-            if (item == null)
-                throw new ItemNotFoundException();
-            item.Name = newName;
-            await _itemStorageService.UpdateAsync(id, item);
-        });
+        var item = await TryGetItemAsync(id);
+        item.Name = newName;
+        await _itemStorageService.UpdateAsync(id, item);
     }
 
     public async Task RemoveFileAsync(string path)
     {
-        await Task.Run(async () => 
-        {
-            var fullPath = await PreparePathForFileAsync(path);
-            File.Delete(fullPath);
-        });
+        var fullPath = await PreparePathForFileAsync(path);
+        File.Delete(fullPath);
     }
 
     public async Task RemoveFolder(string path)
     {
-        await Task.Run(async () => 
-        {
-            var fullPath = await PreparePathForFolderAsync(path);
-            Directory.Delete(fullPath, true);
-        });
+        var fullPath = await PreparePathForFolderAsync(path);
+        Directory.Delete(fullPath, true);
     }
 }
