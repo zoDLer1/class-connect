@@ -50,7 +50,6 @@ public class FileSystemService : IFileSystemService
     {
         CreateDirectory(_fileSystemPath);
         var rootGuid = await CreateRoot();
-        _fileSystemPath = Path.Combine(_fileSystemPath, rootGuid);
         
         var groups = await _groupStorageService.GetAllAsync();
         foreach (var group in groups)
@@ -61,7 +60,7 @@ public class FileSystemService : IFileSystemService
                 ChildId = group.Id,
             };
             await _itemStorageService.CreateConnectionAsync(connection);
-            CreateDirectory(Path.Combine(_fileSystemPath, group.Id));
+            CreateDirectory(Path.Combine(_fileSystemPath, rootGuid, group.Id));
         }
     }
 
@@ -185,13 +184,43 @@ public class FileSystemService : IFileSystemService
         return folder;
     }
 
-    public async Task CreateFileAsync(string path, IFormFile file)
+    public async Task CreateFileAsync(string parentId, IFormFile file)
     {
         await Task.Run(async () => 
         {
-            var fullPath = await PreparePathForFolderAsync(path);
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            using (var fileStream = new FileStream(Path.Combine(fullPath, fileName), FileMode.Create))
+            await CreateFileSystemIfNotExistsAsync();
+
+            var parent = await _itemStorageService.GetAsync(parentId);
+            if (parent == null)
+                throw new ItemNotFoundException();
+
+            var item = new Item 
+            {
+                Id = Guid.NewGuid().ToString(),
+                TypeId = 2,
+                Name = file.FileName,
+                CreationTime = DateTime.Now
+            };
+            var connection = new Connection
+            {
+                ParentId = parentId,
+                ChildId = item.Id,
+            };
+            var fileEntity = new FileEntity
+            {
+                Id = item.Id,
+                Extension = Path.GetExtension(item.Name),
+                MimeType = MimeTypes.GetMimeType(item.Name)
+            };
+
+            await _itemStorageService.CreateAsync(item);
+            await _itemStorageService.CreateConnectionAsync(connection);
+            await _itemStorageService.CreateFileAsync(fileEntity);
+
+            var pathItems = await MakeFullPathAsync(item.Id);
+            var path = string.Join(Path.DirectorySeparatorChar, pathItems);
+            var fullPath = Path.Combine(_fileSystemPath, path);
+            using (var fileStream = new FileStream(fullPath, FileMode.Create))
             {
                 await file.CopyToAsync(fileStream);
             } 
@@ -220,7 +249,7 @@ public class FileSystemService : IFileSystemService
             var pathItems = await MakeFullPathAsync(item.Id);
             var path = string.Join(Path.DirectorySeparatorChar, pathItems.Take(pathItems.Count() - 1));
             var fullPath = await PreparePathForFolderAsync(path);
-            CreateDirectory(Path.Combine(fullPath, name));
+            CreateDirectory(Path.Combine(fullPath, item.Id));
         });
     }
 

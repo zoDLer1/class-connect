@@ -66,25 +66,16 @@ public class FileSystemController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> UploadFileAsync(string? path, IFormFile uploadedFile)
+    public async Task<IActionResult> UploadFileAsync(string? parentId, IFormFile uploadedFile)
     {
-        if (uploadedFile == null)
+        if (parentId == null || uploadedFile == null)
             return BadRequest();
-        
-        try
-        {
-            path = PreparePath(path);
-        }
-        catch (NullReferenceException)
-        {
-            return BadRequest();
-        }
 
         try
         {
-            await _fileSystemService.CreateFileAsync(path, uploadedFile);
+            await _fileSystemService.CreateFileAsync(parentId, uploadedFile);
         }
-        catch (FolderNotFoundException)
+        catch (ItemNotFoundException)
         {
             return NotFound();
         }
