@@ -292,7 +292,7 @@ public class FileSystemService : IFileSystemService
     public async Task RemoveFolder(string id)
     {
         var item = await TryGetItemAsync(id);
-        if (item.Type.Name != "Folder")
+        if (item.Type.Name == "File")
             throw new ItemTypeException();
 
         var path = await MakeFullPathAsync(item.Id);

@@ -126,4 +126,36 @@ public class GroupController : ControllerBase
 
         return Ok();
     }
+
+    [HttpDelete]
+    public async Task<IActionResult> DeleteAsync(string? name)
+    {
+        if (name == null)
+            return BadRequest();
+
+        var groupInfo = await _groupStorageService.GetByGroupNameAsync(name);
+        if (groupInfo == null)
+            return BadRequest();
+
+        try
+        {
+            await _fileSystemService.RemoveFolder(groupInfo.Id);
+        }
+        catch (ItemTypeException)
+        {
+            return BadRequest();
+        }
+        catch (Exception ex)
+        {
+            if (ex is FolderNotFoundException || ex is ItemNotFoundException)
+                return NotFound();
+            throw;
+        }
+        finally
+        {
+            await _groupStorageService.DeleteAsync(groupInfo.Id);
+        }
+
+        return Ok();
+    }
 }
