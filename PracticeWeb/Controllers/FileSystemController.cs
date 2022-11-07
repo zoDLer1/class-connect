@@ -118,14 +118,14 @@ public class FileSystemController : ControllerBase
     }
 
     [HttpPatch]
-    public async Task<IActionResult> RenameAsync(string? id, string? name)
+    public async Task<IActionResult> RenameAsync(string? id, string? newName)
     {
-        if (id == null || name == null)
+        if (id == null || newName == null)
             return BadRequest();
 
         try
         {
-            await _fileSystemService.RenameAsync(id, name);
+            await _fileSystemService.RenameAsync(id, newName);
         }
         catch (ItemNotFoundException)
         {
