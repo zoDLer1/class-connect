@@ -98,7 +98,7 @@ public class FileSystemService : IFileSystemService
         return result;
     }
 
-    private async Task<string> MakePathFromNames(List<string> ids)
+    private async Task<List<string>> MakePathFromNames(List<string> ids)
     {
         var result = new List<string>();
         foreach (var id in ids)
@@ -108,7 +108,7 @@ public class FileSystemService : IFileSystemService
                 continue;
             result.Add(item.Name);
         }
-        return string.Join(Path.DirectorySeparatorChar, result);
+        return result;
     }
 
     private async Task<string> MakeFullPathAsync(string id)
@@ -177,7 +177,7 @@ public class FileSystemService : IFileSystemService
             Name = item.Name, 
             Type = item.Type,
             Path = await MakePathFromNames(pathItems),
-            RealPath = string.Join(Path.DirectorySeparatorChar, pathItems),
+            RealPath = pathItems,
             Guid = item.Id,
             Items = await PrepareItemsAsync(items.Select(i => i.ChildId).ToList()),
             CreationTime = item.CreationTime,
@@ -208,7 +208,7 @@ public class FileSystemService : IFileSystemService
             MimeType = MimeTypes.GetMimeType(item.Name)
         };
 
-        var path = await MakeFullPathAsync(item.Id);
+        var path = await MakeFullPathAsync(parent.Id);
         using (var fileStream = new FileStream(Path.Combine(path, item.Id), FileMode.Create))
             await file.CopyToAsync(fileStream);
 
@@ -233,7 +233,7 @@ public class FileSystemService : IFileSystemService
             ChildId = item.Id,
         };
 
-        var path = await MakeFullPathAsync(item.Id);
+        var path = await MakeFullPathAsync(parent.Id);
         CreateDirectory(Path.Combine(path, item.Id));
         await _itemStorageService.CreateAsync(item);
         await _itemStorageService.CreateConnectionAsync(connection);
