@@ -26,7 +26,7 @@ public class GroupController : ControllerBase
     }
 
     [HttpGet()]
-    public async Task<IActionResult> GetByGroup(string? name)
+    public async Task<IActionResult> GetByGroupAsync(string? name)
     {
         if (name == null)
             return BadRequest();
@@ -39,7 +39,7 @@ public class GroupController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateGroupAsync(string? name)
+    public async Task<IActionResult> CreateAsync(string? name)
     {
         if (name == null || _fileSystemService.RootId == null || await _groupStorageService.GetByGroupNameAsync(name) != null)
             return BadRequest();
