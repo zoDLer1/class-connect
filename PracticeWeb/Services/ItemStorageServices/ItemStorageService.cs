@@ -58,8 +58,8 @@ public class ItemStorageService : IItemStorageService
 
     public async Task DeleteConnectionAsync(string parentId, string childId)
     {
-        var connection = GetConnectionsByParentAsync(parentId);
-        if (connection == null)
+        var connection = await GetConnectionByChildAsync(childId);
+        if (connection == null || connection.ParentId != parentId)
             throw new NullReferenceException();
         _context.Remove(connection);
         await _context.SaveChangesAsync();
