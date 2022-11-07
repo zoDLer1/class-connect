@@ -264,10 +264,23 @@ public class FileSystemService : IFileSystemService
         await _itemStorageService.UpdateAsync(id, item);
     }
 
-    public async Task RemoveFileAsync(string path)
+    public async Task RemoveFileAsync(string id)
     {
-        var fullPath = await PreparePathForFileAsync(path);
-        File.Delete(fullPath);
+        var item = await TryGetItemAsync(id);
+        if (item.Type.Name != "File")
+            throw new ItemTypeException();
+        
+        var pathItems = await GeneratePathAsync(item.Id);
+        var path = Path.Combine(_fileSystemPath, string.Join(Path.DirectorySeparatorChar, pathItems));
+        if (!IsFolderPathValid(path))
+            throw new FolderNotFoundException();
+        
+        File.Delete(path);
+        var connection = await _itemStorageService.GetConnectionByChildAsync(id);
+        if (connection != null)
+            await _itemStorageService.DeleteConnectionAsync(connection.ParentId, connection.ChildId);
+        await _itemStorageService.DeleteFileAsync(item.Id);
+        await _itemStorageService.DeleteAsync(item.Id);
     }
 
     private async Task RemoveConnectionRecursively(string parentId)
@@ -289,7 +302,7 @@ public class FileSystemService : IFileSystemService
     public async Task RemoveFolder(string id)
     {
         var item = await TryGetItemAsync(id);
-        if (item.Type.Name == "File")
+        if (item.Type.Name != "Folder")
             throw new ItemTypeException();
 
         var pathItems = await GeneratePathAsync(item.Id);

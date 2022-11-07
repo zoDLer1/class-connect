@@ -130,14 +130,22 @@ public class FileSystemController : ControllerBase
             {
                 await _fileSystemService.RemoveFileAsync(id);
             }
-            catch (PracticeWeb.Exceptions.FileNotFoundException)
+            catch (ItemTypeException)
             {
-                return NotFound();
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                if (ex is FolderNotFoundException || ex is ItemNotFoundException)
+                    return NotFound();
+                throw;
             }
         }
-        catch (FolderNotFoundException)
+        catch (Exception ex)
         {
-            return NotFound();
+            if (ex is FolderNotFoundException || ex is ItemNotFoundException)
+                return NotFound();
+            throw;
         }
 
         return Ok();
