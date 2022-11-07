@@ -115,31 +115,29 @@ public class FileSystemController : ControllerBase
     }
 
     [HttpDelete]
-    public async Task<IActionResult> DeleteAsync(string? path)
+    public async Task<IActionResult> DeleteAsync(string? id)
     {
-        try
-        {
-            path = PreparePath(path);
-        }
-        catch (NullReferenceException)
-        {
+        if (id == null)
             return BadRequest();
-        }
 
         try
         {
-            await _fileSystemService.RemoveFolder(path);
+            await _fileSystemService.RemoveFolder(id);
         }
-        catch (FolderNotFoundException)
+        catch (ItemTypeException)
         {
             try
             {
-                await _fileSystemService.RemoveFileAsync(path);
+                await _fileSystemService.RemoveFileAsync(id);
             }
             catch (PracticeWeb.Exceptions.FileNotFoundException)
             {
                 return NotFound();
             }
+        }
+        catch (FolderNotFoundException)
+        {
+            return NotFound();
         }
 
         return Ok();
