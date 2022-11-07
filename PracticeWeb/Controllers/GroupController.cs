@@ -25,17 +25,47 @@ public class GroupController : ControllerBase
         _itemStorageService = itemStorageService;
     }
 
+    private async Task<List<Folder>> PrepareAllGroups()
+    {
+        var groups = await _groupStorageService.GetAllAsync();
+        var result = new List<Folder>();
+        foreach (var group in groups)
+        {
+            try
+            {
+                var folder = await _fileSystemService.GetFolderInfoAsync(group.Id);
+                result.Add(folder);
+            }
+            catch
+            {
+                continue;
+            }
+        }
+        return result;
+    }
+
     [HttpGet()]
     public async Task<IActionResult> GetByGroupAsync(string? name)
     {
         if (name == null)
-            return BadRequest();
+            return new JsonResult(await PrepareAllGroups());
 
         var groupInfo = await _groupStorageService.GetByGroupNameAsync(name);
         if (groupInfo == null)
             return BadRequest();
 
-        return new JsonResult(await _fileSystemService.GetFolderInfoAsync(groupInfo.Id));
+        try
+        {
+            return new JsonResult(await _fileSystemService.GetFolderInfoAsync(groupInfo.Id));
+        }
+        catch (ItemTypeException)
+        {
+            return BadRequest();
+        }
+        catch (ItemNotFoundException)
+        {
+            return NotFound();
+        }
     }
 
     [HttpPost]
