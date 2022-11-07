@@ -65,4 +65,35 @@ public class GroupController : ControllerBase
 
         return Ok();
     }
+
+    [HttpPatch]
+    public async Task<IActionResult> RenameAsync(string? name, string newName)
+    {
+        if (name == null || newName == null)
+            return BadRequest();
+        
+        var groupInfo = await _groupStorageService.GetByGroupNameAsync(name);
+        if (groupInfo == null)
+            return BadRequest();
+
+        try
+        {
+            await _fileSystemService.RenameAsync(groupInfo.Id, newName);
+        }
+        catch (ItemNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (ItemTypeException)
+        {
+            return BadRequest();
+        }
+        finally
+        {
+            groupInfo.Name = newName;
+            await _groupStorageService.UpdateAsync(groupInfo.Id, groupInfo);
+        }
+
+        return Ok();
+    }
 }
