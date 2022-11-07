@@ -70,35 +70,11 @@ public class FileSystemService : IFileSystemService
             await CreateFileSystemAsync();
     }
 
-    private string MakeFullPath(string path) => Path.Combine(_fileSystemPath, path);
-
     private bool HasReturns(string path) => ReturnPattern.IsMatch(path);
 
     private bool IsFilePathValid(string path) => !HasReturns(path) || File.Exists(path);
 
     private bool IsFolderPathValid(string path) => !HasReturns(path) || Directory.Exists(path);
-
-    private async Task<string> PreparePathForFileAsync(string path)
-    {
-        await CreateFileSystemIfNotExistsAsync();
-
-        var fullPath = MakeFullPath(path);
-        if (!IsFilePathValid(fullPath))
-            throw new PracticeWeb.Exceptions.FileNotFoundException();
-
-        return fullPath;
-    }
-
-    private async Task<string> PreparePathForFolderAsync(string path)
-    {
-        await CreateFileSystemIfNotExistsAsync();
-
-        var fullPath = MakeFullPath(path);
-        if (!IsFolderPathValid(fullPath))
-            throw new FolderNotFoundException();
-
-        return fullPath;
-    }
 
     public async Task<Item> TryGetItemAsync(string id)
     {
@@ -133,6 +109,16 @@ public class FileSystemService : IFileSystemService
             result.Add(item.Name);
         }
         return string.Join(Path.DirectorySeparatorChar, result);
+    }
+
+    private async Task<string> MakeFullPathAsync(string id)
+    {
+        var pathItems = await GeneratePathAsync(id);
+        var path = Path.Combine(_fileSystemPath, string.Join(Path.DirectorySeparatorChar, pathItems));
+        if (!IsFolderPathValid(path))
+            throw new FolderNotFoundException();
+
+        return path;
     }
 
     private async Task<List<FolderItem>> PrepareItemsAsync(List<string> itemIds)
@@ -172,6 +158,9 @@ public class FileSystemService : IFileSystemService
         
         var pathItems = await GeneratePathAsync(item.Id);
         var path = Path.Combine(_fileSystemPath, string.Join(Path.DirectorySeparatorChar, pathItems));
+        if (!IsFilePathValid(path))
+            throw new ItemNotFoundException();
+        
         return new PhysicalFileResult(path, fileEntity.MimeType);
     }
 
@@ -180,6 +169,7 @@ public class FileSystemService : IFileSystemService
         var item = await TryGetItemAsync(id);
         if (item.Type.Name == "File")
             throw new ItemTypeException();
+        
         var items = await _itemStorageService.GetConnectionsByParentAsync(item.Id);
         var pathItems = await GeneratePathAsync(item.Id);
         var folder = new Folder 
@@ -218,11 +208,7 @@ public class FileSystemService : IFileSystemService
             MimeType = MimeTypes.GetMimeType(item.Name)
         };
 
-        var pathItems = await GeneratePathAsync(parent.Id);
-        var path = Path.Combine(_fileSystemPath, string.Join(Path.DirectorySeparatorChar, pathItems));
-        if (!IsFolderPathValid(path))
-            throw new FolderNotFoundException();
-        
+        var path = await MakeFullPathAsync(item.Id);
         using (var fileStream = new FileStream(Path.Combine(path, item.Id), FileMode.Create))
             await file.CopyToAsync(fileStream);
 
@@ -247,11 +233,7 @@ public class FileSystemService : IFileSystemService
             ChildId = item.Id,
         };
 
-        var pathItems = await GeneratePathAsync(parent.Id);
-        var path = Path.Combine(_fileSystemPath, string.Join(Path.DirectorySeparatorChar, pathItems));
-        if (!IsFolderPathValid(path))
-            throw new FolderNotFoundException();
-
+        var path = await MakeFullPathAsync(item.Id);
         CreateDirectory(Path.Combine(path, item.Id));
         await _itemStorageService.CreateAsync(item);
         await _itemStorageService.CreateConnectionAsync(connection);
@@ -270,11 +252,7 @@ public class FileSystemService : IFileSystemService
         if (item.Type.Name != "File")
             throw new ItemTypeException();
         
-        var pathItems = await GeneratePathAsync(item.Id);
-        var path = Path.Combine(_fileSystemPath, string.Join(Path.DirectorySeparatorChar, pathItems));
-        if (!IsFolderPathValid(path))
-            throw new FolderNotFoundException();
-        
+        var path = await MakeFullPathAsync(item.Id);
         File.Delete(path);
         var connection = await _itemStorageService.GetConnectionByChildAsync(id);
         if (connection != null)
@@ -305,11 +283,7 @@ public class FileSystemService : IFileSystemService
         if (item.Type.Name != "Folder")
             throw new ItemTypeException();
 
-        var pathItems = await GeneratePathAsync(item.Id);
-        var path = Path.Combine(_fileSystemPath, string.Join(Path.DirectorySeparatorChar, pathItems));
-        if (!IsFolderPathValid(path))
-            throw new FolderNotFoundException();
-
+        var path = await MakeFullPathAsync(item.Id);
         Directory.Delete(path, true);
         await RemoveConnectionRecursively(item.Id);
     }
