@@ -87,6 +87,8 @@ public class FileSystemController : ControllerBase
         {
             if (ex is FolderNotFoundException || ex is ItemNotFoundException)
                 return NotFound();
+            else if (ex is ItemTypeException)
+                return BadRequest();
             throw;
         }
 
@@ -107,6 +109,8 @@ public class FileSystemController : ControllerBase
         {
             if (ex is FolderNotFoundException || ex is ItemNotFoundException)
                 return NotFound();
+            else if (ex is ItemTypeException)
+                return BadRequest();
             throw;
         }
 

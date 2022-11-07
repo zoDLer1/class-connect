@@ -72,9 +72,9 @@ public class FileSystemService : IFileSystemService
 
     private bool HasReturns(string path) => ReturnPattern.IsMatch(path);
 
-    private bool IsFilePathValid(string path) => !HasReturns(path) || File.Exists(path);
+    private bool IsFilePathValid(string path) => !HasReturns(path) && File.Exists(path);
 
-    private bool IsFolderPathValid(string path) => !HasReturns(path) || Directory.Exists(path);
+    private bool IsFolderPathValid(string path) => !HasReturns(path) && Directory.Exists(path);
 
     public async Task<Item> TryGetItemAsync(string id)
     {
@@ -209,6 +209,8 @@ public class FileSystemService : IFileSystemService
         };
 
         var path = await MakeFullPathAsync(parent.Id);
+        if (!IsFolderPathValid(path))
+            throw new ItemTypeException();
         using (var fileStream = new FileStream(Path.Combine(path, item.Id), FileMode.Create))
             await file.CopyToAsync(fileStream);
 
@@ -234,6 +236,8 @@ public class FileSystemService : IFileSystemService
         };
 
         var path = await MakeFullPathAsync(parent.Id);
+        if (!IsFolderPathValid(path))
+            throw new ItemTypeException();
         CreateDirectory(Path.Combine(path, item.Id));
         await _itemStorageService.CreateAsync(item);
         await _itemStorageService.CreateConnectionAsync(connection);
