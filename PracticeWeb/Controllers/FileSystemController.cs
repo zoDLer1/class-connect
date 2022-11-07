@@ -127,6 +127,10 @@ public class FileSystemController : ControllerBase
         {
             return NotFound();
         }
+        catch (ItemTypeException)
+        {
+            return BadRequest();
+        }
 
         return Ok();
     }

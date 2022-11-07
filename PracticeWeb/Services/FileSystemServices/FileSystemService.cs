@@ -242,6 +242,9 @@ public class FileSystemService : IFileSystemService
     public async Task RenameAsync(string id, string newName)
     {
         var item = await TryGetItemAsync(id);
+        if (item.Type.Name != "File" && item.Type.Name != "Folder")
+            throw new ItemTypeException();
+        
         item.Name = newName;
         await _itemStorageService.UpdateAsync(id, item);
     }
