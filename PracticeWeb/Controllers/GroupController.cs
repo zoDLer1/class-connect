@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using PracticeWeb.Exceptions;
+using PracticeWeb.Models;
 using PracticeWeb.Services.FileSystemServices;
 using PracticeWeb.Services.GroupStorageServices;
 using PracticeWeb.Services.ItemStorageServices;
@@ -34,5 +36,33 @@ public class GroupController : ControllerBase
             return BadRequest();
 
         return new JsonResult(await _fileSystemService.GetFolderInfoAsync(groupInfo.Id));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateGroupAsync(string? name)
+    {
+        if (name == null || _fileSystemService.RootId == null || await _groupStorageService.GetByGroupNameAsync(name) != null)
+            return BadRequest();
+
+        try
+        {
+            Item item = await _fileSystemService.CreateFolderAsync(_fileSystemService.RootId, name);
+            var group = new Group
+            {
+                Id = item.Id,
+                Name = name
+            };
+            await _groupStorageService.CreateAsync(group);
+        }
+        catch (Exception ex)
+        {
+            if (ex is FolderNotFoundException || ex is ItemNotFoundException)
+                return NotFound();
+            else if (ex is ItemTypeException)
+                return BadRequest();
+            throw;
+        }
+
+        return Ok();
     }
 }

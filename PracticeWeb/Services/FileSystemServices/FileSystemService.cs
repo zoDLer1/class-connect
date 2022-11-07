@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using PracticeWeb.Exceptions;
@@ -10,6 +9,7 @@ namespace PracticeWeb.Services.FileSystemServices;
 
 public class FileSystemService : IFileSystemService
 {
+    public string? RootId { get; private set; }
     private string _fileSystemPath;
     private IGroupStorageService _groupStorageService;
     private IItemStorageService _itemStorageService;
@@ -21,6 +21,8 @@ public class FileSystemService : IFileSystemService
         IItemStorageService itemStorageService)
     {
         _fileSystemPath = Path.Combine(env.ContentRootPath, "Filesystem");
+        var rootPath = Directory.GetFileSystemEntries(_fileSystemPath).FirstOrDefault();
+        RootId = Path.GetFileName(rootPath);
         _groupStorageService = groupStorageService;
         _itemStorageService = itemStorageService;
     }
@@ -43,6 +45,7 @@ public class FileSystemService : IFileSystemService
             CreationTime = DateTime.Now
         };
         await _itemStorageService.CreateAsync(item);
+        RootId = rootGuid;
         return rootGuid;
     }
 
@@ -186,7 +189,7 @@ public class FileSystemService : IFileSystemService
         return folder;
     }
 
-    public async Task CreateFileAsync(string parentId, IFormFile file)
+    public async Task<Item> CreateFileAsync(string parentId, IFormFile file)
     {
         var parent = await TryGetItemAsync(parentId);
         var item = new Item 
@@ -217,9 +220,10 @@ public class FileSystemService : IFileSystemService
         await _itemStorageService.CreateAsync(item);
         await _itemStorageService.CreateConnectionAsync(connection);
         await _itemStorageService.CreateFileAsync(fileEntity);
+        return item;
     }
 
-    public async Task CreateFolderAsync(string parentId, string name)
+    public async Task<Item> CreateFolderAsync(string parentId, string name)
     {
         var parent = await TryGetItemAsync(parentId);
         var item = new Item 
@@ -241,6 +245,7 @@ public class FileSystemService : IFileSystemService
         CreateDirectory(Path.Combine(path, item.Id));
         await _itemStorageService.CreateAsync(item);
         await _itemStorageService.CreateConnectionAsync(connection);
+        return item;
     }
 
     public async Task RenameAsync(string id, string newName)
