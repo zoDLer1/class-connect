@@ -76,7 +76,7 @@ public class GroupController : ControllerBase
 
         try
         {
-            Item item = await _fileSystemService.CreateFolderAsync(_fileSystemService.RootId, name);
+            Item item = await _fileSystemService.CreateFolderAsync(_fileSystemService.RootId, name, 3);
             var group = new Group
             {
                 Id = item.Id,

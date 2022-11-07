@@ -10,6 +10,7 @@ public interface IFileSystemService
     Task<Folder> GetFolderInfoAsync(string id);
     Task<Item> CreateFileAsync(string parentId, IFormFile file);
     Task<Item> CreateFolderAsync(string parentId, string name);
+    Task<Item> CreateFolderAsync(string parentId, string name, int typeId);
     Task RenameAsync(string id, string newName);
     Task RemoveFileAsync(string id);
     Task RemoveFolder(string id);

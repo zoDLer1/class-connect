@@ -21,8 +21,11 @@ public class FileSystemService : IFileSystemService
         IItemStorageService itemStorageService)
     {
         _fileSystemPath = Path.Combine(env.ContentRootPath, "Filesystem");
-        var rootPath = Directory.GetFileSystemEntries(_fileSystemPath).FirstOrDefault();
-        RootId = Path.GetFileName(rootPath);
+        if (IsFolderPathValid(_fileSystemPath))
+        {
+            var rootPath = Directory.GetFileSystemEntries(_fileSystemPath).FirstOrDefault();
+            RootId = Path.GetFileName(rootPath);
+        }
         _groupStorageService = groupStorageService;
         _itemStorageService = itemStorageService;
     }
@@ -45,7 +48,6 @@ public class FileSystemService : IFileSystemService
             CreationTime = DateTime.Now
         };
         await _itemStorageService.CreateAsync(item);
-        RootId = rootGuid;
         return rootGuid;
     }
 
@@ -223,13 +225,13 @@ public class FileSystemService : IFileSystemService
         return item;
     }
 
-    public async Task<Item> CreateFolderAsync(string parentId, string name)
+    public async Task<Item> CreateFolderAsync(string parentId, string name, int typeId)
     {
         var parent = await TryGetItemAsync(parentId);
         var item = new Item 
         {
             Id = Guid.NewGuid().ToString(),
-            TypeId = 1,
+            TypeId = typeId,
             Name = name,
             CreationTime = DateTime.Now
         };
@@ -246,6 +248,11 @@ public class FileSystemService : IFileSystemService
         await _itemStorageService.CreateAsync(item);
         await _itemStorageService.CreateConnectionAsync(connection);
         return item;
+    }
+
+    public async Task<Item> CreateFolderAsync(string parentId, string name)
+    {
+        return await CreateFolderAsync(parentId, name, 1);
     }
 
     public async Task RenameAsync(string id, string newName)
