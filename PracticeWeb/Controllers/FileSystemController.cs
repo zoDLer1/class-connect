@@ -67,6 +67,10 @@ public class FileSystemController : ControllerBase
                 return BadRequest();
             }
         }
+        catch (ItemNotFoundException)
+        {
+            return NotFound();
+        }
     }
 
     [HttpPost]
@@ -79,9 +83,11 @@ public class FileSystemController : ControllerBase
         {
             await _fileSystemService.CreateFileAsync(parentId, uploadedFile);
         }
-        catch (ItemNotFoundException)
+        catch (Exception ex)
         {
-            return NotFound();
+            if (ex is FolderNotFoundException || ex is ItemNotFoundException)
+                return NotFound();
+            throw;
         }
 
         return Ok();
@@ -97,10 +103,13 @@ public class FileSystemController : ControllerBase
         {
             await _fileSystemService.CreateFolderAsync(parentId, name);
         }
-        catch (ItemNotFoundException)
+        catch (Exception ex)
         {
-            return NotFound();
+            if (ex is FolderNotFoundException || ex is ItemNotFoundException)
+                return NotFound();
+            throw;
         }
+
         return Ok();
     }
 
@@ -110,7 +119,15 @@ public class FileSystemController : ControllerBase
         if (id == null || name == null)
             return BadRequest();
 
-        await _fileSystemService.RenameAsync(id, name);
+        try
+        {
+            await _fileSystemService.RenameAsync(id, name);
+        }
+        catch (ItemNotFoundException)
+        {
+            return NotFound();
+        }
+
         return Ok();
     }
 
