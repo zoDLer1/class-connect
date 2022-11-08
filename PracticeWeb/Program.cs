@@ -3,6 +3,7 @@ using PracticeWeb.Models;
 using PracticeWeb.Services.FileSystemServices;
 using PracticeWeb.Services.GroupStorageServices;
 using PracticeWeb.Services.ItemStorageServices;
+using PracticeWeb.Services.SubjectStorageServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,7 @@ builder.Services.AddControllers();
 builder.Services.AddTransient<IFileSystemService, FileSystemService>();
 builder.Services.AddTransient<IGroupStorageService, GroupStorageService>();
 builder.Services.AddTransient<IItemStorageService, ItemStorageService>();
+builder.Services.AddTransient<ISubjectStorageService, SubjectStorageService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
