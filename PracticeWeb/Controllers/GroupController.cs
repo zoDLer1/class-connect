@@ -3,6 +3,7 @@ using PracticeWeb.Exceptions;
 using PracticeWeb.Models;
 using PracticeWeb.Services.FileSystemServices;
 using PracticeWeb.Services.GroupStorageServices;
+using PracticeWeb.Services.SubjectStorageServices;
 using PracticeWeb.Services.ItemStorageServices;
 
 namespace PracticeWeb.Controllers;
@@ -13,19 +14,22 @@ public class GroupController : ControllerBase
 {
     private IFileSystemService _fileSystemService;
     private IGroupStorageService _groupStorageService;
+    private ISubjectStorageService _subjectStorageService;
     private IItemStorageService _itemStorageService;
 
         public GroupController(
         IFileSystemService fileSystemService, 
         IGroupStorageService groupStorageService,
+        ISubjectStorageService subjectStorageService,
         IItemStorageService itemStorageService)
     {
         _fileSystemService = fileSystemService;
         _groupStorageService = groupStorageService;
+        _subjectStorageService = subjectStorageService;
         _itemStorageService = itemStorageService;
     }
 
-    private async Task<List<Folder>> PrepareAllGroups()
+    private async Task<List<Folder>> PrepareAllGroupsAsync()
     {
         var groups = await _groupStorageService.GetAllAsync();
         var result = new List<Folder>();
@@ -44,11 +48,42 @@ public class GroupController : ControllerBase
         return result;
     }
 
+    private async Task<List<SubjectFolder>> PrepareAllSubjectsAsync(string groupId)
+    {
+        var subjects = await _subjectStorageService.GetByGroupAsync(groupId);
+        var result = new List<SubjectFolder>();
+        foreach (var subject in subjects)
+        {
+            try
+            {
+                var folder = await _fileSystemService.GetFolderInfoAsync(subject.Id);
+                var subjectFolder = new SubjectFolder
+                {
+                    Name = folder.Name, 
+                    Type = folder.Type,
+                    Path = folder.Path,
+                    RealPath = folder.RealPath,
+                    Guid = folder.Guid,
+                    Items = folder.Items,
+                    CreationTime = folder.CreationTime,
+                    CreatorName = folder.CreatorName,
+                    Description = subject.Description
+                };
+                result.Add(subjectFolder);
+            }
+            catch
+            {
+                continue;
+            }
+        }
+        return result;
+    }
+
     [HttpGet("byId")]
     public async Task<IActionResult> GetAsync(string? id)
     {
         if (id == null)
-            return new JsonResult(await PrepareAllGroups());
+            return new JsonResult(await PrepareAllGroupsAsync());
 
         var group = await _groupStorageService.GetAsync(id);
         if (group == null)
@@ -72,13 +107,39 @@ public class GroupController : ControllerBase
     public async Task<IActionResult> GetByNameAsync(string? name)
     {
         if (name == null)
-            return new JsonResult(await PrepareAllGroups());
+            return new JsonResult(await PrepareAllGroupsAsync());
 
         var group = await _groupStorageService.GetByGroupNameAsync(name);
         if (group == null)
             return BadRequest();
 
         return await GetAsync(group.Id);
+    }
+
+    [HttpGet("subjects/byId")]
+    public async Task<IActionResult> GetSubjectsAsync(string? id)
+    {
+        if (id == null)
+            return BadRequest();
+
+        var group = await _groupStorageService.GetAsync(id);
+        if (group == null)
+            return BadRequest();
+
+        return new JsonResult(await PrepareAllSubjectsAsync(group.Id));
+    }
+
+    [HttpGet("subjects/byName")]
+    public async Task<IActionResult> GetSubjectsByNameAsync(string? name)
+    {
+        if (name == null)
+            return BadRequest();
+
+        var group = await _groupStorageService.GetByGroupNameAsync(name);
+        if (group == null)
+            return BadRequest();
+
+        return await GetSubjectsAsync(group.Id);
     }
 
     [HttpPost]
