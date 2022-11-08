@@ -45,12 +45,12 @@ public class GroupController : ControllerBase
     }
 
     [HttpGet()]
-    public async Task<IActionResult> GetByGroupAsync(string? name)
+    public async Task<IActionResult> GetAsync(string? id)
     {
-        if (name == null)
+        if (id == null)
             return new JsonResult(await PrepareAllGroups());
 
-        var groupInfo = await _groupStorageService.GetByGroupNameAsync(name);
+        var groupInfo = await _groupStorageService.GetAsync(id);
         if (groupInfo == null)
             return BadRequest();
 
@@ -97,12 +97,12 @@ public class GroupController : ControllerBase
     }
 
     [HttpPatch]
-    public async Task<IActionResult> RenameAsync(string? name, string newName)
+    public async Task<IActionResult> RenameAsync(string? id, string? newName)
     {
-        if (name == null || newName == null)
+        if (id == null || newName == null)
             return BadRequest();
         
-        var groupInfo = await _groupStorageService.GetByGroupNameAsync(name);
+        var groupInfo = await _groupStorageService.GetAsync(id);
         if (groupInfo == null)
             return BadRequest();
 
@@ -128,12 +128,12 @@ public class GroupController : ControllerBase
     }
 
     [HttpDelete]
-    public async Task<IActionResult> DeleteAsync(string? name)
+    public async Task<IActionResult> DeleteAsync(string? id)
     {
-        if (name == null)
+        if (id == null)
             return BadRequest();
 
-        var groupInfo = await _groupStorageService.GetByGroupNameAsync(name);
+        var groupInfo = await _groupStorageService.GetAsync(id);
         if (groupInfo == null)
             return BadRequest();
 
