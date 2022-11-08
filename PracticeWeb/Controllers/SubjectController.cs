@@ -35,8 +35,8 @@ public class SubjectController : ControllerBase
         if (id == null)
             return BadRequest();
 
-        var groupInfo = await _subjectStorageService.GetAsync(id);
-        if (groupInfo == null)
+        var subject = await _subjectStorageService.GetAsync(id);
+        if (subject == null)
             return BadRequest();
 
         try
@@ -83,6 +83,37 @@ public class SubjectController : ControllerBase
             else if (ex is ItemTypeException)
                 return BadRequest();
             throw;
+        }
+
+        return Ok();
+    }
+
+    [HttpPatch]
+    public async Task<IActionResult> RenameAsync(string? id, string? newName)
+    {
+        if (id == null || newName == null)
+            return BadRequest();
+        
+        var subject = await _subjectStorageService.GetAsync(id);
+        if (subject == null)
+            return BadRequest();
+
+        try
+        {
+            await _fileSystemService.RenameAsync(subject.Id, newName);
+        }
+        catch (ItemNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (ItemTypeException)
+        {
+            return BadRequest();
+        }
+        finally
+        {
+            subject.Name = newName;
+            await _subjectStorageService.UpdateAsync(subject.Id, subject);
         }
 
         return Ok();
