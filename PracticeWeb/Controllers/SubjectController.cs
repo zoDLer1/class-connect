@@ -118,4 +118,36 @@ public class SubjectController : ControllerBase
 
         return Ok();
     }
+
+    [HttpDelete]
+    public async Task<IActionResult> DeleteAsync(string? id)
+    {
+        if (id == null)
+            return BadRequest();
+        
+        var subject = await _subjectStorageService.GetAsync(id);
+        if (subject == null)
+            return BadRequest();
+
+        try
+        {
+            await _fileSystemService.RemoveFolder(subject.Id);
+        }
+        catch (ItemTypeException)
+        {
+            return BadRequest();
+        }
+        catch (Exception ex)
+        {
+            if (ex is FolderNotFoundException || ex is ItemNotFoundException)
+                return NotFound();
+            throw;
+        }
+        finally
+        {
+            await _subjectStorageService.DeleteAsync(subject.Id);
+        }
+
+        return Ok();
+    }
 }
