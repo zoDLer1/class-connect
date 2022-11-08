@@ -44,19 +44,19 @@ public class GroupController : ControllerBase
         return result;
     }
 
-    [HttpGet()]
+    [HttpGet("byId")]
     public async Task<IActionResult> GetAsync(string? id)
     {
         if (id == null)
             return new JsonResult(await PrepareAllGroups());
 
-        var groupInfo = await _groupStorageService.GetAsync(id);
-        if (groupInfo == null)
+        var group = await _groupStorageService.GetAsync(id);
+        if (group == null)
             return BadRequest();
 
         try
         {
-            return new JsonResult(await _fileSystemService.GetFolderInfoAsync(groupInfo.Id));
+            return new JsonResult(await _fileSystemService.GetFolderInfoAsync(group.Id));
         }
         catch (ItemTypeException)
         {
@@ -66,6 +66,19 @@ public class GroupController : ControllerBase
         {
             return NotFound();
         }
+    }
+
+    [HttpGet("byName")]
+    public async Task<IActionResult> GetByNameAsync(string? name)
+    {
+        if (name == null)
+            return new JsonResult(await PrepareAllGroups());
+
+        var group = await _groupStorageService.GetByGroupNameAsync(name);
+        if (group == null)
+            return BadRequest();
+
+        return await GetAsync(group.Id);
     }
 
     [HttpPost]
@@ -96,7 +109,7 @@ public class GroupController : ControllerBase
         return Ok();
     }
 
-    [HttpPatch]
+    [HttpPatch("byId")]
     public async Task<IActionResult> RenameAsync(string? id, string? newName)
     {
         if (id == null || newName == null)
@@ -127,7 +140,20 @@ public class GroupController : ControllerBase
         return Ok();
     }
 
-    [HttpDelete]
+    [HttpPatch("byName")]
+    public async Task<IActionResult> RenameByNameAsync(string? name, string? newName)
+    {
+        if (name == null || newName == null)
+            return BadRequest();
+
+        var group = await _groupStorageService.GetByGroupNameAsync(name);
+        if (group == null)
+            return BadRequest();
+
+        return await RenameAsync(group.Id, newName);
+    }
+
+    [HttpDelete("byId")]
     public async Task<IActionResult> DeleteAsync(string? id)
     {
         if (id == null)
@@ -157,5 +183,18 @@ public class GroupController : ControllerBase
         }
 
         return Ok();
+    }
+
+    [HttpDelete("byId")]
+    public async Task<IActionResult> DeleteByNameAsync(string? name)
+    {
+        if (name == null)
+            return BadRequest();
+
+        var group = await _groupStorageService.GetByGroupNameAsync(name);
+        if (group == null)
+            return BadRequest();
+
+        return await DeleteAsync(group.Id);
     }
 }

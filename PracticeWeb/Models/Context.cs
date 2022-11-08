@@ -21,6 +21,10 @@ public class Context : DbContext
     {
         base.OnModelCreating(builder);
 
+        builder.Entity<Group>()
+            .HasIndex(g => g.Name)
+            .IsUnique();
+
         builder.Entity<Connection>().HasKey(t => new {
             t.ParentId, t.ChildId
         });
