@@ -77,6 +77,10 @@ public class SubjectController : ControllerBase
         if (group == null || groupItem == null || groupItem.Type.Name != "Group")
             return NotFound();
 
+        var anotherSubject = await _subjectStorageService.GetByGroupAndNameAsync(groupId, name);
+        if (anotherSubject != null)
+            return BadRequest();
+
         try
         {
             Item folder = await _fileSystemService.CreateFolderAsync(group.Id, name, 4);

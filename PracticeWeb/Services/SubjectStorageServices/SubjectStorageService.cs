@@ -26,6 +26,9 @@ public class SubjectStorageService : ISubjectStorageService
     public async Task<List<Subject>> GetByGroupAsync(string groupId) =>
         await IncludeValues().Where(s => s.GroupId == groupId).ToListAsync();
 
+    public async Task<Subject?> GetByGroupAndNameAsync(string groupId, string name) =>
+        (await GetByGroupAsync(groupId)).FirstOrDefault(g => g.Name == name);
+
     public async Task UpdateAsync(string id, Subject entity) =>
         await _common.UpdateAsync(id, entity);
 
