@@ -37,7 +37,7 @@ public class SubjectController : ControllerBase
 
         var subject = await _subjectStorageService.GetAsync(id);
         if (subject == null)
-            return BadRequest();
+            return NotFound();
 
         try
         {
@@ -75,7 +75,7 @@ public class SubjectController : ControllerBase
         var group = await _groupStorageService.GetAsync(groupId);
         var groupItem = await _itemStorageService.GetAsync(groupId);
         if (group == null || groupItem == null || groupItem.Type.Name != "Group")
-            return BadRequest();
+            return NotFound();
 
         try
         {
@@ -109,7 +109,7 @@ public class SubjectController : ControllerBase
         
         var subject = await _subjectStorageService.GetAsync(id);
         if (subject == null)
-            return BadRequest();
+            return NotFound();
 
         try
         {
@@ -119,13 +119,9 @@ public class SubjectController : ControllerBase
         {
             return NotFound();
         }
-        catch (ItemTypeException)
-        {
-            return BadRequest();
-        }
+
         subject.Name = newName;
         await _subjectStorageService.UpdateAsync(subject.Id, subject);
-
         return Ok();
     }
 
@@ -137,7 +133,7 @@ public class SubjectController : ControllerBase
         
         var subject = await _subjectStorageService.GetAsync(id);
         if (subject == null)
-            return BadRequest();
+            return NotFound();
 
         try
         {
