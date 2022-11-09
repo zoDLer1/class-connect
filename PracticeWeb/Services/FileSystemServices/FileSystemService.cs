@@ -148,7 +148,7 @@ public class FileSystemService : IFileSystemService
                 CreatorName = "testName",
             });
         }
-        return result;
+        return result.OrderBy(i => i.Name).ThenBy(i => i.CreationTime).ToList();
     }
 
     public async Task<FileResult> GetFileAsync(string id)
@@ -257,10 +257,7 @@ public class FileSystemService : IFileSystemService
 
     public async Task RenameAsync(string id, string newName)
     {
-        var item = await TryGetItemAsync(id);
-        if (item.Type.Name != "File" && item.Type.Name != "Folder")
-            throw new ItemTypeException();
-        
+        var item = await TryGetItemAsync(id);        
         item.Name = newName;
         await _itemStorageService.UpdateAsync(id, item);
     }

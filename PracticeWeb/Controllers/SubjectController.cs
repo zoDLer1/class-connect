@@ -41,7 +41,20 @@ public class SubjectController : ControllerBase
 
         try
         {
-            return new JsonResult(await _fileSystemService.GetFolderInfoAsync(id));
+            var folder = await _fileSystemService.GetFolderInfoAsync(id);
+            var subjectFolder = new SubjectFolder
+            {
+                Name = folder.Name, 
+                Type = folder.Type,
+                Path = folder.Path,
+                RealPath = folder.RealPath,
+                Guid = folder.Guid,
+                Items = folder.Items,
+                CreationTime = folder.CreationTime,
+                CreatorName = folder.CreatorName,
+                Description = subject.Description
+            };
+            return new JsonResult(subjectFolder);
         }
         catch (ItemTypeException)
         {
@@ -110,11 +123,8 @@ public class SubjectController : ControllerBase
         {
             return BadRequest();
         }
-        finally
-        {
-            subject.Name = newName;
-            await _subjectStorageService.UpdateAsync(subject.Id, subject);
-        }
+        subject.Name = newName;
+        await _subjectStorageService.UpdateAsync(subject.Id, subject);
 
         return Ok();
     }
@@ -143,10 +153,7 @@ public class SubjectController : ControllerBase
                 return NotFound();
             throw;
         }
-        finally
-        {
-            await _subjectStorageService.DeleteAsync(subject.Id);
-        }
+        await _subjectStorageService.DeleteAsync(subject.Id);
 
         return Ok();
     }

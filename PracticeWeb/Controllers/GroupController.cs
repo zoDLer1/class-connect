@@ -33,7 +33,7 @@ public class GroupController : ControllerBase
     {
         var groups = await _groupStorageService.GetAllAsync();
         var result = new List<Folder>();
-        foreach (var group in groups)
+        foreach (var group in groups.OrderBy(g => g.Name))
         {
             try
             {
@@ -79,15 +79,21 @@ public class GroupController : ControllerBase
         return result;
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetAsync()
+    {
+        return new JsonResult(await PrepareAllGroupsAsync());
+    }
+
     [HttpGet("byId")]
-    public async Task<IActionResult> GetAsync(string? id)
+    public async Task<IActionResult> GetByIdAsync(string? id)
     {
         if (id == null)
-            return new JsonResult(await PrepareAllGroupsAsync());
+            return BadRequest();
 
         var group = await _groupStorageService.GetAsync(id);
         if (group == null)
-            return BadRequest();
+            return NotFound();
 
         try
         {
@@ -107,39 +113,13 @@ public class GroupController : ControllerBase
     public async Task<IActionResult> GetByNameAsync(string? name)
     {
         if (name == null)
-            return new JsonResult(await PrepareAllGroupsAsync());
-
-        var group = await _groupStorageService.GetByGroupNameAsync(name);
-        if (group == null)
-            return BadRequest();
-
-        return await GetAsync(group.Id);
-    }
-
-    [HttpGet("subjects/byId")]
-    public async Task<IActionResult> GetSubjectsAsync(string? id)
-    {
-        if (id == null)
-            return BadRequest();
-
-        var group = await _groupStorageService.GetAsync(id);
-        if (group == null)
-            return BadRequest();
-
-        return new JsonResult(await PrepareAllSubjectsAsync(group.Id));
-    }
-
-    [HttpGet("subjects/byName")]
-    public async Task<IActionResult> GetSubjectsByNameAsync(string? name)
-    {
-        if (name == null)
             return BadRequest();
 
         var group = await _groupStorageService.GetByGroupNameAsync(name);
         if (group == null)
-            return BadRequest();
+            return NotFound();
 
-        return await GetSubjectsAsync(group.Id);
+        return await GetByIdAsync(group.Id);
     }
 
     [HttpPost]
@@ -178,7 +158,7 @@ public class GroupController : ControllerBase
         
         var groupInfo = await _groupStorageService.GetAsync(id);
         if (groupInfo == null)
-            return BadRequest();
+            return NotFound();
 
         try
         {
@@ -188,16 +168,9 @@ public class GroupController : ControllerBase
         {
             return NotFound();
         }
-        catch (ItemTypeException)
-        {
-            return BadRequest();
-        }
-        finally
-        {
-            groupInfo.Name = newName;
-            await _groupStorageService.UpdateAsync(groupInfo.Id, groupInfo);
-        }
 
+        groupInfo.Name = newName;
+        await _groupStorageService.UpdateAsync(groupInfo.Id, groupInfo);
         return Ok();
     }
 
@@ -209,7 +182,7 @@ public class GroupController : ControllerBase
 
         var group = await _groupStorageService.GetByGroupNameAsync(name);
         if (group == null)
-            return BadRequest();
+            return NotFound();
 
         return await RenameAsync(group.Id, newName);
     }
@@ -222,7 +195,7 @@ public class GroupController : ControllerBase
 
         var groupInfo = await _groupStorageService.GetAsync(id);
         if (groupInfo == null)
-            return BadRequest();
+            return NotFound();
 
         try
         {
@@ -238,15 +211,12 @@ public class GroupController : ControllerBase
                 return NotFound();
             throw;
         }
-        finally
-        {
-            await _groupStorageService.DeleteAsync(groupInfo.Id);
-        }
+        await _groupStorageService.DeleteAsync(groupInfo.Id);
 
         return Ok();
     }
 
-    [HttpDelete("byId")]
+    [HttpDelete("byName")]
     public async Task<IActionResult> DeleteByNameAsync(string? name)
     {
         if (name == null)
@@ -254,7 +224,7 @@ public class GroupController : ControllerBase
 
         var group = await _groupStorageService.GetByGroupNameAsync(name);
         if (group == null)
-            return BadRequest();
+            return NotFound();
 
         return await DeleteAsync(group.Id);
     }
