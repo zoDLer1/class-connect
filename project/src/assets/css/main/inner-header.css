@@ -1,0 +1,16 @@
+.inner-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+}
+.inner-header__directories{
+    display: flex;
+    
+}
+
+.inner-header__user{
+    font-size: 18px;
+    font-weight: medium;
+    color: #B6B2B1;
+}

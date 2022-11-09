@@ -1,0 +1,62 @@
+/* BLOCK */
+.directories{
+    display: flex;
+    align-items: center;
+}
+
+/* ELEMS */
+.directories__text{
+    color: #000;
+    font-weight: 700;
+    font-size: 24px;
+    padding: 5px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 230px;
+}
+.directories__directory .directories__text:hover{
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.directories__combiner{
+    position: relative;
+    
+}
+.directories__combiner-items{
+    position: absolute;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    top: 45px;
+    left: -35px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    background-color: #fff;
+}
+.directories__combiner-item:last-child{
+    border: none;
+}
+.directories__combiner-item{
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    cursor: pointer;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);;
+}
+.directories__combiner-item:hover{
+    background-color: rgba(0, 0, 0, 0.1);
+}
+.directories__combiner-text{
+    font-weight: 500;
+    max-width: 330px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+/* MODIFICATORS */
+.directories--separator{
+    color: #B6B2B1;
+    font-size: 20px;
+}

@@ -1,0 +1,10 @@
+@import url('/css/index/infoblock.css');
+
+body{
+    background-image: url('/imgs/image.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 80% 20%;
+    background-attachment: fixed;
+    display: block;
+}
