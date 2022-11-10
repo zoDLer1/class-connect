@@ -1,10 +1,12 @@
 import axios from "axios";
 
 const DOMAIN = 'https://25.62.130.250:7231'
-
+axios.defaults.timeout = 1000 * 1;
 
 export const Defaultconfig = {
-    baseURL: DOMAIN 
+    baseURL: DOMAIN,
+    headers:{},
+    
 }
 const token = localStorage.getItem('token')
 if (token) Defaultconfig.headers['authorization'] = `Bearer ${token}`

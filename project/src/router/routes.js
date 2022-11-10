@@ -6,7 +6,7 @@ import subject from '@/views/subject.vue'
 
 
 const isAuth = localStorage.getItem('token')
-
+console.log(isAuth)
 const authGuard = function(to, from, next){
     if(!isAuth) next({name:'login'});
     else next()

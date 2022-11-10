@@ -29,7 +29,7 @@ export default {
     methods:{
         menuOpen(evt){
             evt.preventDefault();
-            this.$emit('menuOpen', this.data.guid, evt)
+            this.$emit('menuOpen', this.data.guid, this.id-1, evt)
         }
 
     },

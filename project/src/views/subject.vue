@@ -1,9 +1,9 @@
 <template>
     <div class="content">
         <div class="page__section">
-            <inner-header :username="user" :realPath='data.realPath' :path="data.path"></inner-header>
+            <inner-header :username="user" :realPath='getRealPath' :path="getPath"></inner-header>
             <div class="files">
-                <file-branch :data='data.items' :api="api" ></file-branch>
+                <file-branch :data='getItems'></file-branch>
                 <div class="file__info info">
                     <div class="info__header">
                         <h3 class="info__header-label">Предмет 2</h3>
@@ -73,9 +73,12 @@
     import upload from '@/components/info_elements/upload-element.vue'
     import innerHeader from '@/components/header/inner-header.vue'
     import filebranch from '@/components/files/file-branch.vue'
-    import data from '@/assets/info.json'
-
+    import { mapActions, mapGetters } from 'vuex'
+    
     export default {
+        computed:{
+            ...mapGetters(['getItems', 'getGuid', 'getPath', 'getRealPath'])
+        },
         name: 'subject-view',
         components:{
             'file-branch': filebranch,
@@ -84,9 +87,8 @@
         },
         data() {
             return {
-                guid:  this.guidGet(),
                 user: 'zoDLer',
-                data: data,
+
                 api: API,
 
                 types: {
@@ -95,10 +97,11 @@
                         {function: (_)=> _,  mimeTypes: {
                                                 'text/plain': 'file.svg',
                                                 'image/jpeg': 'image.svg',
+                                                'image/png': 'image.svg'
                                                 }
                         },
                         {function: this.getData,  mimeTypes: {null:'group.svg'}},
-                        {function: (_)=> _,  mimeTypes: {null:'folder.svg'}},
+                        {function: this.getData,  mimeTypes: {null:'folder.svg'}},
                     ],
                     default:{
                         mimeType: 'file.svg'
@@ -113,33 +116,15 @@
                 getType: this.getType,
                 getIconPath: this.getIconPath,
                 requireIcon: this.requireIcon,
-                UpdateData: this.UpdateData,
-                guid: this.guid
             }
         },
         methods: {
-            
-
-            UpdateData(){
-                this.getData(this.guid)
-            },
-            getData(path){
-                this.api.show(path)
-                .then((response) => {
-                    this.data = response.data
-                    localStorage.setItem('guid', response.data.guid);
-                    this.data.items.sort((a, b) => a.type.id - b.type.id)
-                    console.log(response.data.realPath)
-                });
-            },
-
+            ...mapActions(['getData', 'updateData']),
             requireIcon(icon){
                 return require(`#/${icon}`)
             },
 
-            guidGet(){
-                return localStorage.getItem('guid') || '87c229ab-b23d-4c5c-bb23-583b1fbc4aa1'
-            },
+           
 
             getType(type){
                 return this.types.items[type]
@@ -151,8 +136,8 @@
             },
         },
         
-        mounted() {    
-            this.getData(this.guid)
+        created() {    
+            this.getData('87c229ab-b23d-4c5c-bb23-583b1fbc4aa1')
         },
         
         

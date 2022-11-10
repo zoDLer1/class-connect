@@ -1,4 +1,4 @@
-import {DefaultApiInstanse} from '@/api/index.js' 
+import {DefaultApiInstanse} from '@/api/' 
 
 
 
@@ -12,17 +12,17 @@ export const API = {
         return DefaultApiInstanse.get(this.filesystem, {params:{id:guid}})
     },
     createFolder(guid, name){
-        return DefaultApiInstanse.post(this.filesystem, null, {params:{id:guid, name:name}})
+        return DefaultApiInstanse.post(this.filesystem, null, {params:{parentId:guid, name:name}})
     },
     createFile(guid, data){
-        return DefaultApiInstanse.post(this.filesystem, data, {params:{id:guid}})
+        return DefaultApiInstanse.post(this.filesystem, data, {params:{parentId:guid}})
     },
 
     rename(guid, name){
-        return DefaultApiInstanse.patch(this.filesystem, {params:{id:guid, name: name}})
+        return DefaultApiInstanse.patch(this.filesystem, {params:{parentId:guid, name: name}})
     },
     delete(guid){
-        return DefaultApiInstanse.delete(this.filesystem, {params:{id:guid}})
+        return DefaultApiInstanse.delete(this.filesystem, {params:{parentId:guid}})
     },
     groups(){
         return DefaultApiInstanse.get(this.group)

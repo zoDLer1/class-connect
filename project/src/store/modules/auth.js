@@ -4,7 +4,7 @@ import {DefaultApiInstanse} from '@/api'
 
 export default {
     state:{
-        token: null || localStorage.getItem('token'),
+        token: null || localStorage.getItem('token'), 
         userRole: null || localStorage.getItem('userRole')
     },
     mutations:{

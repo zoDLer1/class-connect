@@ -4,9 +4,16 @@
 
 <script>
 
-
+import { mapMutations } from 'vuex'
 export default {
-  name: 'App'
+  
+  name: 'App',
+  methods:{
+    ...mapMutations(['setToken']), // only for developing
+  },
+  created(){
+    this.setToken('test') // only for developing
+  }
 }
 </script>
 
