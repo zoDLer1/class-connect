@@ -83,15 +83,16 @@ public class SubjectController : ControllerBase
 
         try
         {
-            Item folder = await _fileSystemService.CreateFolderAsync(group.Id, name, 4);
+            var item = await _fileSystemService.CreateFolderAsync(group.Id, name, 4);
             var subject = new Subject
             {
-                Id = folder.Id,
+                Id = item.Guid,
                 GroupId = group.Id,
                 Name = name,
                 Description = description
             };
             await _subjectStorageService.CreateAsync(subject);
+            return new JsonResult(item);
         }
         catch (Exception ex)
         {
@@ -101,8 +102,6 @@ public class SubjectController : ControllerBase
                 return BadRequest();
             throw;
         }
-
-        return Ok();
     }
 
     [HttpPatch]

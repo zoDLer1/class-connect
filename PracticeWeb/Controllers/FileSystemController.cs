@@ -81,7 +81,8 @@ public class FileSystemController : ControllerBase
 
         try
         {
-            await _fileSystemService.CreateFileAsync(parentId, uploadedFile);
+            var item = await _fileSystemService.CreateFileAsync(parentId, uploadedFile);
+            return new JsonResult(item);
         }
         catch (Exception ex)
         {
@@ -92,7 +93,6 @@ public class FileSystemController : ControllerBase
             throw;
         }
 
-        return Ok();
     }
 
     [HttpPost]
@@ -103,7 +103,8 @@ public class FileSystemController : ControllerBase
 
         try
         {
-            await _fileSystemService.CreateFolderAsync(parentId, name);
+            var item = await _fileSystemService.CreateFolderAsync(parentId, name);
+            return new JsonResult(item);
         }
         catch (Exception ex)
         {
@@ -113,8 +114,6 @@ public class FileSystemController : ControllerBase
                 return BadRequest();
             throw;
         }
-
-        return Ok();
     }
 
     [HttpPatch]

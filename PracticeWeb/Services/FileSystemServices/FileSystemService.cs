@@ -126,27 +126,40 @@ public class FileSystemService : IFileSystemService
         return path;
     }
 
+    private async Task<FolderItem> PrepareItemAsync(string id)
+    {
+        var item = await _itemStorageService.GetAsync(id);
+        if (item == null)
+            throw new ItemNotFoundException();
+        var fullPath = await GeneratePathAsync(item.Id);
+        var path = string.Join(Path.DirectorySeparatorChar, fullPath);
+        var file = await _itemStorageService.GetFileAsync(item.Id);
+        return new FolderItem() 
+        {
+            Name = item.Name,
+            Path = await MakePathFromNames(fullPath),
+            Guid = item.Id,
+            Type = item.Type,
+            MimeType = file?.MimeType,
+            CreationTime = item.CreationTime,
+            CreatorName = "testName",
+        };
+    }
+
     private async Task<List<FolderItem>> PrepareItemsAsync(List<string> itemIds)
     {
         var result = new List<FolderItem>();
         foreach (var id in itemIds)
         {
-            var item = await _itemStorageService.GetAsync(id);
-            if (item == null)
-                continue;
-            var fullPath = await GeneratePathAsync(item.Id);
-            var path = string.Join(Path.DirectorySeparatorChar, fullPath);
-            var file = await _itemStorageService.GetFileAsync(item.Id);
-            result.Add(new FolderItem() 
+            try 
             {
-                Name = item.Name,
-                Path = await MakePathFromNames(fullPath),
-                Guid = item.Id,
-                Type = item.Type,
-                MimeType = file?.MimeType,
-                CreationTime = item.CreationTime,
-                CreatorName = "testName",
-            });
+                var pripared = await PrepareItemAsync(id);
+                result.Add(pripared);
+            }
+            catch (ItemNotFoundException)
+            {
+                continue;
+            }
         }
         return result.OrderBy(i => i.Name).ThenBy(i => i.CreationTime).ToList();
     }
@@ -191,7 +204,7 @@ public class FileSystemService : IFileSystemService
         return folder;
     }
 
-    public async Task<Item> CreateFileAsync(string parentId, IFormFile file)
+    public async Task<FolderItem> CreateFileAsync(string parentId, IFormFile file)
     {
         var parent = await TryGetItemAsync(parentId);
         var item = new Item 
@@ -222,10 +235,10 @@ public class FileSystemService : IFileSystemService
         await _itemStorageService.CreateAsync(item);
         await _itemStorageService.CreateConnectionAsync(connection);
         await _itemStorageService.CreateFileAsync(fileEntity);
-        return item;
+        return await PrepareItemAsync(item.Id);
     }
 
-    public async Task<Item> CreateFolderAsync(string parentId, string name, int typeId)
+    public async Task<FolderItem> CreateFolderAsync(string parentId, string name, int typeId)
     {
         var parent = await TryGetItemAsync(parentId);
         var item = new Item 
@@ -247,10 +260,10 @@ public class FileSystemService : IFileSystemService
         CreateDirectory(Path.Combine(path, item.Id));
         await _itemStorageService.CreateAsync(item);
         await _itemStorageService.CreateConnectionAsync(connection);
-        return item;
+        return await PrepareItemAsync(item.Id);
     }
 
-    public async Task<Item> CreateFolderAsync(string parentId, string name)
+    public async Task<FolderItem> CreateFolderAsync(string parentId, string name)
     {
         return await CreateFolderAsync(parentId, name, 1);
     }

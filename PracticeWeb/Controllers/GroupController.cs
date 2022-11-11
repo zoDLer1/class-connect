@@ -130,13 +130,14 @@ public class GroupController : ControllerBase
 
         try
         {
-            Item item = await _fileSystemService.CreateFolderAsync(_fileSystemService.RootId, name, 3);
+            var item = await _fileSystemService.CreateFolderAsync(_fileSystemService.RootId, name, 3);
             var group = new Group
             {
-                Id = item.Id,
+                Id = item.Guid,
                 Name = name
             };
             await _groupStorageService.CreateAsync(group);
+            return new JsonResult(item);
         }
         catch (Exception ex)
         {
@@ -146,8 +147,6 @@ public class GroupController : ControllerBase
                 return BadRequest();
             throw;
         }
-
-        return Ok();
     }
 
     [HttpPatch("byId")]

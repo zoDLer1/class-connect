@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using PracticeWeb.Services;
 
 namespace PracticeWeb.Models;
 
