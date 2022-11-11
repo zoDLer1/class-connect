@@ -1,6 +1,6 @@
 namespace PracticeWeb.Models;
 
-public class Subject : CommonModel
+public class Subject : StringIdCommonModel
 {
     public string GroupId { get; set; } = null!;
     public Group Group { get; set; } = null!;

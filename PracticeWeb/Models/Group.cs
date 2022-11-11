@@ -1,6 +1,6 @@
 namespace PracticeWeb.Models;
 
-public class Group : CommonModel
+public class Group : StringIdCommonModel
 {
     public string Name { get; set; } = null!;
 }

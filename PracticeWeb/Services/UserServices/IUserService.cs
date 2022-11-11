@@ -5,7 +5,7 @@ namespace PracticeWeb.Services.UserServices;
 /// <summary>
 /// Сервис учёта пользователей
 /// </summary>
-public interface IUserService : IIntegerIdDataService<int, User> 
+public interface IUserService : IDataService<int, User> 
 {
-    Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken);
+    Task<User?> GetByEmailAsync(string email);
 }

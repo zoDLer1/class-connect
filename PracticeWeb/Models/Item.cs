@@ -1,6 +1,6 @@
 namespace PracticeWeb.Models;
 
-public class Item : CommonModel
+public class Item : StringIdCommonModel
 {
     public int TypeId { get; set; }
     public ItemType Type { get; set; } = null!;
