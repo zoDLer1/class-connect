@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using PracticeWeb.Models;
+using PracticeWeb;
 using PracticeWeb.Services.FileSystemServices;
 using PracticeWeb.Services.GroupStorageServices;
 using PracticeWeb.Services.ItemStorageServices;
@@ -21,6 +24,22 @@ builder.Services.AddCors(options =>
     }); 
 });
 builder.Services.AddControllers();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options => {
+        options.RequireHttpsMetadata = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = AuthOptions.ISSUER,
+
+            ValidateAudience = true,
+            ValidAudience = AuthOptions.AUDIENCE,
+            ValidateLifetime = true,
+
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+        };
+    });
 builder.Services.AddTransient<IFileSystemService, FileSystemService>();
 builder.Services.AddTransient<IGroupStorageService, GroupStorageService>();
 builder.Services.AddTransient<IItemStorageService, ItemStorageService>();
@@ -40,6 +59,9 @@ if (app.Environment.IsDevelopment())
 app.UseCors("test");
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseAuthorization();
 
