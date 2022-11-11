@@ -13,6 +13,7 @@ public class Context : DbContext
     public DbSet<Connection> Connections { get; set; } = null!;
 
     public DbSet<Role> Roles { get; set; } = null!;
+    public DbSet<User> Users { get; set; } = null!;
 
     public Context(DbContextOptions<Context> options) : base(options)
     {
