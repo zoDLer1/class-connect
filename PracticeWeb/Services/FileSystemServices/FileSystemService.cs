@@ -259,7 +259,7 @@ public class FileSystemService : IFileSystemService
     {
         var item = await TryGetItemAsync(id);        
         item.Name = newName;
-        await _itemStorageService.UpdateAsync(id, item);
+        await _itemStorageService.UpdateAsync(item);
     }
 
     public async Task RemoveFileAsync(string id)

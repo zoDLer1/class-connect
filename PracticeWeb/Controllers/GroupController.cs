@@ -170,7 +170,7 @@ public class GroupController : ControllerBase
         }
 
         groupInfo.Name = newName;
-        await _groupStorageService.UpdateAsync(groupInfo.Id, groupInfo);
+        await _groupStorageService.UpdateAsync(groupInfo);
         return Ok();
     }
 

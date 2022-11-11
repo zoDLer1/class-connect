@@ -6,12 +6,12 @@ namespace PracticeWeb.Services.GroupStorageServices;
 public class GroupStorageService : IGroupStorageService
 {
     private Context _context;
-    private CommonQueries<Group> _common;
+    private CommonQueries<string, Group> _common;
 
     public GroupStorageService(Context context)
     {
         _context = context;
-        _common = new CommonQueries<Group>(_context);
+        _common = new CommonQueries<string, Group>(_context);
     }
 
     public async Task<Group> CreateAsync(Group entity) =>
@@ -26,8 +26,8 @@ public class GroupStorageService : IGroupStorageService
     public async Task<List<Group>> GetAllAsync() =>
         await _common.GetAllAsync(_context.Groups);
 
-    public async Task UpdateAsync(string id, Group entity) =>
-        await _common.UpdateAsync(id, entity);
+    public async Task UpdateAsync(Group entity) =>
+        await _common.UpdateAsync(entity);
 
     public async Task DeleteAsync(string id) =>
         await _common.DeleteAsync(id);

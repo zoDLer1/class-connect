@@ -115,6 +115,10 @@ public class SubjectController : ControllerBase
         if (subject == null)
             return NotFound();
 
+        var anotherSubject = await _subjectStorageService.GetByGroupAndNameAsync(subject.GroupId, newName);
+        if (anotherSubject != null)
+            return BadRequest();
+
         try
         {
             await _fileSystemService.RenameAsync(subject.Id, newName);
@@ -125,7 +129,7 @@ public class SubjectController : ControllerBase
         }
 
         subject.Name = newName;
-        await _subjectStorageService.UpdateAsync(subject.Id, subject);
+        await _subjectStorageService.UpdateAsync(subject);
         return Ok();
     }
 

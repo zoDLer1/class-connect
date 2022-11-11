@@ -6,12 +6,12 @@ namespace PracticeWeb.Services.SubjectStorageServices;
 public class SubjectStorageService : ISubjectStorageService
 {
     private Context _context;
-    private CommonQueries<Subject> _common;
+    private CommonQueries<string, Subject> _common;
 
     public SubjectStorageService(Context context)
     {
         _context = context;
-        _common = new CommonQueries<Subject>(_context);
+        _common = new CommonQueries<string, Subject>(_context);
     }
 
     public async Task<Subject> CreateAsync(Subject entity) =>
@@ -29,8 +29,8 @@ public class SubjectStorageService : ISubjectStorageService
     public async Task<Subject?> GetByGroupAndNameAsync(string groupId, string name) =>
         (await GetByGroupAsync(groupId)).FirstOrDefault(g => g.Name == name);
 
-    public async Task UpdateAsync(string id, Subject entity) =>
-        await _common.UpdateAsync(id, entity);
+    public async Task UpdateAsync(Subject entity) =>
+        await _common.UpdateAsync(entity);
 
     public async Task DeleteAsync(string id) =>
         await _common.DeleteAsync(id);

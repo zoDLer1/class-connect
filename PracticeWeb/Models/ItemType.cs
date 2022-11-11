@@ -1,7 +1,6 @@
 namespace PracticeWeb.Models;
 
-public class ItemType
+public class ItemType : IntegerIdCommonModel
 {
-    public int Id { get; set; }
     public string Name { get; set; } = null!;
 }

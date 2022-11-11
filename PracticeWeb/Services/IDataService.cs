@@ -5,7 +5,9 @@ using PracticeWeb.Models;
 
 namespace PracticeWeb.Services;
 
-public interface IDataService<T>
+public interface IDataService<TId,T>
+    where TId : IEquatable<TId>
+    where T : CommonModel
 {
     /// <summary>
     /// Добавить сущность
@@ -19,7 +21,7 @@ public interface IDataService<T>
     /// </summary>
     /// <param name="id">ИД сущности</param>
     /// <returns>Сущность</returns>
-    Task<T?> GetAsync(string id);
+    Task<T?> GetAsync(TId id);
 
     /// <summary>
     /// Получить все сущности
@@ -30,15 +32,14 @@ public interface IDataService<T>
     /// <summary>
     /// Обновить сущность
     /// </summary>
-    /// <param name="id">ИД сущности</param>
     /// <param name="entity">Сущность</param>
     /// <returns></returns>
-    Task UpdateAsync(string id, T entity);
+    Task UpdateAsync(T entity);
 
     /// <summary>
     /// Удалить сущность
     /// </summary>
     /// <param name="id">ИД сущности</param>
     /// <returns></returns>
-    Task DeleteAsync(string id);
+    Task DeleteAsync(TId id);
 }

@@ -7,14 +7,14 @@ namespace PracticeWeb.Services.ItemStorageServices;
 public class ItemStorageService : IItemStorageService
 {
     private Context _context;
-    private CommonQueries<Item> _common;
-    private CommonQueries<FileEntity> _commonFile;
+    private CommonQueries<string, Item> _common;
+    private CommonQueries<string, FileEntity> _commonFile;
 
     public ItemStorageService(Context context)
     {
         _context = context;
-        _common = new CommonQueries<Item>(_context);
-        _commonFile = new CommonQueries<FileEntity>(_context);
+        _common = new CommonQueries<string, Item>(_context);
+        _commonFile = new CommonQueries<string, FileEntity>(_context);
     }
 
     public async Task<Item> CreateAsync(Item entity) =>
@@ -29,8 +29,8 @@ public class ItemStorageService : IItemStorageService
     public async Task<ItemType?> GetItemTypeAsync(int id) =>
         await _context.ItemTypes.FirstOrDefaultAsync(t => t.Id == id);
 
-    public async Task UpdateAsync(string id, Item entity) =>
-        await _common.UpdateAsync(id, entity);
+    public async Task UpdateAsync(Item entity) =>
+        await _common.UpdateAsync(entity);
 
     public async Task DeleteAsync(string id) =>
         await _common.DeleteAsync(id);

@@ -6,7 +6,9 @@ using PracticeWeb.Models;
 
 namespace PracticeWeb.Services;
 
-public class CommonQueries<T> where T : CommonModel
+public class CommonQueries<TId, T> 
+    where TId : IEquatable<TId>
+    where T : CommonModel
 {
     private Context _context;
 
@@ -23,22 +25,21 @@ public class CommonQueries<T> where T : CommonModel
         return created.Entity;
     }
 
-    public async Task<T?> GetAsync(string id, IQueryable<T> collection) => 
-        await collection.FirstOrDefaultAsync(e => e.Id == id);
+    public async Task<T?> GetAsync(TId id, IQueryable<T> collection) => 
+        await collection.FirstOrDefaultAsync(e => Equals(e.Id, id));
 
     public async Task<List<T>> GetAllAsync(IQueryable<T> collection) =>
         await collection.ToListAsync();
 
-    public async Task UpdateAsync(string id, T entity)
+    public async Task UpdateAsync(T entity)
     {
-        entity.Id = id;
         _context.Set<T>().Update(entity);
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(string id)
+    public async Task DeleteAsync(TId id)
     {
-        var entity = await _context.Set<T>().FirstOrDefaultAsync((e) => e.Id == id);
+        var entity = await _context.Set<T>().FirstOrDefaultAsync((e) => Equals(e.Id, id));
         if (entity is null)
             throw new NullReferenceException();
         _context.Set<T>().Remove(entity);

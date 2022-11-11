@@ -2,7 +2,7 @@ using PracticeWeb.Models;
 
 namespace PracticeWeb.Services.ItemStorageServices;
 
-public interface IItemStorageService : IDataService<Item>
+public interface IItemStorageService : IDataService<string, Item>
 {
     Task<ItemType?> GetItemTypeAsync(int id);
     Task CreateFileAsync(FileEntity entity);
