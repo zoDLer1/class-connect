@@ -21,6 +21,11 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
+    public bool IsEmailUsed(string email)
+    {
+        return _userService.GetByEmailAsync(email) == null;
+    }
+
     private async Task<ClaimsIdentity> GetIdentityAsync(string email, string password)
     {
         var user = await _authenticationService.LoginAsync(email, password);
@@ -67,11 +72,27 @@ public class UserController : ControllerBase
         }
         catch (UserNotFoundException)
         {
-            return BadRequest();
+            return NotFound();
         }
         catch (InvalidPasswordException)
         {
             return BadRequest();
         }
+    }
+
+    [HttpPost("signup")]
+    public async Task<IActionResult> Signup(
+        [FromForm] string firstName, 
+        [FromForm] string lastName, 
+        [FromForm] string patronymic,
+        [FromForm] string email, 
+        [FromForm] string password)
+    {
+        Console.WriteLine($"{firstName} {lastName} {patronymic} {email} {IsEmailUsed(email)} {password}");
+        if (firstName == null || lastName == null || patronymic == null || email == null || IsEmailUsed(email) || password == null)
+            return BadRequest();
+
+        await _authenticationService.RegisterAsync(firstName, lastName, patronymic, email, password, 1);
+        return Ok();
     }
 }
