@@ -8,6 +8,8 @@ public class User : IntegerIdCommonModel
     public string Email { get; set; } = null!;
     public string Password { get; set; } = null!;
 
+    public long RegTime { get; set; }
+
     public int RoleId { get; set; }
     public Role Role { get; set; } = null!;
 }
