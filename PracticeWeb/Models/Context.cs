@@ -12,6 +12,8 @@ public class Context : DbContext
     public DbSet<FileEntity> Files { get; set; } = null!;
     public DbSet<Connection> Connections { get; set; } = null!;
 
+    public DbSet<Role> Roles { get; set; } = null!;
+
     public Context(DbContextOptions<Context> options) : base(options)
     {
         Database.EnsureCreated();
@@ -28,6 +30,12 @@ public class Context : DbContext
         builder.Entity<Connection>().HasKey(t => new {
             t.ParentId, t.ChildId
         });
+
+        builder.Entity<Role>().HasData(
+            new Role{ Id = 1, Name = "Student", Title = "Студент" },
+            new Role{ Id = 2, Name = "Teacher", Title = "Преподаватель" },
+            new Role{ Id = 3, Name = "Administrator", Title = "Администратор" }
+        );
 
         builder.Entity<ItemType>().HasData(
             new ItemType { Id = 1, Name = "Folder" },
