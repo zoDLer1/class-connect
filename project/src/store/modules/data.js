@@ -13,20 +13,21 @@ export default {
                     },
                     (error) => {
                         console.log(error.code)
-                        if (error.code === 'ECONNABORTED')
-                            commit('setData', DEFAULT_DATA)
-                            console.log('timeout')
+                        commit('setData', DEFAULT_DATA)
+                        // if (error.code === 'ECONNABORTED')
+                            
+                            
                     }
                 )
         },
         updateData({ dispatch, getters }){
             dispatch('getData', getters.getGuid)
         },
-        createFolder({ dispatch, getters }, name){
+        createFolder({ commit, getters }, name){
             API.createFolder(getters.getGuid, name).then(  
-                () => {
-                    dispatch('updateData')
-                    // commit('addItem', response.data) !!!
+                (response) => {
+                    
+                    commit('addItem', response.data)
                 },
                 (error) => {
                     error

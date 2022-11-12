@@ -10,6 +10,7 @@
 .file-branch__item{
     border-bottom: 2px solid rgba(0, 0, 0, 0.1);
     width: 310px;
+    user-select: none;
 }
 .file-branch__item *{
     cursor: pointer;
@@ -17,7 +18,7 @@
 .file-branch__item-body{
     display: flex;
     width: 100%;
-    align-items: flex-end;
+    align-items: center;
     gap: 18px;
 }
 .file-branch__item-label{

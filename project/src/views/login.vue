@@ -48,7 +48,9 @@
             ...mapActions(['onLogin']),
             onSubmit(){
                 this.onLogin({email: this.email, 
-                password:this.password})
+                password:this.password}).then(()=>{
+                    this.$router.push({name: 'subjects'})
+                })
             },
             
         },

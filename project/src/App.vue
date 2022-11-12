@@ -4,16 +4,18 @@
 
 <script>
 
-import { mapMutations } from 'vuex'
+// import { mapMutations, mapActions } from 'vuex'
 export default {
   
   name: 'App',
-  methods:{
-    ...mapMutations(['setToken']), // only for developing
-  },
-  created(){
-    this.setToken('test') // only for developing
-  }
+  // methods:{
+  //   ...mapMutations(['setToken']), // only for developing
+  //   ...mapActions(['onLogout'])
+  // },
+  // created(){
+  //   // this.setToken('test') // only for developing
+    
+  // }
 }
 </script>
 

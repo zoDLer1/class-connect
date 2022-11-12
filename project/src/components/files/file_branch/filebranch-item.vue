@@ -1,6 +1,5 @@
 <template>
-    <div @contextmenu='menuOpen' class="file-branch__item" @dblclick='getType(data.type.id-1).function(data.guid)'>
-
+    <div class="file-branch__item" @dblclick='getType(data.type.id-1).function(data.guid)'>
         <input class="file-branch__field" hidden name="file-branch" type="radio" :id="idComputed">
         <label :for="idComputed" class='file-branch__item-label'>
             <div class="file-branch__item-body">
@@ -27,10 +26,7 @@ export default {
         id: Number
     },
     methods:{
-        menuOpen(evt){
-            evt.preventDefault();
-            this.$emit('menuOpen', this.data.guid, this.id-1, evt)
-        }
+       
 
     },
     inject: ['getData', 'getType', 'getIconPath'],

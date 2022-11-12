@@ -69,7 +69,6 @@
 </style>
 
 <script>
-    import {API} from '@/api/requests'
     import upload from '@/components/info_elements/upload-element.vue'
     import innerHeader from '@/components/header/inner-header.vue'
     import filebranch from '@/components/files/file-branch.vue'
@@ -88,9 +87,6 @@
         data() {
             return {
                 user: 'zoDLer',
-
-                api: API,
-
                 types: {
                     items:[
                         {function: this.getData, mimeTypes: {null:'folder.svg'}},
@@ -123,9 +119,6 @@
             requireIcon(icon){
                 return require(`#/${icon}`)
             },
-
-           
-
             getType(type){
                 return this.types.items[type]
             },
@@ -137,7 +130,7 @@
         },
         
         created() {    
-            this.getData('87c229ab-b23d-4c5c-bb23-583b1fbc4aa1')
+            this.getData('7ebfa97a-2eae-4a16-80e3-d2c1fb2d21f4')
         },
         
         

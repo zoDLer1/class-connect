@@ -1,5 +1,5 @@
 <template>
-    <div @click='object.function' class="menu__item">
+    <div @click='object.func' class="menu__item">
     <img :src="object.icon" alt="">
         <p class="menu__item-text">{{object.name}}</p>
     </div>

@@ -1,7 +1,13 @@
 <template>
-    <div :style='setCoords' v-if='menu.show' class="files__branch-menu menu">
-        <menu-item v-for='(obj, index) in menu.objs' :key='index' :object='obj'></menu-item>        
+    <div v-if='menu.visible' @contextmenu.prevent='menu.hide' @click.prevent='menu.hide' class='menu'>
+        <div :style='menu.getCoords'  class="menu__layout">
+            <div class="menu__items">
+                <menu-item v-for='obj in menu.objs' :key='obj.name' :object='obj'></menu-item> 
+            </div>
+            
+        </div>
     </div>
+    
 </template>
 
 <script>    
@@ -13,13 +19,6 @@
         components:{
             'menu-item': item
         },
-        computed:{
-            setCoords(){
-                let [x,y] = this.menu.coords
-                let [x_offset,y_offset] = this.menu.offset
-                return `top: ${y+y_offset}px; left: ${x+x_offset}px`
-            },
-        }
     }
 </script>
 

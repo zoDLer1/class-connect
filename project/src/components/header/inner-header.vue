@@ -7,7 +7,7 @@
                 <directoty-seporator v-if='part.appendSeporator'></directoty-seporator>
             </div>
         </div>
-        <a class="inner-header__user" href="#">{{username}}</a>
+        <a @click.prevent='logout' class="inner-header__user" href="#">{{getUser}}</a>
         
     </header>
     
@@ -18,6 +18,7 @@
     import directory from '@/components/header/directory/directory.vue'
     import seporator from '@/components/header/directory/directoty-seporator.vue'
     import combiner from '@/components/header/directory/directory-combiner.vue'
+    import { mapActions, mapGetters } from 'vuex'
     export default{
         components:{
             'directory-component': directory,
@@ -31,6 +32,11 @@
         },
         inject: ['getData'],
         methods: {
+            ...mapActions(['onLogout']),
+            logout(){
+                this.onLogout()
+                this.$router.push({name:'login'})
+            },
             separatedPath(){
                 let path = []
                 let realPath = this.realPath
@@ -44,7 +50,7 @@
                 return path
             },
         },
-        
+        computed: mapGetters(['getUser'])
     }
 
 </script>

@@ -19,10 +19,10 @@ export const API = {
     },
 
     rename(guid, name){
-        return DefaultApiInstanse.patch(this.filesystem, {params:{parentId:guid, name: name}})
+        return DefaultApiInstanse.patch(this.filesystem, {params:{id:guid, name: name}})
     },
     delete(guid){
-        return DefaultApiInstanse.delete(this.filesystem, {params:{parentId:guid}})
+        return DefaultApiInstanse.delete(this.filesystem, {params:{id:guid}})
     },
     groups(){
         return DefaultApiInstanse.get(this.group)
