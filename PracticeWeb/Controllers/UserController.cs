@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using PracticeWeb.Exceptions;
 using PracticeWeb.Services.AuthenticationServices;
+using PracticeWeb.Services.FileSystemServices;
 using PracticeWeb.Services.UserServices;
 
 namespace PracticeWeb.Controllers;
@@ -13,17 +14,19 @@ namespace PracticeWeb.Controllers;
 public class UserController : ControllerBase
 {
     private IAuthenticationService _authenticationService;
+    private IFileSystemService _fileSystemService;
     private IUserService _userService;
 
-    public UserController(IAuthenticationService authenticationService, IUserService userService)
+    public UserController(IAuthenticationService authenticationService, IUserService userService, IFileSystemService fileSystemService)
     {
         _authenticationService = authenticationService;
+        _fileSystemService = fileSystemService;
         _userService = userService;
     }
 
-    public bool IsEmailUsed(string email)
+    public async Task<bool> IsEmailUsedAsync(string email)
     {
-        return _userService.GetByEmailAsync(email) == null;
+        return await _userService.GetByEmailAsync(email) != null;
     }
 
     private async Task<ClaimsIdentity> GetIdentityAsync(string email, string password)
@@ -31,8 +34,9 @@ public class UserController : ControllerBase
         var user = await _authenticationService.LoginAsync(email, password);
         var claims = new List<Claim>
         {
-            new Claim("Email", user.Email),
+            new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimsIdentity.DefaultNameClaimType, user.FirstName),
+            new Claim(ClaimTypes.Surname, user.LastName),
             new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.Name)
         };
         ClaimsIdentity identity = new ClaimsIdentity(
@@ -65,8 +69,13 @@ public class UserController : ControllerBase
             
             return new JsonResult(
                 new {
-                    acess_token = encodedJwt,
-                    username = identity.Name
+                    acessToken = encodedJwt,
+                    user = new {
+                        firstName = identity.Name,
+                        lastName = identity.FindFirst(ClaimTypes.Surname)?.Value,
+                        role = identity.FindFirst(ClaimTypes.Role)?.Value,
+                        folder = _fileSystemService.RootId
+                    }
                 }
             );
         }
@@ -84,12 +93,11 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Signup(
         [FromForm] string firstName, 
         [FromForm] string lastName, 
-        [FromForm] string patronymic,
+        [FromForm] string? patronymic,
         [FromForm] string email, 
         [FromForm] string password)
     {
-        Console.WriteLine($"{firstName} {lastName} {patronymic} {email} {IsEmailUsed(email)} {password}");
-        if (firstName == null || lastName == null || patronymic == null || email == null || IsEmailUsed(email) || password == null)
+        if (firstName == null || lastName == null || email == null || await IsEmailUsedAsync(email) || password == null)
             return BadRequest();
 
         await _authenticationService.RegisterAsync(firstName, lastName, patronymic, email, password, 1);

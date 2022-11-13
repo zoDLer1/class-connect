@@ -11,7 +11,7 @@ public interface IAuthenticationService
     Task RegisterAsync(
         string firstName, 
         string lastName,
-        string patronymic,
+        string? patronymic,
         string email, 
         string password, 
         int roleId);

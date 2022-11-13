@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using PracticeWeb.Exceptions;
 using PracticeWeb.Models;
 using PracticeWeb.Services.FileSystemServices;
-using PracticeWeb.Services.GroupStorageServices;
-using PracticeWeb.Services.ItemStorageServices;
 
 namespace PracticeWeb.Controllers;
 
@@ -13,17 +11,10 @@ namespace PracticeWeb.Controllers;
 public class FileSystemController : ControllerBase
 {
     private IFileSystemService _fileSystemService;
-    private IGroupStorageService _groupStorageService;
-    private IItemStorageService _itemStorageService;
 
-    public FileSystemController(
-        IFileSystemService fileSystemService, 
-        IGroupStorageService groupStorageService,
-        IItemStorageService itemStorageService)
+    public FileSystemController(IFileSystemService fileSystemService)
     {
         _fileSystemService = fileSystemService;
-        _groupStorageService = groupStorageService;
-        _itemStorageService = itemStorageService;
     }
 
     private void CreateDirectory(string path) 
@@ -73,12 +64,12 @@ public class FileSystemController : ControllerBase
         }
     }
 
-    [HttpPost]
-    public async Task<IActionResult> UploadFileAsync(string? parentId, IFormFile uploadedFile)
+    [HttpPost("file")]
+    public async Task<IActionResult> UploadFileAsync([FromForm] string? parentId, [FromForm] IFormFile? uploadedFile)
     {
         if (parentId == null || uploadedFile == null)
             return BadRequest();
-
+        
         try
         {
             var item = await _fileSystemService.CreateFileAsync(parentId, uploadedFile);
@@ -96,14 +87,18 @@ public class FileSystemController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateFolderAsync(string? parentId, string? name)
+    public async Task<IActionResult> CreateFolderAsync(
+        [FromForm] string? parentId, 
+        [FromForm] string? name, 
+        [FromForm] string? type, 
+        [FromForm] Dictionary<string, string>? parameters)
     {
-        if (parentId == null || name == null)
+        if (parentId == null || name == null || type == null)
             return BadRequest();
 
         try
         {
-            var item = await _fileSystemService.CreateFolderAsync(parentId, name);
+            var item = await _fileSystemService.CreateFolderAsync(parentId, name, type, parameters);
             return new JsonResult(item);
         }
         catch (Exception ex)
@@ -111,6 +106,12 @@ public class FileSystemController : ControllerBase
             if (ex is FolderNotFoundException || ex is ItemNotFoundException)
                 return NotFound();
             else if (ex is ItemTypeException)
+                return BadRequest();
+            else if (ex is InvalidPathException)
+                return BadRequest();
+            else if (ex is InvalidGroupNameException)
+                return BadRequest();
+            else if (ex is InvalidSubjectNameException)
                 return BadRequest();
             throw;
         }
@@ -146,24 +147,7 @@ public class FileSystemController : ControllerBase
 
         try
         {
-            await _fileSystemService.RemoveFolder(id);
-        }
-        catch (ItemTypeException)
-        {
-            try
-            {
-                await _fileSystemService.RemoveFileAsync(id);
-            }
-            catch (ItemTypeException)
-            {
-                return BadRequest();
-            }
-            catch (Exception ex)
-            {
-                if (ex is FolderNotFoundException || ex is ItemNotFoundException)
-                    return NotFound();
-                throw;
-            }
+            await _fileSystemService.RemoveAsync(id);
         }
         catch (Exception ex)
         {

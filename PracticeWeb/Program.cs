@@ -1,13 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using PracticeWeb.Models;
 using PracticeWeb;
+using PracticeWeb.Models;
+using PracticeWeb.Exceptions;
+using PracticeWeb.Services;
 using PracticeWeb.Services.AuthenticationServices;
 using PracticeWeb.Services.FileSystemServices;
-using PracticeWeb.Services.GroupStorageServices;
-using PracticeWeb.Services.ItemStorageServices;
-using PracticeWeb.Services.SubjectStorageServices;
+using PracticeWeb.Services.FileSystemServices.Helpers;
 using PracticeWeb.Services.UserServices;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,9 +44,42 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddTransient<IFileSystemService, FileSystemService>();
-builder.Services.AddTransient<IGroupStorageService, GroupStorageService>();
-builder.Services.AddTransient<IItemStorageService, ItemStorageService>();
-builder.Services.AddTransient<ISubjectStorageService, SubjectStorageService>();
+
+builder.Services.AddTransient<FileHelperService>();
+builder.Services.AddTransient<FolderHelperService>();
+builder.Services.AddTransient<GroupHelperService>();
+builder.Services.AddTransient<SubjectHelperService>();
+
+builder.Services.AddTransient<ServiceResolver>(serviceProvider => key =>
+{
+    IFileSystemHelper? service;
+    switch (key)
+    {
+        case "File":
+            service = serviceProvider.GetService<FileHelperService>();
+            if (service == null)
+                throw new ServiceNotFoundException();
+            return service;
+        case "Folder":
+            service = serviceProvider.GetService<FolderHelperService>();
+            if (service == null)
+                throw new ServiceNotFoundException();
+            return service;
+        case "Group":
+            service = serviceProvider.GetService<GroupHelperService>();
+            if (service == null)
+                throw new ServiceNotFoundException();
+            return service;
+        case "Subject":
+            service = serviceProvider.GetService<SubjectHelperService>();
+            if (service == null)
+                throw new ServiceNotFoundException();
+            return service;
+        default:
+            throw new KeyNotFoundException();
+    }
+});
+
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
