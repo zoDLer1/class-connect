@@ -52,29 +52,22 @@ builder.Services.AddTransient<SubjectHelperService>();
 
 builder.Services.AddTransient<ServiceResolver>(serviceProvider => key =>
 {
-    IFileSystemHelper? service;
+    TService GetService<TService>() {
+        var service = serviceProvider.GetService<TService>();
+        if (service == null)
+            throw new ServiceNotFoundException();
+        return service;
+    };
     switch (key)
     {
         case "File":
-            service = serviceProvider.GetService<FileHelperService>();
-            if (service == null)
-                throw new ServiceNotFoundException();
-            return service;
+            return GetService<FileHelperService>();
         case "Folder":
-            service = serviceProvider.GetService<FolderHelperService>();
-            if (service == null)
-                throw new ServiceNotFoundException();
-            return service;
+            return GetService<FolderHelperService>();
         case "Group":
-            service = serviceProvider.GetService<GroupHelperService>();
-            if (service == null)
-                throw new ServiceNotFoundException();
-            return service;
+            return GetService<GroupHelperService>();
         case "Subject":
-            service = serviceProvider.GetService<SubjectHelperService>();
-            if (service == null)
-                throw new ServiceNotFoundException();
-            return service;
+            return GetService<SubjectHelperService>();
         default:
             throw new KeyNotFoundException();
     }
