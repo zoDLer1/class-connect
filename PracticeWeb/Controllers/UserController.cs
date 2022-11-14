@@ -1,8 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using PracticeWeb.Exceptions;
+using PracticeWeb.Models;
+using PracticeWeb.Services;
 using PracticeWeb.Services.AuthenticationServices;
 using PracticeWeb.Services.FileSystemServices;
 using PracticeWeb.Services.UserServices;
@@ -13,12 +16,20 @@ namespace PracticeWeb.Controllers;
 [Route("[controller]")]
 public class UserController : ControllerBase
 {
+    private Context _context;
+    private CommonQueries<string, Group> _commonGroupQueries;
     private IAuthenticationService _authenticationService;
     private IFileSystemService _fileSystemService;
     private IUserService _userService;
 
-    public UserController(IAuthenticationService authenticationService, IUserService userService, IFileSystemService fileSystemService)
+    public UserController(
+        Context context,
+        IAuthenticationService authenticationService, 
+        IUserService userService, 
+        IFileSystemService fileSystemService)
     {
+        _context = context;
+        _commonGroupQueries = new CommonQueries<string, Group>(_context);
         _authenticationService = authenticationService;
         _fileSystemService = fileSystemService;
         _userService = userService;
@@ -74,7 +85,7 @@ public class UserController : ControllerBase
                         firstName = identity.Name,
                         lastName = identity.FindFirst(ClaimTypes.Surname)?.Value,
                         role = identity.FindFirst(ClaimTypes.Role)?.Value,
-                        folder = _fileSystemService.RootId
+                        folder = _fileSystemService.RootId,
                     }
                 }
             );
@@ -103,6 +114,40 @@ public class UserController : ControllerBase
             return BadRequest(new { errrorText = "Данная почта уже используется" });
 
         await _authenticationService.RegisterAsync(firstName, lastName, patronymic, email, password, 1);
+        return Ok();
+    }
+
+    [Authorize]
+    [HttpPost]
+    public async Task<IActionResult> AcceptInvite([FromForm] string? groupId)
+    {
+        if (groupId == null)
+            return BadRequest(new { errorText = "Недостаточно параметров" });
+
+        var group = await _commonGroupQueries.GetAsync(groupId, _context.Groups);
+        if (group == null)
+            return NotFound(new { errorText = "Группа не найдена" });
+        
+        var email = User.FindFirst(ClaimTypes.Email)?.Value;
+        if (email == null)
+            return Unauthorized(new { errorText = "Почта не найдена" });
+        
+        var user = await _userService.GetByEmailAsync(email);
+        if (user == null)
+            return BadRequest(new { errorText = "Пользователь не найден" });
+
+        if (user.Role.Name != "Student")
+            return Forbid();
+
+        if (_context.GroupStudents.FirstOrDefault(s => s.StudentId == user.Id && s.GroupId == group.Id) != null)
+            return BadRequest(new { errorText = "Данный пользователь уже добавлен в группу" });
+
+        var student = new GroupStudent{
+            GroupId = group.Id,
+            StudentId = user.Id
+        };
+        await _context.GroupStudents.AddAsync(student);
+        await _context.SaveChangesAsync();
         return Ok();
     }
 }
