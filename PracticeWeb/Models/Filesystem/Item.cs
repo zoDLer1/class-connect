@@ -6,4 +6,7 @@ public class Item : StringIdCommonModel
     public ItemType Type { get; set; } = null!;
     public string Name { get; set; } = null!;
     public DateTime CreationTime { get; set; }
+    
+    public int CreatorId { get; set; }
+    public User Creator { get; set; } = null!;
 }
