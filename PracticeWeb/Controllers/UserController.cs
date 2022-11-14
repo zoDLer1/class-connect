@@ -51,7 +51,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Login([FromForm] string email, [FromForm] string password)
     {
         if (email == null || password == null)
-            return BadRequest();
+            return BadRequest(new { errrorText = "Недостаточно параметров" });
 
         try
         {
@@ -81,11 +81,11 @@ public class UserController : ControllerBase
         }
         catch (UserNotFoundException)
         {
-            return NotFound();
+            return NotFound(new { errrorText = "Пользователь не найден" });
         }
         catch (InvalidPasswordException)
         {
-            return BadRequest();
+            return BadRequest(new { errrorText = "Неправильный пароль" });
         }
     }
 
@@ -97,8 +97,10 @@ public class UserController : ControllerBase
         [FromForm] string email, 
         [FromForm] string password)
     {
-        if (firstName == null || lastName == null || email == null || await IsEmailUsedAsync(email) || password == null)
-            return BadRequest();
+        if (firstName == null || lastName == null || email == null || password == null)
+            return BadRequest(new { errrorText = "Недостаточно параметров" });
+        if (await IsEmailUsedAsync(email))
+            return BadRequest(new { errrorText = "Данная почта уже используется" });
 
         await _authenticationService.RegisterAsync(firstName, lastName, patronymic, email, password, 1);
         return Ok();
