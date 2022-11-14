@@ -38,6 +38,10 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (group == null)
             throw new ItemNotFoundException();
 
+        var anotherGroup = await _context.Groups.FirstOrDefaultAsync(s => s.Name == newName);
+        if (anotherGroup != null)
+            throw new InvalidGroupNameException();
+
         var item = await base.UpdateAsync(id, newName);
         group.Name = newName;
         await _commonGroupQueries.UpdateAsync(group);
