@@ -46,7 +46,8 @@ public class Context : DbContext
 
         builder.Entity<User>().HasData(
             new User { Id = 1, FirstName = "Админ", LastName = "Админов", Email = "admin@admin.admin", RoleId = 3, Password = "$2a$11$vZJfXw2NUiLp43m/lkoc6.uW5W6ibxwKHFHlKlcoJmHrFvRwk.yWG", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()},
-            new User { Id = 2, FirstName = "Валенок", LastName = "Купцов", Patronymic = "Анатольевич", Email = "test@test.test", RoleId = 2, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()}
+            new User { Id = 2, FirstName = "Валенок", LastName = "Купцов", Patronymic = "Анатольевич", Email = "test@test.test", RoleId = 2, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()},
+            new User { Id = 3, FirstName = "Валентин", LastName = "Купцов", Patronymic = "Анатольевич", Email = "teacher", RoleId = 2, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()}
         );
 
         builder.Entity<ItemType>().HasData(

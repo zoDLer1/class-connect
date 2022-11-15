@@ -56,7 +56,7 @@ public class GroupController : ControllerBase
 
     [Authorize(Roles = "Teacher,Administrator")]
     [HttpPost("remove")]
-    public async Task<IActionResult> RemoveStudent([FromForm] string? groupId, int? studentId)
+    public async Task<IActionResult> RemoveStudent([FromForm] string? groupId, [FromForm] int? studentId)
     {
         if (groupId == null || studentId == null)
             return BadRequest(new { errorText = "Недостаточно параметров" });
@@ -77,7 +77,7 @@ public class GroupController : ControllerBase
         if (teacher == null)
             return BadRequest(new { errorText = "Преподаватель не найден" });
 
-        if (group.TeacherId != teacher.Id)
+        if (group.TeacherId != teacher.Id && teacher.Role.Name == "Teacher")
             return BadRequest(new { errorText = "Пользователь не является преподавателем этой группы" });
         
         var groupStudent = await _context.GroupStudents.FirstOrDefaultAsync(s => s.StudentId == student.Id && s.GroupId == group.Id);
