@@ -49,6 +49,7 @@ builder.Services.AddTransient<FileHelperService>();
 builder.Services.AddTransient<FolderHelperService>();
 builder.Services.AddTransient<GroupHelperService>();
 builder.Services.AddTransient<SubjectHelperService>();
+builder.Services.AddTransient<TaskHelperService>();
 
 builder.Services.AddTransient<ServiceResolver>(serviceProvider => key =>
 {
@@ -68,6 +69,8 @@ builder.Services.AddTransient<ServiceResolver>(serviceProvider => key =>
             return GetService<GroupHelperService>();
         case "Subject":
             return GetService<SubjectHelperService>();
+        case "Task":
+            return GetService<TaskHelperService>();
         default:
             throw new KeyNotFoundException();
     }

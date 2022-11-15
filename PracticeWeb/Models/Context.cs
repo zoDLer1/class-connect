@@ -47,7 +47,8 @@ public class Context : DbContext
             new ItemType { Id = 1, Name = "Folder" },
             new ItemType { Id = 2, Name = "File" },
             new ItemType { Id = 3, Name = "Group" },
-            new ItemType { Id = 4, Name = "Subject" }
+            new ItemType { Id = 4, Name = "Subject" },
+            new ItemType { Id = 5, Name = "Task" }
         );
 
         builder.Entity<Item>().HasData(

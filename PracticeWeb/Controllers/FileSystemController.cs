@@ -156,6 +156,23 @@ public class FileSystemController : ControllerBase
         return Ok();
     }
 
+    [HttpPatch("type")]
+    public async Task<IActionResult> UpdateTypeAsync(string? id, string newType)
+    {
+        if (id == null || newType == null)
+            return BadRequest(new { errrorText = "Недостаточно параметров" });
+        
+        try
+        {
+            await _fileSystemService.UpdateTypeAsync(id, newType);
+        }
+        catch (ItemNotFoundException)
+        {
+            return NotFound(new { errrorText = "Объект не найден" });
+        }
+        return Ok();
+    }
+
     [HttpDelete]
     public async Task<IActionResult> DeleteAsync(string? id)
     {

@@ -125,6 +125,19 @@ public abstract class FileSystemQueriesHelper
         return await PrepareItemAsync(item.Id);
     }
 
+    public async virtual Task<FolderItem> UpdateTypeAsync(string id, string newType)
+    {
+        var item = await TryGetItemAsync(id);
+        if (item.Type.Name != "Folder" && item.Type.Name != "Task")
+            throw new ItemTypeException();
+        var type = await _context.ItemTypes.FirstOrDefaultAsync(t => t.Name == newType);
+        if (type == null)
+            throw new ItemTypeException();
+        item.TypeId = type.Id;
+        await _common.UpdateAsync(item);
+        return await PrepareItemAsync(item.Id);
+    }
+
     private async Task RemoveConnectionRecursively(string parentId)
     {
         var parent = await TryGetItemAsync(parentId);

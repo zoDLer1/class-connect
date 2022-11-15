@@ -220,6 +220,12 @@ public class FileSystemService : IFileSystemService
         var newItem = await _serviceAccessor(item.Type.Name).UpdateAsync(id, newName);
     }
 
+    public async Task UpdateTypeAsync(string id, string newType)
+    {
+        var item = await TryGetItemAsync(id);
+        var newItem = await _serviceAccessor(item.Type.Name).UpdateTypeAsync(id, newType);
+    }
+
     public async Task RemoveAsync(string id)
     {
         var item = await TryGetItemAsync(id);
