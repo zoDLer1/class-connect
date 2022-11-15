@@ -1,10 +1,10 @@
 namespace PracticeWeb.Models;
 
-public class GroupStudent
+public class Work : StringIdCommonModel
 {
-    public string GroupId { get; set; } = null!;
-    public Group Group { get; set; } = null!;
-
-    public int StudentId { get; set; }
-    public User Student { get; set; } = null!;
+    public string SubjectId { get; set; } = null!;
+    public Subject Subject { get; set; } = null!;
+    
+    public bool IsSubmitted { get; set; }
+    public int? Mark { get; set; }
 }
