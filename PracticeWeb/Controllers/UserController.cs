@@ -34,7 +34,7 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    public async Task<bool> IsEmailUsedAsync(string email)
+    private async Task<bool> IsEmailUsedAsync(string email)
     {
         return await _userService.GetByEmailAsync(email) != null;
     }
@@ -58,7 +58,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromForm] string email, [FromForm] string password)
+    public async Task<IActionResult> Login([FromForm] string? email, [FromForm] string? password)
     {
         if (email == null || password == null)
             return BadRequest(new { errrorText = "Недостаточно параметров" });
