@@ -16,6 +16,8 @@ public class Context : DbContext
     public DbSet<Group> Groups { get; set; } = null!;
     public DbSet<Subject> Subjects { get; set; } = null!;
     public DbSet<GroupStudent> GroupStudents { get; set; } = null!;
+    public DbSet<Work> Works { get; set; } = null!;
+    public DbSet<WorkItem> WorkItems { get; set; } = null!;
 
     public Context(DbContextOptions<Context> options) : base(options)
     {
@@ -38,6 +40,10 @@ public class Context : DbContext
             t.GroupId, t.StudentId
         });
 
+        builder.Entity<WorkItem>().HasKey(t => new {
+            t.WorkId, t.ItemId
+        });
+
         builder.Entity<Role>().HasData(
             new Role { Id = 1, Name = "Student", Title = "Студент" },
             new Role { Id = 2, Name = "Teacher", Title = "Преподаватель" },
@@ -55,7 +61,8 @@ public class Context : DbContext
             new ItemType { Id = 2, Name = "File" },
             new ItemType { Id = 3, Name = "Group" },
             new ItemType { Id = 4, Name = "Subject" },
-            new ItemType { Id = 5, Name = "Task" }
+            new ItemType { Id = 5, Name = "Task" },
+            new ItemType { Id = 6, Name = "Work" }
         );
 
         builder.Entity<Item>().HasData(
