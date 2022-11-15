@@ -1,6 +1,9 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using PracticeWeb.Exceptions;
+using PracticeWeb.Models;
 using PracticeWeb.Services.FileSystemServices;
+using PracticeWeb.Services.UserServices;
 
 namespace PracticeWeb.Controllers;
 
@@ -9,15 +12,30 @@ namespace PracticeWeb.Controllers;
 public class FileSystemController : ControllerBase
 {
     private IFileSystemService _fileSystemService;
+    private IUserService _userService;
 
-    public FileSystemController(IFileSystemService fileSystemService)
+    public FileSystemController(IFileSystemService fileSystemService, IUserService userService)
     {
         _fileSystemService = fileSystemService;
+        _userService = userService;
     }
 
     private void CreateDirectory(string path) 
     {
         Directory.CreateDirectory(path);
+    }
+
+    private async Task<User> GetUserAsync()
+    {
+        var email = User.FindFirst(ClaimTypes.Email)?.Value;
+        if (email == null)
+            throw new UserNotFoundException();
+        
+        var user = await _userService.GetByEmailAsync(email);
+        if (user == null)
+            throw new UserNotFoundException();
+
+        return user;
     }
 
     private string PreparePath(string? path)
@@ -73,11 +91,16 @@ public class FileSystemController : ControllerBase
     {
         if (parentId == null || uploadedFile == null)
             return BadRequest(new { errrorText = "Недостаточно параметров" });
-        
+
         try
         {
-            var item = await _fileSystemService.CreateFileAsync(parentId, uploadedFile);
+            var user = GetUserAsync();
+            var item = await _fileSystemService.CreateFileAsync(parentId, uploadedFile, user.Id);
             return new JsonResult(item);
+        }
+        catch (UserNotFoundException)
+        {
+            return NotFound(new { errrorText = "Пользователь не найден" });
         }
         catch (ItemNotFoundException)
         {
@@ -101,8 +124,13 @@ public class FileSystemController : ControllerBase
 
         try
         {
-            var item = await _fileSystemService.CreateFolderAsync(parentId, name, type, parameters);
+            var user = GetUserAsync();
+            var item = await _fileSystemService.CreateFolderAsync(parentId, name, type, user.Id, parameters);
             return new JsonResult(item);
+        }
+        catch (UserNotFoundException)
+        {
+            return NotFound(new { errrorText = "Пользователь не найден" });
         }
         catch (ItemNotFoundException)
         {

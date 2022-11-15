@@ -82,6 +82,16 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+using(var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<Context>();
+    var isCreated = await context.Database.EnsureCreatedAsync();
+    if (isCreated)
+    {
+        await scope.ServiceProvider.GetRequiredService<IFileSystemService>().RecreateFileSystemAsync();
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

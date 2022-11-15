@@ -84,7 +84,7 @@ public class UserController : ControllerBase
                         firstName = identity.Name,
                         lastName = identity.FindFirst(ClaimTypes.Surname)?.Value,
                         role = identity.FindFirst(ClaimTypes.Role)?.Value,
-                        folder = _fileSystemService.RootId,
+                        folder = _fileSystemService.RootGuid,
                     }
                 }
             );
@@ -101,11 +101,11 @@ public class UserController : ControllerBase
 
     [HttpPost("signup")]
     public async Task<IActionResult> Signup(
-        [FromForm] string firstName, 
-        [FromForm] string lastName, 
+        [FromForm] string? firstName, 
+        [FromForm] string? lastName, 
         [FromForm] string? patronymic,
-        [FromForm] string email, 
-        [FromForm] string password)
+        [FromForm] string? email, 
+        [FromForm] string? password)
     {
         if (firstName == null || lastName == null || email == null || password == null)
             return BadRequest(new { errrorText = "Недостаточно параметров" });

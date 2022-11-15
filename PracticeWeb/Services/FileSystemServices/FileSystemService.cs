@@ -8,7 +8,7 @@ namespace PracticeWeb.Services.FileSystemServices;
 
 public class FileSystemService : IFileSystemService
 {
-    public string? RootId { get; private set; }
+    public string? RootGuid { get; private set; }
     private string _fileSystemPath;
     protected Context _context;
     private CommonQueries<string, Item> _commonItemQueries;
@@ -25,7 +25,7 @@ public class FileSystemService : IFileSystemService
         if (IsFolderPathValid(_fileSystemPath))
         {
             var rootPath = Directory.GetFileSystemEntries(_fileSystemPath).FirstOrDefault();
-            RootId = Path.GetFileName(rootPath);
+            RootGuid = Path.GetFileName(rootPath);
         }
         _serviceAccessor = serviceAccessor;
         _commonItemQueries = new CommonQueries<string, Item>(_context);
@@ -36,45 +36,64 @@ public class FileSystemService : IFileSystemService
         Directory.CreateDirectory(path);
     }
 
-    private async Task<string> CreateRoot()
+    private async Task<string> CreateRootAsync(string rootGuid)
     {
-        var rootGuid = Guid.NewGuid().ToString();
         var path = Path.Combine(_fileSystemPath, rootGuid);
         CreateDirectory(path);
-        var item = new Item 
+        if (await _commonItemQueries.GetAsync(rootGuid, _context.Items) == null)
         {
-            Id = rootGuid,
-            TypeId = 1,
-            Name = "Корень",
-            CreationTime = DateTime.Now
-        };
-        await _commonItemQueries.CreateAsync(item);
+            var item = new Item 
+            {
+                Id = rootGuid,
+                TypeId = 1,
+                Name = "Корень",
+                CreationTime = DateTime.Now,
+                CreatorId = 1,
+            };
+            await _commonItemQueries.CreateAsync(item);
+        }
         return rootGuid;
     }
 
     private async Task CreateFileSystemAsync()
     {
         CreateDirectory(_fileSystemPath);
-        var rootGuid = await CreateRoot();
+        if (RootGuid != null)
+            await CreateRootAsync(RootGuid);
+        else
+            RootGuid = await CreateRootAsync(Guid.NewGuid().ToString());
         
         var groups = _context.Groups.ToList();
         foreach (var group in groups)
         {
             var connection = new Connection
             {
-                ParentId = rootGuid,
+                ParentId = RootGuid,
                 ChildId = group.Id,
             };
             await _context.Connections.AddAsync(connection);
             await _context.SaveChangesAsync();
-            CreateDirectory(Path.Combine(_fileSystemPath, rootGuid, group.Id));
+            CreateDirectory(Path.Combine(_fileSystemPath, RootGuid, group.Id));
         }
+    }
+
+    public async Task RecreateFileSystemAsync()
+    {
+        if (Directory.Exists(_fileSystemPath))
+            Directory.Delete(_fileSystemPath, true);
+        await CreateFileSystemAsync();
     }
 
     private async Task CreateFileSystemIfNotExistsAsync() 
     {
-        if (!Directory.Exists(_fileSystemPath))
-            await CreateFileSystemAsync();
+        if (await _context.Database.EnsureCreatedAsync())
+            await RecreateFileSystemAsync();
+        else if (!Directory.Exists(_fileSystemPath))
+        {
+            await _context.Database.EnsureDeletedAsync();
+            await _context.Database.EnsureCreatedAsync();
+            await RecreateFileSystemAsync();
+        }
     }
 
     private bool HasReturns(string path) => ReturnPattern.IsMatch(path);
@@ -196,7 +215,7 @@ public class FileSystemService : IFileSystemService
         return folder;
     }
 
-    public async Task<FolderItem> CreateFileAsync(string parentId, IFormFile file)
+    public async Task<FolderItem> CreateFileAsync(string parentId, IFormFile file, int creatorId)
     {
         await CreateFileSystemIfNotExistsAsync();
         var (path, item) = await _serviceAccessor("File").CreateAsync(parentId, file.FileName);
@@ -205,7 +224,7 @@ public class FileSystemService : IFileSystemService
         return item;
     }
 
-    public async Task<FolderItem> CreateFolderAsync(string parentId, string name, string type, Dictionary<string, string>? parameters)
+    public async Task<FolderItem> CreateFolderAsync(string parentId, string name, string type, int creatorId, Dictionary<string, string>? parameters)
     {
         await CreateFileSystemIfNotExistsAsync();
         var parent = await TryGetItemAsync(parentId);
