@@ -1,5 +1,7 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PracticeWeb.Exceptions;
 using PracticeWeb.Models;
 using PracticeWeb.Services.FileSystemServices;
@@ -13,11 +15,13 @@ public class FileSystemController : ControllerBase
 {
     private IFileSystemService _fileSystemService;
     private IUserService _userService;
+    private Context _context;
 
-    public FileSystemController(IFileSystemService fileSystemService, IUserService userService)
+    public FileSystemController(IFileSystemService fileSystemService, IUserService userService, Context context)
     {
         _fileSystemService = fileSystemService;
         _userService = userService;
+        _context = context;
     }
 
     private void CreateDirectory(string path) 
@@ -84,6 +88,53 @@ public class FileSystemController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Student")]
+    [HttpPost("work")]
+    public async Task<IActionResult> UploadWork(
+        [FromForm] string? parentId, 
+        [FromForm] IFormFile? uploadedFile)
+    {
+        if (parentId == null || uploadedFile == null)
+            return BadRequest(new { errrorText = "Недостаточно параметров" });
+
+        try
+        {
+            var user = await GetUserAsync();
+            var fullUserName = string.Join(' ', new { user.FirstName, user.LastName, user.Patronymic });
+            var folder = await _fileSystemService.CreateFolderAsync(parentId, fullUserName, "Work", user.Id, null);
+            var file = await _fileSystemService.CreateFileAsync(folder.Guid, uploadedFile, user.Id);
+            return new JsonResult(file);
+        }
+        catch (UserNotFoundException)
+        {
+            return NotFound(new { errrorText = "Студент не найден" });
+        }
+        catch (ItemNotFoundException)
+        {
+            return NotFound(new { errrorText = "Объект не найден" });
+        }
+        catch (FolderNotFoundException)
+        {
+            return NotFound(new { errrorText = "Папка не найдена" });
+        }
+        catch (InvalidPathException)
+        {
+            return BadRequest(new { errrorText = "Передан неправильный родитель" });
+        }
+        catch (InvalidGroupNameException)
+        {
+            return BadRequest(new { errrorText = "Неправильное название группы" });
+        }
+        catch (InvalidSubjectNameException)
+        {
+            return BadRequest(new { errrorText = "Неправильное название предмета" });
+        }
+        catch (KeyNotFoundException)
+        {
+            return BadRequest(new { errrorText = "Невалидное значение параметра Type" });
+        }
+    }
+
     [HttpPost("file")]
     public async Task<IActionResult> UploadFileAsync(
         [FromForm] string? parentId, 
@@ -94,7 +145,7 @@ public class FileSystemController : ControllerBase
 
         try
         {
-            var user = GetUserAsync();
+            var user = await GetUserAsync();
             var item = await _fileSystemService.CreateFileAsync(parentId, uploadedFile, user.Id);
             return new JsonResult(item);
         }
@@ -124,7 +175,7 @@ public class FileSystemController : ControllerBase
 
         try
         {
-            var user = GetUserAsync();
+            var user = await GetUserAsync();
             var item = await _fileSystemService.CreateFolderAsync(parentId, name, type, user.Id, parameters);
             return new JsonResult(item);
         }
