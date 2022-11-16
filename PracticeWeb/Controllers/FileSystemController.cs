@@ -116,9 +116,8 @@ public class FileSystemController : ControllerBase
         {
             var user = await GetUserAsync();
             var fullUserName = string.Join(' ', new[] { user.FirstName, user.LastName, user.Patronymic });
-            var folder = await _fileSystemService.CreateFolderAsync(parentId, fullUserName, "Work", user, null);
-            var file = await _fileSystemService.CreateFileAsync(folder.Guid, uploadedFile, user);
-            return new JsonResult(file);
+            var work = await _fileSystemService.CreateWorkAsync(parentId, fullUserName, "Work", uploadedFile, user);
+            return new JsonResult(work);
         }
         catch (UserNotFoundException)
         {
@@ -150,6 +149,7 @@ public class FileSystemController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Teacher,Admin")]
     [HttpPost("file")]
     public async Task<IActionResult> UploadFileAsync(
         [FromForm] string? parentId, 
@@ -178,6 +178,7 @@ public class FileSystemController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Teacher,Admin")]
     [HttpPost]
     public async Task<IActionResult> CreateFolderAsync(
         [FromForm] string? parentId, 

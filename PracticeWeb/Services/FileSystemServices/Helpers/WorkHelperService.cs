@@ -53,14 +53,13 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
     public async virtual Task<Object> GetChildItemAsync(string id, User user)
     {
-        Console.WriteLine("teeeeest");
         await HasAccessAsync(id, user, new List<string>());
-        Console.WriteLine("teeeeest");
         return await base.GetFolderInfoAsync(id);
     }
 
-    public async Task<(string, FolderItem)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
+    public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
     {
+        await HasUserAccessToParentAsync(parentId, user, new List<string>());
         var parent = await TryGetItemAsync(parentId);
         if (parent.Type.Name != "Task")
             throw new InvalidPathException();
@@ -77,7 +76,7 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (subjectId == null)
             throw new FolderNotFoundException();
 
-        var (path, item) = await base.CreateAsync(parentId, name, 6, user.Id);
+        var (itemPath, item) = await base.CreateAsync(parentId, name, 6, user);
         var work = new Work
         {
             Id = item.Guid,
@@ -85,7 +84,7 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
             IsSubmitted = false
         };
         await _commonWorkQueries.CreateAsync(work);
-        return (path, item);
+        return (itemPath, await GetChildItemAsync(item.Guid, user));
     }
 
     public async new Task DeleteAsync(string id)

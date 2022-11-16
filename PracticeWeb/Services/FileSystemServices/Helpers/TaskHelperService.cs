@@ -70,14 +70,15 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
     public async virtual Task<Object> GetChildItemAsync(string id, User user)
     {
-        await GetAsync(id, user);
+        var path = await HasAccessAsync(id, user, new List<string>());
         return await base.GetFolderInfoAsync(id);
     }
 
-    public async Task<(string, FolderItem)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
+    public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
     {
-        var result = await base.CreateAsync(parentId, name, 5, user.Id);
-        return result;
+        await HasUserAccessToParentAsync(parentId, user, new List<string>());
+        var (itemPath, item) = await base.CreateAsync(parentId, name, 5, user);
+        return (itemPath, await GetChildItemAsync(item.Guid, user));
     }
 
     public async new Task DeleteAsync(string id)

@@ -22,7 +22,6 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (group == null)
             throw new ItemNotFoundException();
 
-        Console.WriteLine($"group: {id} check if teacher in this group {group.TeacherId == user.Id} and he has a subject {await _context.Subjects.FirstOrDefaultAsync(s => s.TeacherId == user.Id && s.GroupId == group.Id) != null}");
         // Проверяем, является ли преподаватель руководителем группы или ведёт ли какой-нибудь предмет
         if (user.Role.Name == "Teacher" && !(group.TeacherId == user.Id || 
             await _context.Subjects.FirstOrDefaultAsync(s => s.TeacherId == user.Id && s.GroupId == group.Id) != null))
@@ -94,12 +93,16 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async Task<(string, FolderItem)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
+    public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
     {
+        if (user.Role.Name != "Administrator")
+            throw new AccessDeniedException();
+
         // Проверяем, является ли родитель корнем
-        if (await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == parentId) != null)
+        if (await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == parentId) != null && parentId != _rootGuid)
             throw new InvalidPathException();
 
+        // Проверяем, есть ли группа с таким же названием
         if (await _context.Groups.FirstOrDefaultAsync(g => g.Name == name) != null)
             throw new InvalidGroupNameException();
 
@@ -110,7 +113,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (!int.TryParse(parameters?["TeacherId"], out teacherId))
             throw new NullReferenceException();
         
-        var (path, item) = await base.CreateAsync(parentId, name, 3, user.Id);
+        var (itemPath, item) = await base.CreateAsync(parentId, name, 3, user);
         var group = new Group
         {
             Id = item.Guid,
@@ -118,7 +121,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             TeacherId = teacherId,
         };
         await _commonGroupQueries.CreateAsync(group);
-        return (path, item);
+        return (itemPath, await GetChildItemAsync(item.Guid, user));
     }
 
     public async override Task<FolderItem> UpdateAsync(string id, string newName)

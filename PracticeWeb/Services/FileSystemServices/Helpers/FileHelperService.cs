@@ -45,7 +45,7 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
     public async virtual Task<Object> GetChildItemAsync(string id, User user)
     {
-        // await GetAsync(id, user);
+        await HasAccessAsync(id, user, new List<string>());
         var folderItem = await base.GetFolderInfoAsync(id);
         var fileEntity = await _commonFileQueries.GetAsync(id, _context.Files);
         return new 
@@ -58,9 +58,10 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async Task<(string, FolderItem)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
+    public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
     {
-        var (path, item) = await base.CreateAsync(parentId, name, 2, user.Id);
+        await HasUserAccessToParentAsync(parentId, user, new List<string>());
+        var (itemPath, item) = await base.CreateAsync(parentId, name, 2, user);
         var fileEntity = new FileEntity
         {
             Id = item.Guid,
@@ -68,7 +69,7 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
             MimeType = MimeTypes.GetMimeType(item.Name)
         };
         await _commonFileQueries.CreateAsync(fileEntity);
-        return (path, item);
+        return (itemPath, await GetChildItemAsync(item.Guid, user));
     }
 
     public async new Task DeleteAsync(string id)

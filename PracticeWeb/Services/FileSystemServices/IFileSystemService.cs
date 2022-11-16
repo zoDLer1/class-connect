@@ -9,8 +9,9 @@ public interface IFileSystemService
     Task RecreateFileSystemAsync();
     Task<FileResult> GetFileAsync(string id, User user);
     Task<Object> GetObjectAsync(string id, User user);
-    Task<FolderItem> CreateFileAsync(string parentId, IFormFile file, User user);
-    Task<FolderItem> CreateFolderAsync(string parentId, string name, string type, User user, Dictionary<string, string>? parameters);
+    Task<Object> CreateWorkAsync(string parentId, string name, string type, IFormFile file, User user);
+    Task<Object> CreateFileAsync(string parentId, IFormFile file, User user);
+    Task<Object> CreateFolderAsync(string parentId, string name, string type, User user, Dictionary<string, string>? parameters);
     Task RenameAsync(string id, string newName);
     Task UpdateTypeAsync(string id, string newType);
     Task RemoveAsync(string id);

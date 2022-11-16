@@ -24,7 +24,6 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (subject == null)
             throw new ItemNotFoundException();
 
-        Console.WriteLine($"subject: {id} check if teacher in this group {subject.Group.TeacherId == user.Id} and he has a subject {subject.TeacherId == user.Id}");
         // Проверяем, является ли преподаватель руководителем группы или ведёт ли данный предмет
         if (user.Role.Name == "Teacher" && !(subject.Group.TeacherId == user.Id || subject.TeacherId == user.Id))
             throw new AccessDeniedException();
@@ -71,8 +70,11 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async Task<(string, FolderItem)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
+    public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
     {
+        if (user.Role.Name != "Administrator")
+            throw new AccessDeniedException();
+        
         // Проверяем, является ли родитель папкой
         var group = await _commonGroupQueries.GetAsync(parentId, _context.Groups);
         if (group == null)
@@ -91,7 +93,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (!int.TryParse(parameters?["TeacherId"], out teacherId))
             throw new NullReferenceException();
         
-        var (path, item) = await base.CreateAsync(parentId, name, 4, user.Id);
+        var (itemPath, item) = await base.CreateAsync(parentId, name, 4, user);
         var subject = new Subject
         {
             Id = item.Guid,
@@ -101,7 +103,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Description = parameters?.ContainsKey("Description") == true ? parameters["Description"] : null
         };
         await _commonSubjectQueries.CreateAsync(subject);
-        return (path, item);
+        return (itemPath, await GetChildItemAsync(item.Guid, user));
     }
 
     public async override Task<FolderItem> UpdateAsync(string id, string newName)

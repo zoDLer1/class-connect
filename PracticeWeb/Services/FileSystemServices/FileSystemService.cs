@@ -139,21 +139,33 @@ public class FileSystemService : IFileSystemService
         return await _serviceAccessor(item.Type.Name).GetAsync(id, user);
     }
 
-    public async Task<FolderItem> CreateFileAsync(string parentId, IFormFile file, User user)
+    public async Task<Object> CreateWorkAsync(string parentId, string name, string type, IFormFile file, User user)
+    {
+        await CreateFileSystemIfNotExistsAsync();
+        var parent = await TryGetItemAsync(parentId);
+        var (path, item) = await _serviceAccessor("Work").CreateAsync(parentId, name, user, null);
+        CreateDirectory(path);
+        var id = Path.GetFileName(path);
+        var child = await TryGetItemAsync(id);
+        var result = await CreateFileAsync(id, file, user);
+        return result;
+    }
+
+    public async Task<Object> CreateFileAsync(string parentId, IFormFile file, User user)
     {
         await CreateFileSystemIfNotExistsAsync();
         var (path, item) = await _serviceAccessor("File").CreateAsync(parentId, file.FileName, user);
-        using (var fileStream = new FileStream(Path.Combine(path, item.Guid), FileMode.Create))
+        using (var fileStream = new FileStream(path, FileMode.Create))
             await file.CopyToAsync(fileStream);
         return item;
     }
 
-    public async Task<FolderItem> CreateFolderAsync(string parentId, string name, string type, User user, Dictionary<string, string>? parameters)
+    public async Task<Object> CreateFolderAsync(string parentId, string name, string type, User user, Dictionary<string, string>? parameters)
     {
         await CreateFileSystemIfNotExistsAsync();
         var parent = await TryGetItemAsync(parentId);
         var (path, item) = await _serviceAccessor(type).CreateAsync(parentId, name, user, parameters);
-        CreateDirectory(Path.Combine(path, item.Guid));
+        CreateDirectory(path);
         return item;
     }
 

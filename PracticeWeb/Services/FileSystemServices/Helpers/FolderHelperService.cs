@@ -46,24 +46,26 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return folder;
     }
 
-    public async virtual Task<Object> GetChildItemAsync(string id, User user)
+    public async Task<Object> GetChildItemAsync(string id, User user)
     {
         var item = await TryGetItemAsync(id);
 
         // Проверяем, если запрос от студента и он обращается ли к корню
-        Console.WriteLine("aaaaaaaa");
         var path = await HasAccessAsync(id, user, new List<string>());
-        if (user.Role.Name == "Student" && path.Count() == 0)
+        if (user.Role.Name == "Student" && (path.Count() == 0 || id == _rootGuid))
             throw new AccessDeniedException();
-        Console.WriteLine("bbbbbbbb");
             
         return await base.GetFolderInfoAsync(id);
     }
 
-    public async Task<(string, FolderItem)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
+    public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
     {
-        var result = await base.CreateAsync(parentId, name, 1, user.Id);
-        return result;
+        await HasUserAccessToParentAsync(parentId, user, new List<string>());
+        if (parentId == _rootGuid)
+            throw new AccessDeniedException();
+        
+        var (itemPath, item) = await base.CreateAsync(parentId, name, 1, user);
+        return (itemPath, await GetChildItemAsync(item.Guid, user));
     }
 
     public async new Task DeleteAsync(string id)

@@ -94,7 +94,6 @@ public abstract class FileSystemQueriesHelper
             try 
             {
                 var item = await TryGetItemAsync(id);
-                Console.WriteLine($"child: {item.Id}");
                 try
                 {
                     var child = await _serviceAccessor(item.Type.Name).GetChildItemAsync(item.Id, user);
@@ -130,9 +129,7 @@ public abstract class FileSystemQueriesHelper
         if (item.Type.Name == "File")
             throw new ItemTypeException();
         
-        Console.WriteLine($"getting folder with id {id}");
         var children = await _context.Connections.Where(c => c.ParentId == item.Guid).Select(i => i.ChildId).ToListAsync();
-        Console.WriteLine($"children count: {children.Count()}");
         var pathItems =  await GeneratePathAsync(item.Guid);
         var folder = new Folder 
         {
@@ -168,7 +165,7 @@ public abstract class FileSystemQueriesHelper
         return path;
     }
 
-    public async virtual Task<(string, FolderItem)> CreateAsync(string parentId, string name, int typeId, int userId)
+    public async virtual Task<(string, FolderItem)> CreateAsync(string parentId, string name, int typeId, User user)
     {
         var parent = await TryGetItemAsync(parentId);
         var item = new Item 
@@ -177,7 +174,7 @@ public abstract class FileSystemQueriesHelper
             TypeId = typeId,
             Name = name,
             CreationTime = DateTime.Now,
-            CreatorId = userId
+            CreatorId = user.Id
         };
         var connection = new Connection
         {
@@ -192,7 +189,7 @@ public abstract class FileSystemQueriesHelper
         await _common.CreateAsync(item);
         await _context.Connections.AddAsync(connection);
         await _context.SaveChangesAsync();
-        return (path, await PrepareItemAsync(item.Id));
+        return (Path.Combine(path, item.Id), await PrepareItemAsync(item.Id));
     }
 
     public async virtual Task<FolderItem> UpdateAsync(string id, string newName)
@@ -209,7 +206,6 @@ public abstract class FileSystemQueriesHelper
         if (item.Type.Name != "Folder" && item.Type.Name != "Task")
             throw new ItemTypeException();
         var type = await _context.ItemTypes.FirstOrDefaultAsync(t => t.Name == newType);
-        Console.WriteLine($"type: {type} — {newType}");
         if (type == null || type.Name != "Folder" && type.Name != "Task")
             throw new ItemTypeException();
         item.TypeId = type.Id;
