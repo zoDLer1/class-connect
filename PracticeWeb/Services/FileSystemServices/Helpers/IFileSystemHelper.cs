@@ -8,7 +8,7 @@ public interface IFileSystemHelper
     Task<Object> GetAsync(string id, User user);
     Task<Object> GetChildItemAsync(string id, User user);
     Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null);
-    Task<FolderItem> UpdateAsync(string id, string newName);
-    Task<FolderItem> UpdateTypeAsync(string id, string newType);
+    Task<FolderItem> UpdateAsync(string id, string newName, User user);
+    Task<FolderItem> UpdateTypeAsync(string id, string newType, User user);
     Task DeleteAsync(string id);
 }

@@ -106,8 +106,11 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return (itemPath, await GetChildItemAsync(item.Guid, user));
     }
 
-    public async override Task<FolderItem> UpdateAsync(string id, string newName)
+    public async override Task<FolderItem> UpdateAsync(string id, string newName, User user)
     {
+        if (user.Role.Name != "Administrator")
+            throw new AccessDeniedException();
+
         var subject = await _commonSubjectQueries.GetAsync(id, _context.Subjects);
         if (subject == null)
             throw new ItemNotFoundException();
@@ -118,7 +121,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (anotherSubject != null)
             throw new InvalidSubjectNameException();
 
-        var item = await base.UpdateAsync(id, newName);
+        var item = await base.UpdateAsync(id, newName, user);
         subject.Name = newName;
         await _commonSubjectQueries.UpdateAsync(subject);
         return item;

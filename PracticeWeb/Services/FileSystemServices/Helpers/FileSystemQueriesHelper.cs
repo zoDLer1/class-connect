@@ -192,22 +192,32 @@ public abstract class FileSystemQueriesHelper
         return (Path.Combine(path, item.Id), await PrepareItemAsync(item.Id));
     }
 
-    public async virtual Task<FolderItem> UpdateAsync(string id, string newName)
+    public async virtual Task<FolderItem> UpdateAsync(string id, string newName, User user)
     {
-        var item = await TryGetItemAsync(id);        
+        await HasUserAccessToParentAsync(id, user, new List<string>());
+        var item = await TryGetItemAsync(id);
+        if (item.CreatorId != user.Id)
+            throw new AccessDeniedException();  
+            
         item.Name = newName;
         await _common.UpdateAsync(item);
         return await PrepareItemAsync(item.Id);
     }
 
-    public async virtual Task<FolderItem> UpdateTypeAsync(string id, string newType)
+    public async virtual Task<FolderItem> UpdateTypeAsync(string id, string newType, User user)
     {
+        await HasUserAccessToParentAsync(id, user, new List<string>());
         var item = await TryGetItemAsync(id);
+        if (item.CreatorId != user.Id)
+            throw new AccessDeniedException();
+            
         if (item.Type.Name != "Folder" && item.Type.Name != "Task")
             throw new ItemTypeException();
+
         var type = await _context.ItemTypes.FirstOrDefaultAsync(t => t.Name == newType);
         if (type == null || type.Name != "Folder" && type.Name != "Task")
             throw new ItemTypeException();
+
         item.TypeId = type.Id;
         await _common.UpdateAsync(item);
         return await PrepareItemAsync(item.Id);

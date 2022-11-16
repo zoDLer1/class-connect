@@ -147,6 +147,10 @@ public class FileSystemController : ControllerBase
         {
             return BadRequest(new { errorText = "Невалидное значение параметра Type" });
         }
+        catch (AccessDeniedException)
+        {
+            return Forbid();
+        }
     }
 
     [Authorize(Roles = "Teacher,Admin")]
@@ -175,6 +179,10 @@ public class FileSystemController : ControllerBase
         catch (FolderNotFoundException)
         {
             return NotFound(new { errorText = "Папка не найдена" });
+        }
+        catch (AccessDeniedException)
+        {
+            return Forbid();
         }
     }
 
@@ -229,6 +237,7 @@ public class FileSystemController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Teacher,Admin")]
     [HttpPatch]
     public async Task<IActionResult> RenameAsync(string? id, string? newName)
     {
@@ -237,7 +246,12 @@ public class FileSystemController : ControllerBase
 
         try
         {
-            await _fileSystemService.RenameAsync(id, newName);
+            var user = await GetUserAsync();
+            await _fileSystemService.RenameAsync(id, newName, user);
+        }
+        catch (UserNotFoundException)
+        {
+            return NotFound(new { errorText = "Пользователь не найден" });
         }
         catch (ItemNotFoundException)
         {
@@ -251,10 +265,15 @@ public class FileSystemController : ControllerBase
         {
             return BadRequest(new { errorText = "Неправильное название предмета" });
         }
+        catch (AccessDeniedException)
+        {
+            return Forbid();
+        }
 
         return Ok();
     }
 
+    [Authorize(Roles = "Teacher,Admin")]
     [HttpPatch("type")]
     public async Task<IActionResult> UpdateTypeAsync(string? id, string? newType)
     {
@@ -263,12 +282,22 @@ public class FileSystemController : ControllerBase
         
         try
         {
-            await _fileSystemService.UpdateTypeAsync(id, newType);
+            var user = await GetUserAsync();
+            await _fileSystemService.UpdateTypeAsync(id, newType, user);
+        }
+        catch (UserNotFoundException)
+        {
+            return NotFound(new { errorText = "Пользователь не найден" });
         }
         catch (ItemNotFoundException)
         {
             return NotFound(new { errorText = "Объект не найден" });
         }
+        catch (AccessDeniedException)
+        {
+            return Forbid();
+        }
+        
         return Ok();
     }
 

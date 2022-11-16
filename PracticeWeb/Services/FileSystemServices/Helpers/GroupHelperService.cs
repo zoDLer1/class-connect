@@ -77,7 +77,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async virtual Task<Object> GetChildItemAsync(string id, User user)
+    public async Task<Object> GetChildItemAsync(string id, User user)
     {
         var path = await HasAccessAsync(id, user, new List<string>());
         var group = await _commonGroupQueries.GetAsync(id, _context.Groups);
@@ -124,8 +124,11 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return (itemPath, await GetChildItemAsync(item.Guid, user));
     }
 
-    public async override Task<FolderItem> UpdateAsync(string id, string newName)
+    public async override Task<FolderItem> UpdateAsync(string id, string newName, User user)
     {
+        if (user.Role.Name != "Administrator")
+            throw new AccessDeniedException();
+
         var group = await _commonGroupQueries.GetAsync(id, _context.Groups);
         if (group == null)
             throw new ItemNotFoundException();
@@ -134,7 +137,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (anotherGroup != null)
             throw new InvalidGroupNameException();
 
-        var item = await base.UpdateAsync(id, newName);
+        var item = await base.UpdateAsync(id, newName, user);
         group.Name = newName;
         await _commonGroupQueries.UpdateAsync(group);
         return item;

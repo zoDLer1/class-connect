@@ -12,7 +12,7 @@ public interface IFileSystemService
     Task<Object> CreateWorkAsync(string parentId, string name, string type, IFormFile file, User user);
     Task<Object> CreateFileAsync(string parentId, IFormFile file, User user);
     Task<Object> CreateFolderAsync(string parentId, string name, string type, User user, Dictionary<string, string>? parameters);
-    Task RenameAsync(string id, string newName);
-    Task UpdateTypeAsync(string id, string newType);
+    Task RenameAsync(string id, string newName, User user);
+    Task UpdateTypeAsync(string id, string newType, User user);
     Task RemoveAsync(string id);
 }

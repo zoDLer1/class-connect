@@ -169,16 +169,16 @@ public class FileSystemService : IFileSystemService
         return item;
     }
 
-    public async Task RenameAsync(string id, string newName)
+    public async Task RenameAsync(string id, string newName, User user)
     {
         var item = await TryGetItemAsync(id);
-        var newItem = await _serviceAccessor(item.Type.Name).UpdateAsync(id, newName);
+        var newItem = await _serviceAccessor(item.Type.Name).UpdateAsync(id, newName, user);
     }
 
-    public async Task UpdateTypeAsync(string id, string newType)
+    public async Task UpdateTypeAsync(string id, string newType, User user)
     {
         var item = await TryGetItemAsync(id);
-        var newItem = await _serviceAccessor(item.Type.Name).UpdateTypeAsync(id, newType);
+        var newItem = await _serviceAccessor(item.Type.Name).UpdateTypeAsync(id, newType, user);
     }
 
     public async Task RemoveAsync(string id)
