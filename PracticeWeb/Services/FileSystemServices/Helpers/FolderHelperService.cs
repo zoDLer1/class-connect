@@ -68,9 +68,9 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return (itemPath, await GetChildItemAsync(item.Guid, user));
     }
 
-    public async new Task DeleteAsync(string id)
+    public async new Task DeleteAsync(string id, User user)
     {
-        var path = await base.DeleteAsync(id);
+        var path = await base.DeleteAsync(id, user);
         Directory.Delete(path, true);
     }
 }

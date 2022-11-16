@@ -245,15 +245,17 @@ public abstract class FileSystemQueriesHelper
                 _context.Files.Remove(file);
                 await _context.SaveChangesAsync();
             }
-
         }
         
         await _common.DeleteAsync(parent.Id);
     }
 
-    public async virtual Task<string> DeleteAsync(string id)
+    public async virtual Task<string> DeleteAsync(string id, User user)
     {
         var item = await TryGetItemAsync(id);
+        if (item.CreatorId != user.Id)
+            throw new AccessDeniedException();
+
         var path = await MakeFullPathAsync(item.Id);
         await RemoveConnectionRecursively(item.Id);
         return path;

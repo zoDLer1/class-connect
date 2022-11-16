@@ -72,10 +72,10 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return (itemPath, await GetChildItemAsync(item.Guid, user));
     }
 
-    public async new Task DeleteAsync(string id)
+    public async new Task DeleteAsync(string id, User user)
     {
+        var path = await base.DeleteAsync(id, user);
         await _commonFileQueries.DeleteAsync(id);
-        var path = await base.DeleteAsync(id);
         File.Delete(path);
     }
 }

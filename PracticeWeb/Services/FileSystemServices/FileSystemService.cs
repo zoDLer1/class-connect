@@ -22,7 +22,7 @@ public class FileSystemService : IFileSystemService
     {
         _context = context;
         _fileSystemPath = Path.Combine(env.ContentRootPath, "Filesystem");
-        if (IsFolderPathValid(_fileSystemPath))
+        if (Directory.Exists(_fileSystemPath))
         {
             var rootPath = Directory.GetFileSystemEntries(_fileSystemPath).FirstOrDefault();
             RootGuid = Path.GetFileName(rootPath);
@@ -96,10 +96,6 @@ public class FileSystemService : IFileSystemService
         }
     }
 
-    private bool HasReturns(string path) => ReturnPattern.IsMatch(path);
-
-    private bool IsFolderPathValid(string path) => !HasReturns(path) && Directory.Exists(path);
-
     public async Task<Item> TryGetItemAsync(string id)
     {
         await CreateFileSystemIfNotExistsAsync();
@@ -109,17 +105,6 @@ public class FileSystemService : IFileSystemService
             throw new ItemNotFoundException();
         
         return item;
-    }
-
-    private async Task<List<string>> GeneratePathAsync(string childId)
-    {
-        var connection = await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == childId);;
-        if (connection == null)
-            return new List<string>() { childId };
-
-        var result = await GeneratePathAsync(connection.ParentId);
-        result.Add(connection.ChildId);
-        return result;
     }
 
     public async Task<FileResult> GetFileAsync(string id, User user)
@@ -181,9 +166,9 @@ public class FileSystemService : IFileSystemService
         var newItem = await _serviceAccessor(item.Type.Name).UpdateTypeAsync(id, newType, user);
     }
 
-    public async Task RemoveAsync(string id)
+    public async Task RemoveAsync(string id, User user)
     {
         var item = await TryGetItemAsync(id);
-        await _serviceAccessor(item.Type.Name).DeleteAsync(id);
+        await _serviceAccessor(item.Type.Name).DeleteAsync(id, user);
     }
 }

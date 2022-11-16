@@ -301,6 +301,7 @@ public class FileSystemController : ControllerBase
         return Ok();
     }
 
+    [Authorize(Roles = "Teacher,Admin")]
     [HttpDelete]
     public async Task<IActionResult> DeleteAsync(string? id)
     {
@@ -309,7 +310,12 @@ public class FileSystemController : ControllerBase
 
         try
         {
-            await _fileSystemService.RemoveAsync(id);
+            var user = await GetUserAsync();
+            await _fileSystemService.RemoveAsync(id, user);
+        }
+        catch (UserNotFoundException)
+        {
+            return NotFound(new { errorText = "Пользователь не найден" });
         }
         catch (ItemNotFoundException)
         {
@@ -318,6 +324,10 @@ public class FileSystemController : ControllerBase
         catch (FolderNotFoundException)
         {
             return NotFound(new { errorText = "Папка не найдена" });
+        }
+        catch (AccessDeniedException)
+        {
+            return Forbid();
         }
 
         return Ok();
