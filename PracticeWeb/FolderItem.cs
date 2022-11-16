@@ -5,7 +5,6 @@ namespace PracticeWeb;
 public class FolderItem 
 {
     public string Name { get; set; } = null!;
-    public List<string> Path { get; set; } = null!;
     public string Guid { get; set; } = null!;
 
     public ItemType Type { get; set; } = null!;

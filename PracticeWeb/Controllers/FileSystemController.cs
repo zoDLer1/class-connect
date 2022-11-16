@@ -54,37 +54,52 @@ public class FileSystemController : ControllerBase
         return path;
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAsync(string? id)
     {
         if (id == null)
-            return BadRequest(new { errrorText = "Недостаточно параметров" });
+            return BadRequest(new { errorText = "Недостаточно параметров" });
 
         try
         {
-            return new JsonResult(await _fileSystemService.GetFolderInfoAsync(id));
+            var user = await GetUserAsync();
+            return new JsonResult(await _fileSystemService.GetObjectAsync(id, user));
         }
         catch (ItemTypeException)
         {
             try {
-                return await _fileSystemService.GetFileAsync(id);
+                var user = await GetUserAsync();
+                return await _fileSystemService.GetFileAsync(id, user);
             }
             catch (ItemNotFoundException)
             {
-                return NotFound(new { errrorText = "Файл не найден" });
+                return NotFound(new { errorText = "Файл не найден" });
             }
             catch (ItemTypeException)
             {
-                return BadRequest(new { errrorText = "Неверный тип файла" });
+                return BadRequest(new { errorText = "Неверный тип файла" });
+            }
+            catch (UserNotFoundException)
+            {
+                return NotFound(new { errorText = "Пользователь не найден" });
             }
         }
         catch (ItemNotFoundException)
         {
-            return NotFound(new { errrorText = "Объект не найден" });
+            return NotFound(new { errorText = "Объект не найден" });
         }
         catch (FolderNotFoundException)
         {
-            return NotFound(new { errrorText = "Папка не найдена" });
+            return NotFound(new { errorText = "Папка не найдена" });
+        }
+        catch (UserNotFoundException)
+        {
+            return NotFound(new { errorText = "Пользователь не найден" });
+        }
+        catch (AccessDeniedException)
+        {
+            return Forbid();
         }
     }
 
@@ -95,71 +110,71 @@ public class FileSystemController : ControllerBase
         [FromForm] IFormFile? uploadedFile)
     {
         if (parentId == null || uploadedFile == null)
-            return BadRequest(new { errrorText = "Недостаточно параметров" });
+            return BadRequest(new { errorText = "Недостаточно параметров" });
 
         try
         {
             var user = await GetUserAsync();
-            var fullUserName = string.Join(' ', new { user.FirstName, user.LastName, user.Patronymic });
-            var folder = await _fileSystemService.CreateFolderAsync(parentId, fullUserName, "Work", user.Id, null);
-            var file = await _fileSystemService.CreateFileAsync(folder.Guid, uploadedFile, user.Id);
+            var fullUserName = string.Join(' ', new[] { user.FirstName, user.LastName, user.Patronymic });
+            var folder = await _fileSystemService.CreateFolderAsync(parentId, fullUserName, "Work", user, null);
+            var file = await _fileSystemService.CreateFileAsync(folder.Guid, uploadedFile, user);
             return new JsonResult(file);
         }
         catch (UserNotFoundException)
         {
-            return NotFound(new { errrorText = "Студент не найден" });
+            return NotFound(new { errorText = "Студент не найден" });
         }
         catch (ItemNotFoundException)
         {
-            return NotFound(new { errrorText = "Объект не найден" });
+            return NotFound(new { errorText = "Объект не найден" });
         }
         catch (FolderNotFoundException)
         {
-            return NotFound(new { errrorText = "Папка не найдена" });
+            return NotFound(new { errorText = "Папка не найдена" });
         }
         catch (InvalidPathException)
         {
-            return BadRequest(new { errrorText = "Передан неправильный родитель" });
+            return BadRequest(new { errorText = "Передан неправильный родитель" });
         }
         catch (InvalidGroupNameException)
         {
-            return BadRequest(new { errrorText = "Неправильное название группы" });
+            return BadRequest(new { errorText = "Неправильное название группы" });
         }
         catch (InvalidSubjectNameException)
         {
-            return BadRequest(new { errrorText = "Неправильное название предмета" });
+            return BadRequest(new { errorText = "Неправильное название предмета" });
         }
         catch (KeyNotFoundException)
         {
-            return BadRequest(new { errrorText = "Невалидное значение параметра Type" });
+            return BadRequest(new { errorText = "Невалидное значение параметра Type" });
         }
     }
 
     [HttpPost("file")]
     public async Task<IActionResult> UploadFileAsync(
         [FromForm] string? parentId, 
-        [FromForm] IFormFile? uploadedFile)
+        [FromForm] IFormFile uploadedFile)
     {
         if (parentId == null || uploadedFile == null)
-            return BadRequest(new { errrorText = "Недостаточно параметров" });
+            return BadRequest(new { errorText = "Недостаточно параметров" });
 
         try
         {
             var user = await GetUserAsync();
-            var item = await _fileSystemService.CreateFileAsync(parentId, uploadedFile, user.Id);
+            var item = await _fileSystemService.CreateFileAsync(parentId, uploadedFile, user);
             return new JsonResult(item);
         }
         catch (UserNotFoundException)
         {
-            return NotFound(new { errrorText = "Пользователь не найден" });
+            return NotFound(new { errorText = "Пользователь не найден" });
         }
         catch (ItemNotFoundException)
         {
-            return NotFound(new { errrorText = "Объект не найден" });
+            return NotFound(new { errorText = "Объект не найден" });
         }
         catch (FolderNotFoundException)
         {
-            return NotFound(new { errrorText = "Папка не найдена" });
+            return NotFound(new { errorText = "Папка не найдена" });
         }
     }
 
@@ -171,41 +186,45 @@ public class FileSystemController : ControllerBase
         [FromForm] Dictionary<string, string>? parameters)
     {
         if (parentId == null || name == null || type == null)
-            return BadRequest(new { errrorText = "Недостаточно параметров" });
+            return BadRequest(new { errorText = "Недостаточно параметров" });
 
         try
         {
             var user = await GetUserAsync();
-            var item = await _fileSystemService.CreateFolderAsync(parentId, name, type, user.Id, parameters);
+            var item = await _fileSystemService.CreateFolderAsync(parentId, name, type, user, parameters);
             return new JsonResult(item);
         }
         catch (UserNotFoundException)
         {
-            return NotFound(new { errrorText = "Пользователь не найден" });
+            return NotFound(new { errorText = "Пользователь не найден" });
         }
         catch (ItemNotFoundException)
         {
-            return NotFound(new { errrorText = "Объект не найден" });
+            return NotFound(new { errorText = "Объект не найден" });
         }
         catch (FolderNotFoundException)
         {
-            return NotFound(new { errrorText = "Папка не найдена" });
+            return NotFound(new { errorText = "Папка не найдена" });
         }
         catch (InvalidPathException)
         {
-            return BadRequest(new { errrorText = "Передан неправильный родитель" });
+            return BadRequest(new { errorText = "Передан неправильный родитель" });
         }
         catch (InvalidGroupNameException)
         {
-            return BadRequest(new { errrorText = "Неправильное название группы" });
+            return BadRequest(new { errorText = "Неправильное название группы" });
         }
         catch (InvalidSubjectNameException)
         {
-            return BadRequest(new { errrorText = "Неправильное название предмета" });
+            return BadRequest(new { errorText = "Неправильное название предмета" });
         }
         catch (KeyNotFoundException)
         {
-            return BadRequest(new { errrorText = "Невалидное значение параметра Type" });
+            return BadRequest(new { errorText = "Невалидное значение параметра Type" });
+        }
+        catch (NullReferenceException)
+        {
+            return BadRequest(new { errorText = "Недостаточно параметров" });
         }
     }
 
@@ -213,7 +232,7 @@ public class FileSystemController : ControllerBase
     public async Task<IActionResult> RenameAsync(string? id, string? newName)
     {
         if (id == null || newName == null)
-            return BadRequest(new { errrorText = "Недостаточно параметров" });
+            return BadRequest(new { errorText = "Недостаточно параметров" });
 
         try
         {
@@ -221,25 +240,25 @@ public class FileSystemController : ControllerBase
         }
         catch (ItemNotFoundException)
         {
-            return NotFound(new { errrorText = "Объект не найден" });
+            return NotFound(new { errorText = "Объект не найден" });
         }
         catch (InvalidGroupNameException)
         {
-            return BadRequest(new { errrorText = "Неправильное название группы" });
+            return BadRequest(new { errorText = "Неправильное название группы" });
         }
         catch (InvalidSubjectNameException)
         {
-            return BadRequest(new { errrorText = "Неправильное название предмета" });
+            return BadRequest(new { errorText = "Неправильное название предмета" });
         }
 
         return Ok();
     }
 
     [HttpPatch("type")]
-    public async Task<IActionResult> UpdateTypeAsync(string? id, string newType)
+    public async Task<IActionResult> UpdateTypeAsync(string? id, string? newType)
     {
         if (id == null || newType == null)
-            return BadRequest(new { errrorText = "Недостаточно параметров" });
+            return BadRequest(new { errorText = "Недостаточно параметров" });
         
         try
         {
@@ -247,7 +266,7 @@ public class FileSystemController : ControllerBase
         }
         catch (ItemNotFoundException)
         {
-            return NotFound(new { errrorText = "Объект не найден" });
+            return NotFound(new { errorText = "Объект не найден" });
         }
         return Ok();
     }
@@ -256,7 +275,7 @@ public class FileSystemController : ControllerBase
     public async Task<IActionResult> DeleteAsync(string? id)
     {
         if (id == null)
-            return BadRequest(new { errrorText = "Недостаточно параметров" });
+            return BadRequest(new { errorText = "Недостаточно параметров" });
 
         try
         {
@@ -264,11 +283,11 @@ public class FileSystemController : ControllerBase
         }
         catch (ItemNotFoundException)
         {
-            return NotFound(new { errrorText = "Объект не найден" });
+            return NotFound(new { errorText = "Объект не найден" });
         }
         catch (FolderNotFoundException)
         {
-            return NotFound(new { errrorText = "Папка не найдена" });
+            return NotFound(new { errorText = "Папка не найдена" });
         }
 
         return Ok();

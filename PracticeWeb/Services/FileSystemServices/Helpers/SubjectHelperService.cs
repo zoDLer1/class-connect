@@ -9,13 +9,69 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
     private CommonQueries<string, Group> _commonGroupQueries;
     private CommonQueries<string, Subject> _commonSubjectQueries;
     
-    public SubjectHelperService(IHostEnvironment env, Context context) : base(env, context)
+    public SubjectHelperService(
+        IHostEnvironment env, 
+        ServiceResolver serviceAccessor,
+        Context context) : base(env, serviceAccessor, context)
     {
         _commonGroupQueries = new CommonQueries<string, Group>(_context);
         _commonSubjectQueries = new CommonQueries<string, Subject>(_context);
     }
 
-    public async Task<(string, FolderItem)> CreateAsync(string parentId, string name, Dictionary<string, string>? parameters=null)
+    public async Task<List<string>> HasAccessAsync(string id, User user, List<string> path)
+    {
+        var subject = await _commonSubjectQueries.GetAsync(id, _context.Subjects.Include(s => s.Group));
+        if (subject == null)
+            throw new ItemNotFoundException();
+
+        Console.WriteLine($"subject: {id} check if teacher in this group {subject.Group.TeacherId == user.Id} and he has a subject {subject.TeacherId == user.Id}");
+        // Проверяем, является ли преподаватель руководителем группы или ведёт ли данный предмет
+        if (user.Role.Name == "Teacher" && !(subject.Group.TeacherId == user.Id || subject.TeacherId == user.Id))
+            throw new AccessDeniedException();
+
+        await HasUserAccessToParentAsync(id, user, path);
+        path.Add(subject.Id);
+        return path;
+    }
+
+    public async Task<Object> GetAsync(string id, User user)
+    {
+        var path = await HasAccessAsync(id, user, new List<string>());
+        var subject = await _commonSubjectQueries.GetAsync(id, _context.Subjects.Include(s => s.Group));
+        var folder = await base.GetFolderAsync(id, user);
+        return new 
+        {
+            Name = folder.Name,
+            Type = folder.Type,
+            Path = folder.Path,
+            RealPath = path,
+            Guid = folder.Guid,
+            Children = folder.Children,
+            CreationTime = folder.CreationTime,
+            Group = subject?.Group.Name,
+            Teacher = subject?.TeacherId,
+            Description = subject?.Description
+        };
+    }
+
+    public async virtual Task<Object> GetChildItemAsync(string id, User user)
+    {
+        var path = await HasAccessAsync(id, user, new List<string>());
+        var subject = await _commonSubjectQueries.GetAsync(id, _context.Subjects.Include(s => s.Group));
+        var folderItem = await base.GetFolderInfoAsync(id);
+        return new 
+        {
+            Name = folderItem.Name,
+            Type = folderItem.Type,
+            Guid = folderItem.Guid,
+            CreationTime = folderItem.CreationTime,
+            Group = subject?.Group.Name,
+            Teacher = subject?.TeacherId,
+            Description = subject?.Description
+        };
+    }
+
+    public async Task<(string, FolderItem)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
     {
         // Проверяем, является ли родитель папкой
         var group = await _commonGroupQueries.GetAsync(parentId, _context.Groups);
@@ -27,13 +83,21 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         var anotherSubject = groupSubjects.FirstOrDefault(g => g.Name == name);
         if (anotherSubject != null)
             throw new InvalidSubjectNameException();
+
+        if (parameters?.ContainsKey("TeacherId") == false)
+        throw new NullReferenceException();
         
-        var (path, item) = await base.CreateAsync(parentId, name, 4);
+        int teacherId = 0;
+        if (!int.TryParse(parameters?["TeacherId"], out teacherId))
+            throw new NullReferenceException();
+        
+        var (path, item) = await base.CreateAsync(parentId, name, 4, user.Id);
         var subject = new Subject
         {
             Id = item.Guid,
             GroupId = group.Id,
             Name = name,
+            TeacherId = teacherId,
             Description = parameters?.ContainsKey("Description") == true ? parameters["Description"] : null
         };
         await _commonSubjectQueries.CreateAsync(subject);

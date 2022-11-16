@@ -61,7 +61,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Login([FromForm] string? email, [FromForm] string? password)
     {
         if (email == null || password == null)
-            return BadRequest(new { errrorText = "Недостаточно параметров" });
+            return BadRequest(new { errorText = "Недостаточно параметров" });
 
         try
         {
@@ -79,7 +79,7 @@ public class UserController : ControllerBase
             
             return new JsonResult(
                 new {
-                    acessToken = encodedJwt,
+                    accessToken = encodedJwt,
                     user = new {
                         firstName = identity.Name,
                         lastName = identity.FindFirst(ClaimTypes.Surname)?.Value,
@@ -91,11 +91,11 @@ public class UserController : ControllerBase
         }
         catch (UserNotFoundException)
         {
-            return NotFound(new { errrorText = "Пользователь не найден" });
+            return NotFound(new { errorText = "Пользователь не найден" });
         }
         catch (InvalidPasswordException)
         {
-            return BadRequest(new { errrorText = "Неправильный пароль" });
+            return BadRequest(new { errorText = "Неправильный пароль" });
         }
     }
 
@@ -108,9 +108,9 @@ public class UserController : ControllerBase
         [FromForm] string? password)
     {
         if (firstName == null || lastName == null || email == null || password == null)
-            return BadRequest(new { errrorText = "Недостаточно параметров" });
+            return BadRequest(new { errorText = "Недостаточно параметров" });
         if (await IsEmailUsedAsync(email))
-            return BadRequest(new { errrorText = "Данная почта уже используется" });
+            return BadRequest(new { errorText = "Данная почта уже используется" });
 
         await _authenticationService.RegisterAsync(firstName, lastName, patronymic, email, password, 1);
         return Ok();

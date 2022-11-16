@@ -9,14 +9,22 @@ public abstract class FileSystemQueriesHelper
 {
     protected Context _context;
     protected CommonQueries<string, Item> _common;
+    protected ServiceResolver _serviceAccessor;
+    protected string? _rootGuid;
     private string _fileSystemPath;
-    private Regex ReturnPattern = new Regex(@"\/\.\.(?![^\/])");
+    private Regex _returnPattern = new Regex(@"\/\.\.(?![^\/])");
 
-    public FileSystemQueriesHelper(IHostEnvironment env, Context context)
+    public FileSystemQueriesHelper(IHostEnvironment env, ServiceResolver serviceAccessor, Context context)
     {
         _context = context;
         _common = new CommonQueries<string, Item>(_context);
+        _serviceAccessor = serviceAccessor;
         _fileSystemPath = Path.Combine(env.ContentRootPath, "Filesystem");
+        if (IsFolderPathValid(_fileSystemPath))
+        {
+            var rootPath = Directory.GetFileSystemEntries(_fileSystemPath).FirstOrDefault();
+            _rootGuid = Path.GetFileName(rootPath);
+        }
     }
 
     protected async Task<Item> TryGetItemAsync(string id)
@@ -28,21 +36,39 @@ public abstract class FileSystemQueriesHelper
         return item;
     }
 
-    private bool HasReturns(string path) => ReturnPattern.IsMatch(path);
-
-    private bool IsFilePathValid(string path) => !HasReturns(path) && File.Exists(path);
-
-    private bool IsFolderPathValid(string path) => !HasReturns(path) && Directory.Exists(path);
-
-    protected async Task<List<string>> MakePathFromNames(List<string> ids)
+    protected async Task<bool> HasUserAccessToParentAsync(string id, User user, List<string> path)
     {
-        var result = new List<string>();
+        var connection = await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == id);
+        if (connection == null)
+            throw new InvalidPathException();
+        var parent = await TryGetItemAsync(connection.ParentId);
+        // Проверяем, имеет ли пользователь доступ к родителю
+        await _serviceAccessor(parent.Type.Name).HasAccessAsync(parent.Id, user, path);
+        return true;
+    }
+
+    protected string CombineWithFileSystemPath(string path) => Path.Combine(_fileSystemPath, path);
+
+    private bool HasReturns(string path) => _returnPattern.IsMatch(path);
+
+    protected bool IsFilePathValid(string path) => !HasReturns(path) && File.Exists(path);
+
+    protected bool IsFolderPathValid(string path) => !HasReturns(path) && Directory.Exists(path);
+
+    protected async Task<List<object>> MakePathAsync(List<string> ids)
+    {
+        var result = new List<object>();
         foreach (var id in ids)
         {
-            var item = await _common.GetAsync(id, _context.Items);
+            var item = await _common.GetAsync(id, _context.Items.Include(i => i.Type));
             if (item == null)
                 continue;
-            result.Add(item.Name);
+            result.Add(new 
+            {
+                Name = item.Name,
+                Guid = item.Id,
+                Type = item.Type
+            });
         }
         return result;
     }
@@ -50,24 +76,75 @@ public abstract class FileSystemQueriesHelper
     protected async Task<FolderItem> PrepareItemAsync(string id)
     {
         var item = await TryGetItemAsync(id);
-        var fullPath = await GeneratePathAsync(item.Id);
-        var path = string.Join(Path.DirectorySeparatorChar, fullPath);
-        var file = await _context.Files.FirstOrDefaultAsync(f => f.Id == item.Id);
         return new FolderItem() 
         {
             Name = item.Name,
-            Path = await MakePathFromNames(fullPath),
             Guid = item.Id,
             Type = item.Type,
-            MimeType = file?.MimeType,
+            CreationTime = item.CreationTime,
+            CreatorName = $"{item.Creator.FirstName} {item.Creator.LastName}"
+        };
+    }
+
+    protected async Task<List<Object>> PrepareChildrenAsync(List<string> itemIds, User user)
+    {
+        var children = new List<Object>();
+        foreach (var id in itemIds)
+        {
+            try 
+            {
+                var item = await TryGetItemAsync(id);
+                Console.WriteLine($"child: {item.Id}");
+                try
+                {
+                    var child = await _serviceAccessor(item.Type.Name).GetChildItemAsync(item.Id, user);
+                    children.Add(child);
+                }
+                catch (AccessDeniedException)
+                {
+                    continue;
+                }
+                
+            }
+            catch (ItemNotFoundException)
+            {
+                continue;
+            }
+        }
+        return children;
+    }
+
+    public async virtual Task<Item> GetAsync(string id)
+    {
+        return await TryGetItemAsync(id);
+    }
+
+    public async virtual Task<FolderItem> GetFolderInfoAsync(string id)
+    {
+        return await PrepareItemAsync(id);
+    }
+
+    public async virtual Task<Folder> GetFolderAsync(string id, User user)
+    {
+        var item = await GetFolderInfoAsync(id);
+        if (item.Type.Name == "File")
+            throw new ItemTypeException();
+        
+        Console.WriteLine($"getting folder with id {id}");
+        var children = await _context.Connections.Where(c => c.ParentId == item.Guid).Select(i => i.ChildId).ToListAsync();
+        Console.WriteLine($"children count: {children.Count()}");
+        var pathItems =  await GeneratePathAsync(item.Guid);
+        var folder = new Folder 
+        {
+            Name = item.Name, 
+            Type = item.Type,
+            Path = await MakePathAsync(pathItems),
+            Guid = item.Guid,
+            Children = await PrepareChildrenAsync(children, user),
             CreationTime = item.CreationTime,
             CreatorName = "testName",
         };
-    }
-    public async virtual Task<FolderItem> GetAsync(string id)
-    {
-        var item = await TryGetItemAsync(id);      
-        return await PrepareItemAsync(id);
+        return folder;
     }
 
     protected async Task<List<string>> GeneratePathAsync(string childId)
@@ -91,7 +168,7 @@ public abstract class FileSystemQueriesHelper
         return path;
     }
 
-    public async virtual Task<(string, FolderItem)> CreateAsync(string parentId, string name, int typeId)
+    public async virtual Task<(string, FolderItem)> CreateAsync(string parentId, string name, int typeId, int userId)
     {
         var parent = await TryGetItemAsync(parentId);
         var item = new Item 
@@ -99,7 +176,8 @@ public abstract class FileSystemQueriesHelper
             Id = Guid.NewGuid().ToString(),
             TypeId = typeId,
             Name = name,
-            CreationTime = DateTime.Now
+            CreationTime = DateTime.Now,
+            CreatorId = userId
         };
         var connection = new Connection
         {
@@ -131,7 +209,8 @@ public abstract class FileSystemQueriesHelper
         if (item.Type.Name != "Folder" && item.Type.Name != "Task")
             throw new ItemTypeException();
         var type = await _context.ItemTypes.FirstOrDefaultAsync(t => t.Name == newType);
-        if (type == null)
+        Console.WriteLine($"type: {type} — {newType}");
+        if (type == null || type.Name != "Folder" && type.Name != "Task")
             throw new ItemTypeException();
         item.TypeId = type.Id;
         await _common.UpdateAsync(item);
@@ -176,5 +255,6 @@ public abstract class FileSystemQueriesHelper
 
     private IQueryable<Item> IncludeValues() =>
         _context.Items
-            .Include(e => e.Type);
+            .Include(e => e.Type)
+            .Include(e => e.Creator);
 }
