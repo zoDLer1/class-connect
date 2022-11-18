@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PracticeWeb.Exceptions;
 using PracticeWeb.Models;
 
 namespace PracticeWeb.Services.FileSystemServices.Helpers;
@@ -77,6 +78,13 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
     {
         await HasUserAccessToParentAsync(parentId, user, new List<string>());
+        if (parentId == _rootGuid)
+            throw new InvalidPathException();
+
+        var parent = await TryGetItemAsync(parentId);
+        if (parent.Type.Name != "Subject" && parent.Type.Name != "Folder")
+            throw new InvalidPathException();
+        
         var (itemPath, item) = await base.CreateAsync(parentId, name, 5, user);
         return (itemPath, await GetChildItemAsync(item.Guid, user));
     }

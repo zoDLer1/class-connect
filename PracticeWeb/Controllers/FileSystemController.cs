@@ -153,7 +153,7 @@ public class FileSystemController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "Teacher,Admin")]
+    [Authorize(Roles = "Teacher,Administrator")]
     [HttpPost("file")]
     public async Task<IActionResult> UploadFileAsync(
         [FromForm] string? parentId, 
@@ -180,13 +180,17 @@ public class FileSystemController : ControllerBase
         {
             return NotFound(new { errorText = "Папка не найдена" });
         }
+        catch (InvalidPathException)
+        {
+            return BadRequest(new { errorText = "Передан неправильный родитель" });
+        }
         catch (AccessDeniedException)
         {
             return Forbid();
         }
     }
 
-    [Authorize(Roles = "Teacher,Admin")]
+    [Authorize(Roles = "Teacher,Administrator")]
     [HttpPost]
     public async Task<IActionResult> CreateFolderAsync(
         [FromForm] string? parentId, 
@@ -227,6 +231,10 @@ public class FileSystemController : ControllerBase
         {
             return BadRequest(new { errorText = "Неправильное название предмета" });
         }
+        catch (InvalidUserRoleException)
+        {
+            return BadRequest(new { errorText = "Неправильная роль пользователя" });
+        }
         catch (KeyNotFoundException)
         {
             return BadRequest(new { errorText = "Невалидное значение параметра Type" });
@@ -235,12 +243,17 @@ public class FileSystemController : ControllerBase
         {
             return BadRequest(new { errorText = "Недостаточно параметров" });
         }
+        catch (AccessDeniedException)
+        {
+            return Forbid();
+        }
     }
 
-    [Authorize(Roles = "Teacher,Admin")]
+    [Authorize(Roles = "Teacher,Administrator")]
     [HttpPatch]
     public async Task<IActionResult> RenameAsync(string? id, string? newName)
     {
+        Console.WriteLine($"{id} {newName}");
         if (id == null || newName == null)
             return BadRequest(new { errorText = "Недостаточно параметров" });
 
@@ -265,6 +278,10 @@ public class FileSystemController : ControllerBase
         {
             return BadRequest(new { errorText = "Неправильное название предмета" });
         }
+        catch (InvalidPathException)
+        {
+            return BadRequest(new { errorText = "Передан неправильный айди" });
+        }
         catch (AccessDeniedException)
         {
             return Forbid();
@@ -273,7 +290,7 @@ public class FileSystemController : ControllerBase
         return Ok();
     }
 
-    [Authorize(Roles = "Teacher,Admin")]
+    [Authorize(Roles = "Teacher,Administrator")]
     [HttpPatch("type")]
     public async Task<IActionResult> UpdateTypeAsync(string? id, string? newType)
     {
@@ -293,6 +310,14 @@ public class FileSystemController : ControllerBase
         {
             return NotFound(new { errorText = "Объект не найден" });
         }
+        catch (ItemTypeException)
+        {
+            return BadRequest(new { errorText = "Передан неправильный тип" });
+        }
+        catch (InvalidPathException)
+        {
+            return BadRequest(new { errorText = "Передан неправильный айди" });
+        }
         catch (AccessDeniedException)
         {
             return Forbid();
@@ -301,7 +326,7 @@ public class FileSystemController : ControllerBase
         return Ok();
     }
 
-    [Authorize(Roles = "Teacher,Admin")]
+    [Authorize(Roles = "Teacher,Administrator")]
     [HttpDelete]
     public async Task<IActionResult> DeleteAsync(string? id)
     {
@@ -324,6 +349,10 @@ public class FileSystemController : ControllerBase
         catch (FolderNotFoundException)
         {
             return NotFound(new { errorText = "Папка не найдена" });
+        }
+        catch (InvalidPathException)
+        {
+            return BadRequest(new { errorText = "Передан неправильный айди" });
         }
         catch (AccessDeniedException)
         {

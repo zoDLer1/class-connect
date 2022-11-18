@@ -92,6 +92,13 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         int teacherId = 0;
         if (!int.TryParse(parameters?["TeacherId"], out teacherId))
             throw new NullReferenceException();
+
+        var teacher = _context.Users.Include(s => s.Role).FirstOrDefault(s => s.Id == teacherId);
+        if (teacher == null)
+            throw new UserNotFoundException();
+
+        if (teacher.Role.Name != "Teacher")
+            throw new InvalidUserRoleException();
         
         var (itemPath, item) = await base.CreateAsync(parentId, name, 4, user);
         var subject = new Subject

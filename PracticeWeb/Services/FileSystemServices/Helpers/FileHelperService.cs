@@ -61,6 +61,13 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
     {
         await HasUserAccessToParentAsync(parentId, user, new List<string>());
+        if (parentId == _rootGuid)
+            throw new InvalidPathException();
+
+        var parent = await TryGetItemAsync(parentId);
+        if (parent.Type.Name != "Subject" && parent.Type.Name != "Folder" && parent.Type.Name != "Task")
+            throw new InvalidPathException();
+
         var (itemPath, item) = await base.CreateAsync(parentId, name, 2, user);
         var fileEntity = new FileEntity
         {
@@ -75,7 +82,6 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public async new Task DeleteAsync(string id, User user)
     {
         var path = await base.DeleteAsync(id, user);
-        await _commonFileQueries.DeleteAsync(id);
         File.Delete(path);
     }
 }

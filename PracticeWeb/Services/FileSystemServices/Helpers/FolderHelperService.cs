@@ -62,7 +62,11 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
     {
         await HasUserAccessToParentAsync(parentId, user, new List<string>());
         if (parentId == _rootGuid)
-            throw new AccessDeniedException();
+            throw new InvalidPathException();
+        
+        var parent = await TryGetItemAsync(parentId);
+        if (parent.Type.Name != "Subject" && parent.Type.Name != "Folder" && parent.Type.Name != "Task")
+            throw new InvalidPathException();
         
         var (itemPath, item) = await base.CreateAsync(parentId, name, 1, user);
         return (itemPath, await GetChildItemAsync(item.Guid, user));

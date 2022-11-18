@@ -252,6 +252,7 @@ public abstract class FileSystemQueriesHelper
 
     public async virtual Task<string> DeleteAsync(string id, User user)
     {
+        await HasUserAccessToParentAsync(id, user, new List<string>());
         var item = await TryGetItemAsync(id);
         if (item.CreatorId != user.Id)
             throw new AccessDeniedException();

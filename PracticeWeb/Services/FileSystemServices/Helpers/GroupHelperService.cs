@@ -95,9 +95,11 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
     public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
     {
+        Console.WriteLine(user.Role.Name);
         if (user.Role.Name != "Administrator")
             throw new AccessDeniedException();
 
+        Console.WriteLine($"is root {_rootGuid}: {await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == parentId) == null} {parentId == _rootGuid}");
         // Проверяем, является ли родитель корнем
         if (await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == parentId) != null && parentId != _rootGuid)
             throw new InvalidPathException();
@@ -112,6 +114,13 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         int teacherId = 0;
         if (!int.TryParse(parameters?["TeacherId"], out teacherId))
             throw new NullReferenceException();
+
+        var teacher = _context.Users.Include(s => s.Role).FirstOrDefault(s => s.Id == teacherId);
+        if (teacher == null)
+            throw new UserNotFoundException();
+
+        if (teacher.Role.Name != "Teacher")
+            throw new InvalidUserRoleException();
         
         var (itemPath, item) = await base.CreateAsync(parentId, name, 3, user);
         var group = new Group

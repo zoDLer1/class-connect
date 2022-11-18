@@ -76,12 +76,27 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (subjectId == null)
             throw new FolderNotFoundException();
 
+        if (parameters?.ContainsKey("StudentId") == false)
+            throw new NullReferenceException();
+        
+        int studentId = 0;
+        if (!int.TryParse(parameters?["StudentId"], out studentId))
+            throw new NullReferenceException();
+
+        var student = _context.Users.Include(s => s.Role).FirstOrDefault(s => s.Id == studentId);
+        if (student == null)
+            throw new UserNotFoundException();
+
+        if (student.Role.Name != "Student")
+            throw new InvalidUserRoleException();
+
         var (itemPath, item) = await base.CreateAsync(parentId, name, 6, user);
         var work = new Work
         {
             Id = item.Guid,
             SubjectId = subjectId,
-            IsSubmitted = false
+            IsSubmitted = false,
+            StudentId = studentId
         };
         await _commonWorkQueries.CreateAsync(work);
         return (itemPath, await GetChildItemAsync(item.Guid, user));
