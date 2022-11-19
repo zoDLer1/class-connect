@@ -196,7 +196,7 @@ public abstract class FileSystemQueriesHelper
     {
         await HasUserAccessToParentAsync(id, user, new List<string>());
         var item = await TryGetItemAsync(id);
-        if (item.CreatorId != user.Id)
+        if (user.Role.Name != "Administrator" && item.CreatorId != user.Id)
             throw new AccessDeniedException();  
             
         item.Name = newName;
@@ -208,7 +208,7 @@ public abstract class FileSystemQueriesHelper
     {
         await HasUserAccessToParentAsync(id, user, new List<string>());
         var item = await TryGetItemAsync(id);
-        if (item.CreatorId != user.Id)
+        if (user.Role.Name != "Administrator" && item.CreatorId != user.Id)
             throw new AccessDeniedException();
             
         if (item.Type.Name != "Folder" && item.Type.Name != "Task")
@@ -254,7 +254,7 @@ public abstract class FileSystemQueriesHelper
     {
         await HasUserAccessToParentAsync(id, user, new List<string>());
         var item = await TryGetItemAsync(id);
-        if (item.CreatorId != user.Id)
+        if (user.Role.Name != "Administrator" && item.CreatorId != user.Id)
             throw new AccessDeniedException();
 
         var path = await MakeFullPathAsync(item.Id);
