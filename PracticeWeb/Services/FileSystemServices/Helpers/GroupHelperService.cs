@@ -36,17 +36,20 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return path;
     }
 
-    private Object GetGroupData(string id)
+    private Object GetGroupData(Group group, User user)
     {
+        var subjects = _context.Subjects.Where(s => s.GroupId == group.Id);
+        if (group.TeacherId != user.Id)
+            subjects = subjects.Where(s => s.TeacherId == user.Id);
         return new 
         {
-            Subjects = _context.Subjects.Where(s => s.GroupId == id).Select(s => new 
+            Subjects = subjects.Select(s => new 
             {
                 Id = s.Id,
                 Name = s.Name
             }),
             Students = _context.GroupStudents
-                .Where(s => s.GroupId == id)
+                .Where(s => s.GroupId == group.Id)
                 .ToList()
                 .Select(s => {
                     var user = _context.Users.First(u => u.Id == s.StudentId);
@@ -62,7 +65,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public async Task<Object> GetAsync(string id, User user)
     {
         var path = await HasAccessAsync(id, user, new List<string>());
-        var group = await _commonGroupQueries.GetAsync(id, _context.Groups);
+        var group = await _commonGroupQueries.GetAsync(id, _context.Groups.Include(g => g.Teacher));
         var folder = await base.GetFolderAsync(id, user);
         return new 
         {
@@ -72,8 +75,8 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Guid = folder.Guid,
             Children = folder.Children,
             CreationTime = folder.CreationTime,
-            Teacher = group?.TeacherId,
-            Data = user.Role.Name == "Student" ? null : GetGroupData(id)
+            Teacher = group?.Teacher,
+            Data = user.Role.Name == "Student" || group == null ? null : GetGroupData(group, user)
         };
     }
 
@@ -89,7 +92,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Guid = folderItem.Guid,
             CreationTime = folderItem.CreationTime,
             Teacher = group?.TeacherId,
-            Data = user.Role.Name == "Student" ? null : GetGroupData(id)
+            Data = user.Role.Name == "Student" || group == null ? null : GetGroupData(group, user)
         };
     }
 

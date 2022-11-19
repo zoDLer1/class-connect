@@ -55,6 +55,7 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Guid = folderItem.Guid,
             MimeType = fileEntity?.MimeType,
             CreationTime = folderItem.CreationTime,
+            CreatorName = folderItem.CreatorName
         };
     }
 

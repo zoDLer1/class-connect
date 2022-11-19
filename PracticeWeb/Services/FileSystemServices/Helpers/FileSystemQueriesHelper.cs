@@ -139,7 +139,7 @@ public abstract class FileSystemQueriesHelper
             Guid = item.Guid,
             Children = await PrepareChildrenAsync(children, user),
             CreationTime = item.CreationTime,
-            CreatorName = "testName",
+            CreatorName = item.CreatorName,
         };
         return folder;
     }
