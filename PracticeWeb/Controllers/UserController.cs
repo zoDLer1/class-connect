@@ -1,6 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PracticeWeb.Exceptions;
 using PracticeWeb.Models;
@@ -32,6 +34,23 @@ public class UserController : ControllerBase
         _authenticationService = authenticationService;
         _fileSystemService = fileSystemService;
         _userService = userService;
+    }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpGet("teachers")]
+    public IActionResult GetTeachers()
+    {
+        var teachers = _context.Users.Include(u => u.Role)
+            .Where(u => u.Role.Name == "Teacher")
+            .Select(u => new 
+                {
+                    Id = u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Patronymic = u.Patronymic
+                }
+            );
+        return new JsonResult(teachers);   
     }
 
     private async Task<bool> IsEmailUsedAsync(string email)

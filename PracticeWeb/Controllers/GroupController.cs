@@ -23,6 +23,20 @@ public class GroupController : ControllerBase
         _userService = userService;
     }
 
+    [Authorize(Roles = "Administrator")]
+    [HttpGet("teachers")]
+    public IActionResult GetGroups()
+    {
+        var groups = _context.Groups
+            .Select(g => new 
+                {
+                    Id = g.Id,
+                    Name = g.Name
+                }
+            );
+        return new JsonResult(groups);   
+    }
+
     [Authorize(Roles = "Student")]
     [HttpPost("enter")]
     public async Task<IActionResult> EnterGroup([FromForm] string? groupId)
