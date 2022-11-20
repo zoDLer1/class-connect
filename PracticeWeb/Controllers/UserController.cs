@@ -62,6 +62,7 @@ public class UserController : ControllerBase
 
     private ClaimsIdentity GetIdentity(User user)
     {
+        Console.WriteLine($"{user.Email} {user.FirstName} {user.LastName}");
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Email, user.Email),
@@ -77,20 +78,26 @@ public class UserController : ControllerBase
         return identity;
     }
 
-    private string CreateToken(User user)
+    private Object CreateToken(User user)
     {
         var identity = GetIdentity(user);
         var now = DateTime.UtcNow;
+        var expires = now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME));
         var jwt = new JwtSecurityToken(
             issuer: AuthOptions.ISSUER,
             audience: AuthOptions.AUDIENCE,
             notBefore: now,
             claims: identity.Claims,
-            expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
+            expires: expires,
             signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)
         );
         var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-        return encodedJwt;
+        return new 
+        {
+            Token = encodedJwt,
+            Created = now,
+            Expires = expires
+        };
     }
 
     private RefreshToken GenerateRefreshToken()
@@ -102,6 +109,39 @@ public class UserController : ControllerBase
             Expires = DateTime.Now.AddDays(2),
         };
         return refreshToken;
+    }
+
+    [HttpPost("refreshToken")]
+    public async Task<IActionResult> RefreshToken([FromForm] string? token)
+    {
+        if (token == null)
+            return BadRequest(new { errorText = "Недостаточно параметров" });
+        
+        var user = await _context.Users
+            .Include(u => u.Role)
+            .Include(u => u.RefreshToken)
+            .FirstOrDefaultAsync(u => u.RefreshTokenId == token);
+        Console.WriteLine($"{user?.FirstName} — \"{token}\" {user?.RefreshTokenId}: {user?.RefreshToken}");
+        if (user == null || user.RefreshToken == null)
+            return Unauthorized("Неверный RefreshToken");
+        else if (user.RefreshToken.Expires < DateTime.Now)
+            return Unauthorized("RefreshToken истёк");
+
+        var jwt = CreateToken(user);
+        var newRefreshToken = GenerateRefreshToken();
+        user.RefreshToken = newRefreshToken;
+        await _userService.UpdateAsync(user);
+
+        return new JsonResult(
+            new {
+                accessToken = jwt,
+                refreshToken = new {
+                    token = newRefreshToken.Token,
+                    created = newRefreshToken.Created,
+                    expires = newRefreshToken.Expires
+                }
+            }
+        );
     }
 
     [HttpPost("login")]
