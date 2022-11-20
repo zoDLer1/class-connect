@@ -32,6 +32,18 @@
             "mimeType": null,
             "creationTime": "2022-11-06T12:35:47.862131",
             "creatorName": "testName"
+        },
+        {
+            "name": "Практическая 2",
+            "path": ["Корень", "ИСП-564","Практическая 2"],
+            "guid": "3fb57581-d519-4dfe-8d17-4ed5911062bc",
+            "type": {
+                "id": 2,
+                "name": "File"
+            },
+            "mimeType": null,
+            "creationTime": "2022-11-06T12:35:56.862165",
+            "creatorName": "testName"
         }
     ],
     "creationTime": "2022-11-06T12:35:25.325637",

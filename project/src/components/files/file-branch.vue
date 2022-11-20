@@ -1,79 +1,151 @@
 <template>
     <div @contextmenu.prevent='menu.toggle' class="files__branch">
         <div class="file-branch">
-            <filebranch-item @contextmenu.prevent='(evt) => item_menu.toggle(evt, {selected: item.guid, index: index})' v-for='(item, index) in data' :data='item' :key='index' :id='index+1'></filebranch-item>
-            <input @change='Upload' id="file-loader" type="file" hidden>
+            <filebranch-item 
+            @edit='edit_subj'
+            @contextmenu.prevent='(evt) => item_menu.toggle(evt, {selected: item, index: index})' 
+            v-for='(item, index) in filteredData' 
+            :data='item' 
+            :key='index' 
+            :id='index+1'
+            :edit='editable[index]'
+            >
+            </filebranch-item>
+            
         </div>
     </div>
-    <menu-component :menu='item_menu'></menu-component>
+    <itemMenu-component :menu='item_menu'></itemMenu-component>
     <menu-component :menu='menu'></menu-component>
+    <subject-popup @create='create_subj' @close='popupToggle' v-if='popup'></subject-popup>
 </template>
 
 <script>
-    import Menu from '@/menu'
+    import { MainMenu, ItemMenu } from '@/menu/main'
     import item from '@/components/files/file_branch/filebranch-item.vue'
     import menu from '@/components/menu/menu-component.vue'
-    import { mapGetters, mapActions } from 'vuex'
+    import itemMenu from '@/components/menu/itemMenu-component.vue'
+    import popup from '@/components/popup/subject-popup.vue'
+    import { mapActions } from 'vuex'
     
     export default{
         components:{
             'filebranch-item': item,
             'menu-component': menu,
+            'subject-popup': popup,
+            'itemMenu-component': itemMenu
         },
         props:{
             data: Array,
         },
+        inject:['types', 'alert'],
         data(){
             return{
-                menu: new Menu([
-                        {
-                            name: 'Новая папка', 
-                            icon: this.requireIcon('add_folder.svg'), 
-                            function: () => {
-                                this.createFolder('name')
-                            }    
+                popup: false,
+                editable: Array(this.data.length),
+                menu: new MainMenu({
+                    create:{
+                        name: 'Создать', 
+                        icon: 'add_folder.svg', 
+                        func: () => {
+                            this.popupToggle()
+                        }    
+                    }
+                }, 'file-branch'),
+                
+
+                item_menu: new ItemMenu({
+                    edit:{
+                        name: 'Переименовать', 
+                        icon: 'edit.svg', 
+                        func: () => {
+                            this.EditMode(true)
+                            this.item_menu.objs.edit.setCondition(false)
+                            this.item_menu.objs.save.setCondition(true)
                         },
-                        {
-                            name: 'Добавить файл', 
-                            icon: this.requireIcon('add_file.svg'), 
-                            function: () => {
-                                document.querySelector('#file-loader').click()
-                            }
-                        }
-                    ], 'file-branch'),
-                item_menu: new Menu([
-                        {
-                            name: 'Переименовать', 
-                            icon: this.requireIcon('edit.svg'), 
-                            function: () => {
-                                
-                                this.remane(this.item_menu.selected, 'newName')
-                            }
-                        },
-                        {
+
+                
+                    },
+                    save:{
+                        name: 'Сохранить', 
+                        icon: 'save.svg', 
+                        func: () => {
+                            this.EditMode(false)
+                            this.item_menu.objs.edit.setCondition(true) 
+                            this.item_menu.objs.save.setCondition(false) 
                             
-                            name: 'Удалить', 
-                            icon: this.requireIcon('delete.svg'), 
-                            function: () => {
-                                this.delete({guid:this.item_menu.selected, index:this.item_menu.index})
-                            }
-                        }
-                    ], null)                
+                        },
+                        condition: false
+                
+                    },
+                    delete:{
+                        name: 'Удалить', 
+                        icon: 'delete.svg', 
+                        func: () => {
+                            let item = this.item_menu.selected
+                            this.delete_subj(item)                            
+                        },
+
+                    }
+                }),                
             }
         },
-        inject: ["requireIcon"],
+        computed:{
+            filteredData(){
+                return this.data.filter(item => this.types.byTypeIndex(item.type.id-1).permissions.read)
+            }
+        },
 
-        computed:mapGetters(['getGuid']),
         methods: {
-            ...mapActions(['createFolder', 'createFile', 'delete', 'remname']),
-            Upload(evt){
-                let formData = new FormData()
-                formData.append('uploadedFile', evt.target.files[0])
-                this.createFile(formData)
+            ...mapActions(['createFolder', 'createFile', 'delete', 'remname']),       
+            popupToggle(){
+                this.popup = !this.popup
+            },
+            // https://stackoverflow.com/questions/1026069/how-do-i-make-the-first-letter-of-a-string-uppercase-in-javascript
+            capitalizeFirstLetter(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            },
+            create_subj(key, name, file){
                 
+                let object = this.types.objects[key]
+                if (object.permissions.create){
+                    object.methods.create(name, file ? file : this.capitalizeFirstLetter(key)).then(
+                        (response) => console.log(response),
+                        (error) => {console.log(error); this.alert(`${error.response.status}: ${error.response.data.errorText}`)}
+                    )
+                }
+                else{
+                    this.alert('У вас недостаточно прав!')
+                }
+                this.popupToggle()
+            },
+
+            edit_subj(item, name){
+                this.item_menu.objs.save.func()
+                let object = this.types.byTypeIndex(item.type.id-1)
+                if (object.permissions.edit){
+                 
+                    object.methods.edit(item.guid, name)
+                }
+                else{
+                    this.alert('У вас недостаточно прав!')
+                }
+
+            },
+            delete_subj(item){
+                let object = this.types.byTypeIndex(item.type.id-1)
+                if (object.permissions.delete){
+                    object.methods.delete(item.guid, this.item_menu.index)
+                }
+                else{
+                    this.alert('У вас недостаточно прав!')
+                }
+            },
+            EditMode(condition){
+                this.editable[this.item_menu.index] = condition
             },
 
         },
+       
         
     }
 

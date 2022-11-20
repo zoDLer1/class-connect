@@ -1,5 +1,5 @@
 import { createStore } from 'vuex'
-import folder from './modules/data.js'
+import data from './modules/data.js'
 import auth from './modules/auth.js'
 
 
@@ -9,7 +9,7 @@ export default new createStore({
     state:{},
     getters:{},
     modules:{
-        folder,
+        data,
         auth
     }
 })

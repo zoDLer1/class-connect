@@ -3,7 +3,7 @@ import {AuthApiInstanse, DefaultApiInstanse} from '@/api'
 
 export const AuthAPI = {
     login_url : '/user/login',
-    logout_url : '/user/logout',
+    teachers_url : '/user/teachers',
     register_url: '/user/signup',
     
     login(email, password){
@@ -13,7 +13,15 @@ export const AuthAPI = {
         return AuthApiInstanse.post(this.login_url, data)
     },
     register(data){
-        return DefaultApiInstanse.post(this.register_url, data)
+        let formdata = new FormData()
+
+        for (let elem in data){
+            formdata.append(elem, data[elem])
+        }
+        return AuthApiInstanse.post(this.register_url, formdata)
+    },
+    teachers(){
+        return DefaultApiInstanse.get(this.teachers_url)
     },
 
     logout(){

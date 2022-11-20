@@ -1,18 +1,19 @@
 import {API} from '@/api/requests'
-import DEFAULT_DATA from '@/assets/info.json'
+import DEFAULT_DATA from '@/assets/info2.json'
 
 
 export default {
     actions:{
         getData({ commit }, guid){
-            API.show(guid)
+            
+            return API.show(guid)
                 .then(  
                     (response) => {
                         commit('setData', response.data)
                         console.log(response.data)
                     },
                     (error) => {
-                        console.log(error.code)
+                        console.log(error);
                         commit('setData', DEFAULT_DATA)
                         // if (error.code === 'ECONNABORTED')
                             
@@ -23,19 +24,23 @@ export default {
         updateData({ dispatch, getters }){
             dispatch('getData', getters.getGuid)
         },
-        createFolder({ commit, getters }, name){
-            API.createFolder(getters.getGuid, name).then(  
+        create({ commit, getters }, { name, type }){
+            
+            return API.create(getters.getGuid, name, type).then(  
                 (response) => {
                     
                     commit('addItem', response.data)
                 },
-                (error) => {
-                    error
-                }
+                
             )
         },
-        createFile({ dispatch, getters }, data){
-            API.createFile(getters.getGuid, data).then(  
+        createFile({ dispatch, getters }, { name, file }){
+            let formData = new FormData()
+            formData.append('uploadedFile', file)
+            formData.append('id', getters.getGuid)
+            formData.append('name', name)
+
+            API.createFile(formData).then(  
                 () => {
                     dispatch('updateData')
                     // commit('addItem', response.data) !!!
@@ -51,31 +56,36 @@ export default {
                     commit('deleteItem', index)
                 },
                 () => {
-
+                    
                 }
             )
         },
-        // rename({ commit }, guid, name){
+        edit({ commit }, { guid, name }){
+            commit
+            return API.edit(guid, name).then(()=>{
 
-        // }
+            })
+            // !!!
+        }
     },
     mutations:{
         deleteItem(state, index){
             
             state.items.splice(index, 1)
         },
+        
         addItem(state, item){
             state.items.push(item)
         },
         setData(state, data){
-            state.items = data.items
+            state.children = data.children
             state.path = data.path
             state.realPath = data.realPath
             state.guid = data.guid
             localStorage.setItem('guid', data.guid);
         },
         setItems(state, items){
-            state.items = items.sort((a, b) => a.type.id - b.type.id)
+            state.children = items.sort((a, b) => a.type.id - b.type.id)
         },
         setPath(state, path){
             state.path = path
@@ -87,15 +97,19 @@ export default {
             state.guid = guid
             localStorage.setItem('guid', guid);
         },
+        deleteGuid(state){
+            state.guid = null
+            localStorage.removeItem('guid')
+        },
     },
     state:{
-        items: [],
+        children: [],
         realPath: [],
         guid: null || localStorage.getItem('guid'),
         path: []
     },
     getters:{
-        getItems: (state) => state.items,
+        getItems: (state) => state.children,
         getPath: (state) => state.path,
         getRealPath: (state) => state.realPath,
         getGuid: (state) => state.guid

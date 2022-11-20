@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const DOMAIN = 'https://25.62.130.250:7231'
+const DOMAIN = 'http://25.62.130.250:5222/'
 axios.defaults.timeout = 1000 * 100;
 
 export const Defaultconfig = {

@@ -1,13 +1,14 @@
 <template>
     <div class="content">
+        <information-alert :object='alert'></information-alert>
         <div class="page__section">
-            <inner-header :username="user" :realPath='getRealPath' :path="getPath"></inner-header>
+            <inner-header :path="getPath"></inner-header>
             <div class="files">
                 <file-branch :data='getItems'></file-branch>
                 <div class="file__info info">
                     <div class="info__header">
                         <h3 class="info__header-label">Предмет 2</h3>
-                        <!-- <p class="info__header-sub">до 23 ноября</p> -->
+                            <p class="info__header-sub">до 23 ноября</p> 
                     </div>
                     <div class="info__item">
                         <input class="info__item-field" hidden type="checkbox" id="info">
@@ -54,11 +55,13 @@
                         </div>
                     </div>
                     <upload-element></upload-element>
-                    
                 </div>
             </div>
+            
+            
         </div>
     </div>
+    
 </template>
 
 
@@ -69,73 +72,53 @@
 </style>
 
 <script>
+    import types from '@/types/subjects'
     import upload from '@/components/info_elements/upload-element.vue'
     import innerHeader from '@/components/header/inner-header.vue'
     import filebranch from '@/components/files/file-branch.vue'
+    import alert from '@/components/files/information-alert.vue'
     import { mapActions, mapGetters } from 'vuex'
     
     export default {
         computed:{
-            ...mapGetters(['getItems', 'getGuid', 'getPath', 'getRealPath'])
+            ...mapGetters(['getItems', 'getGuid', 'getPath'])
         },
         name: 'subject-view',
         components:{
             'file-branch': filebranch,
             'inner-header': innerHeader,
             'upload-element': upload,
+            'information-alert': alert
+            
         },
         data() {
             return {
-                user: 'zoDLer',
-                types: {
-                    items:[
-                        {function: this.getData, mimeTypes: {null:'folder.svg'}},
-                        {function: (_)=> _,  mimeTypes: {
-                                                'text/plain': 'file.svg',
-                                                'image/jpeg': 'image.svg',
-                                                'image/png': 'image.svg'
-                                                }
-                        },
-                        {function: this.getData,  mimeTypes: {null:'group.svg'}},
-                        {function: this.getData,  mimeTypes: {null:'folder.svg'}},
-                    ],
-                    default:{
-                        mimeType: 'file.svg'
+                s_types: types,
+                alert: { 
+                    show: false,
+                    info: '',
+                    toggle: () => {
+                        this.alert.show = !this.alert.show
                     }
                 }
-                    
             }
         },
         provide() {
             return {
-                getData: this.getData,
-                getType: this.getType,
-                getIconPath: this.getIconPath,
-                requireIcon: this.requireIcon,
+                types: this.s_types,
+                alert: this.open_alert
             }
         },
         methods: {
-            ...mapActions(['getData', 'updateData']),
-            requireIcon(icon){
-                return require(`#/${icon}`)
-            },
-            getType(type){
-                return this.types.items[type]
-            },
-            getIconPath(type, mimeType){
-                type = this.getType(type)
-                let src = type.mimeTypes[mimeType]
-                return this.requireIcon(src ? src : this.types.default.mimeType)
-            },
+            ...mapActions(['getData', 'updateData', 'Teachers']),
+            open_alert(info){
+                this.alert.info = info
+                this.alert.toggle()
+            }  
         },
-        
         created() {    
-            this.getData('7ebfa97a-2eae-4a16-80e3-d2c1fb2d21f4')
+            this.updateData()
+            this.Teachers()
         },
-        
-        
     }    
-
-
-
 </script>

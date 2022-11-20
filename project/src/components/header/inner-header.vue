@@ -2,12 +2,12 @@
     <header class="inner-header">
         <div class="inner-header__directories directories">
             <div v-for='part in separatedPath()' :key='part' style='display: flex'>
-                <directory-component v-if='part.type == "part"' :info='part.name'  @click="getData(part.guid)"></directory-component>
+                <directory-component v-if='part.type == "part"' :info='part.name'  @click="types.read(0)(part.guid)"></directory-component>
                 <directoty-combiner v-else :info='part.name' :items='part.items'></directoty-combiner>
                 <directoty-seporator v-if='part.appendSeporator'></directoty-seporator>
             </div>
         </div>
-        <a @click.prevent='logout' class="inner-header__user" href="#">{{getUser}}</a>
+        <a @click.prevent='logout' class="inner-header__user" href="#">{{getUser ? getUser.firstName : ''}}</a>
         
     </header>
     
@@ -26,23 +26,21 @@
             'directoty-combiner':combiner,
         },
         props: {
-            username: String,
-            path: Array,
-            realPath: Array
+            path: Array
         },
-        inject: ['getData'],
+        inject: ['types'],
         methods: {
             ...mapActions(['onLogout']),
             logout(){
                 this.onLogout()
                 this.$router.push({name:'login'})
+                
             },
             separatedPath(){
                 let path = []
-                let realPath = this.realPath
                 let splitedPath = this.path
                 for (const [index, part] of splitedPath.entries()){
-                    path.push({type: 'part', guid:realPath[index], name: part, appendSeporator: index+1 != splitedPath.length})   
+                    path.push({type: 'part', guid:part.guid, name: part.name, appendSeporator: index+1 != splitedPath.length})   
                 }
                 if (path.length > 3){
                     path.splice(1,0,{type: 'combiner', name:'...', appendSeporator: true, items: path.splice(1, path.length-3)})

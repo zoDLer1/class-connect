@@ -19,6 +19,16 @@
     color: #fff;
     font-size: 24px;
 }
+select{
+
+}
+.form__close{
+    position: absolute;
+    width: 30px;
+    top: 10px;
+    right: 30px;
+    cursor: pointer;
+}
 .form__header-label{
     text-align: center;
     font-weight: bold;
@@ -65,6 +75,12 @@
     font-family: 'Ubuntu';
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25);
 }
+
+.form__submit input:disabled + .form__input-label{
+    background-color: #B6B2B1;
+    
+}
+
 
 .form__link{
     font-family: 'Ubuntu';

@@ -46,3 +46,10 @@
     fill: #0388D4;
     fill-opacity: 1;
 }
+.file-branch__item-edit{
+    outline: none;
+    display: inline-block;
+    width: 100%;
+    font-size: 20px;
+    height: 24px;
+}
