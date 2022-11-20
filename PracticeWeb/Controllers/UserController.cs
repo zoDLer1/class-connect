@@ -1,5 +1,7 @@
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -58,9 +60,8 @@ public class UserController : ControllerBase
         return await _userService.GetByEmailAsync(email) != null;
     }
 
-    private async Task<ClaimsIdentity> GetIdentityAsync(string email, string password)
+    private ClaimsIdentity GetIdentity(User user)
     {
-        var user = await _authenticationService.LoginAsync(email, password);
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Email, user.Email),
@@ -76,6 +77,33 @@ public class UserController : ControllerBase
         return identity;
     }
 
+    private string CreateToken(User user)
+    {
+        var identity = GetIdentity(user);
+        var now = DateTime.UtcNow;
+        var jwt = new JwtSecurityToken(
+            issuer: AuthOptions.ISSUER,
+            audience: AuthOptions.AUDIENCE,
+            notBefore: now,
+            claims: identity.Claims,
+            expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
+            signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)
+        );
+        var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+        return encodedJwt;
+    }
+
+    private RefreshToken GenerateRefreshToken()
+    {
+        var refreshToken = new RefreshToken
+        {
+            Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+            Created = DateTime.Now,
+            Expires = DateTime.Now.AddDays(2),
+        };
+        return refreshToken;
+    }
+
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromForm] string? email, [FromForm] string? password)
     {
@@ -84,26 +112,33 @@ public class UserController : ControllerBase
 
         try
         {
-            var identity = await GetIdentityAsync(email, password);
-            var now = DateTime.UtcNow;
-            var jwt = new JwtSecurityToken(
-                issuer: AuthOptions.ISSUER,
-                audience: AuthOptions.AUDIENCE,
-                notBefore: now,
-                claims: identity.Claims,
-                expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
-                signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)
-            );
-            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-            
+            var user = await _authenticationService.LoginAsync(email, password);
+            var jwt = CreateToken(user);
+
+            var refreshToken = GenerateRefreshToken();
+            user.RefreshToken = refreshToken;
+            await _userService.UpdateAsync(user);
+
+            var folder = _fileSystemService.RootGuid;
+            if (user.Role.Name == "Student")
+            {
+                var group = await _context.GroupStudents.FirstOrDefaultAsync(s => s.StudentId == user.Id);
+                folder = group?.GroupId;
+            }
+
             return new JsonResult(
                 new {
-                    accessToken = encodedJwt,
+                    accessToken = jwt,
+                    refreshToken = new {
+                        token = refreshToken.Token,
+                        created = refreshToken.Created,
+                        expires = refreshToken.Expires
+                    }, 
                     user = new {
-                        firstName = identity.Name,
-                        lastName = identity.FindFirst(ClaimTypes.Surname)?.Value,
-                        role = identity.FindFirst(ClaimTypes.Role)?.Value,
-                        folder = _fileSystemService.RootGuid,
+                        firstName = user.FirstName,
+                        lastName = user.LastName,
+                        role = user.Role.Name,
+                        folder = folder,
                     }
                 }
             );

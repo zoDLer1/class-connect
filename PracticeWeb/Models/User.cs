@@ -12,4 +12,7 @@ public class User : IntegerIdCommonModel
 
     public int RoleId { get; set; }
     public Role Role { get; set; } = null!;
+
+    public string? RefreshTokenId { get; set; }
+    public RefreshToken? RefreshToken { get; set; }
 }

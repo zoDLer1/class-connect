@@ -12,6 +12,7 @@ public class Context : DbContext
 
     public DbSet<Role> Roles { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
+    public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
 
     public DbSet<Group> Groups { get; set; } = null!;
     public DbSet<Subject> Subjects { get; set; } = null!;
@@ -32,12 +33,24 @@ public class Context : DbContext
             .HasIndex(g => g.Name)
             .IsUnique();
 
+        builder.Entity<User>()
+            .HasIndex(g => g.RefreshTokenId)
+            .IsUnique();
+
         builder.Entity<Connection>().HasKey(t => new {
             t.ParentId, t.ChildId
         });
 
         builder.Entity<GroupStudent>().HasKey(t => new {
-            t.StudentId
+            t.GroupId, t.StudentId
+        });
+
+        builder.Entity<GroupStudent>()
+            .HasIndex(g => g.StudentId)
+            .IsUnique();
+
+        builder.Entity<RefreshToken>().HasKey(t => new {
+            t.Token
         });
 
         builder.Entity<WorkItem>().HasKey(t => new {
