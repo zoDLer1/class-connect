@@ -128,15 +128,14 @@ public abstract class FileSystemQueriesHelper
         var item = await GetFolderInfoAsync(id);
         if (item.Type.Name == "File")
             throw new ItemTypeException();
-        
+        var path = await _serviceAccessor(item.Type.Name).HasAccessAsync(id, user, new List<string>());
         var children = await _context.Connections.Where(c => c.ParentId == item.Guid).Select(i => i.ChildId).ToListAsync();
-        var pathItems =  await GeneratePathAsync(item.Guid);
         var folder = new Folder 
         {
             Name = item.Name, 
             Type = item.Type,
-            Path = await MakePathAsync(pathItems),
             Guid = item.Guid,
+            Path = await MakePathAsync(path),
             Children = await PrepareChildrenAsync(children, user),
             CreationTime = item.CreationTime,
             CreatorName = item.CreatorName,

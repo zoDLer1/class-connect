@@ -54,15 +54,13 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
     public async Task<Object> GetAsync(string id, User user)
     {
-        var path = await HasAccessAsync(id, user, new List<string>());
         var folder = await base.GetFolderAsync(id, user);
-        folder.Path = await MakePathAsync(path);
         return new
         {
             Name = folder.Name,
             Type = folder.Type,
-            Path = folder.Path,
             Guid = folder.Guid,
+            Path = folder.Path,
             Children = folder.Children,
             CreationTime = folder.CreationTime,
             Work = GetWorkData(id, user)

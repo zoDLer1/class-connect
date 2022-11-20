@@ -37,7 +37,7 @@ public class Context : DbContext
         });
 
         builder.Entity<GroupStudent>().HasKey(t => new {
-            t.GroupId, t.StudentId
+            t.StudentId
         });
 
         builder.Entity<WorkItem>().HasKey(t => new {

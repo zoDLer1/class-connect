@@ -35,16 +35,14 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
     public async Task<Object> GetAsync(string id, User user)
     {
-        var path = await HasAccessAsync(id, user, new List<string>());
         var subject = await _commonSubjectQueries.GetAsync(id, _context.Subjects.Include(s => s.Group));
         var folder = await base.GetFolderAsync(id, user);
         return new 
         {
             Name = folder.Name,
             Type = folder.Type,
-            Path = folder.Path,
-            RealPath = path,
             Guid = folder.Guid,
+            Path = folder.Path,
             Children = folder.Children,
             CreationTime = folder.CreationTime,
             Group = subject?.Group.Name,
@@ -56,7 +54,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public async virtual Task<Object> GetChildItemAsync(string id, User user)
     {
         var path = await HasAccessAsync(id, user, new List<string>());
-        var subject = await _commonSubjectQueries.GetAsync(id, _context.Subjects.Include(s => s.Group));
+        var subject = await _commonSubjectQueries.GetAsync(id, _context.Subjects.Include(s => s.Group).Include(s => s.Teacher));
         var folderItem = await base.GetFolderInfoAsync(id);
         return new 
         {
@@ -65,7 +63,12 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Guid = folderItem.Guid,
             CreationTime = folderItem.CreationTime,
             Group = subject?.Group.Name,
-            Teacher = subject?.TeacherId,
+            Teacher = new {
+                Id = subject?.Teacher.Id,
+                FirstName = subject?.Teacher.FirstName,
+                LastName = subject?.Teacher.LastName,
+                Patronymic = subject?.Teacher.Patronymic
+            },
             Description = subject?.Description
         };
     }

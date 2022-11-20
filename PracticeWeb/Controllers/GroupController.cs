@@ -56,7 +56,7 @@ public class GroupController : ControllerBase
         if (user == null)
             return BadRequest(new { errorText = "Студент не найден" });
 
-        if (await _context.GroupStudents.FirstOrDefaultAsync(s => s.StudentId == user.Id && s.GroupId == group.Id) != null)
+        if (await _context.GroupStudents.FirstOrDefaultAsync(s => s.StudentId == user.Id) != null)
             return BadRequest(new { errorText = "Данный пользователь уже добавлен в группу" });
 
         var student = new GroupStudent{

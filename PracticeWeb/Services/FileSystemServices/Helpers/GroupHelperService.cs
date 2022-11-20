@@ -64,18 +64,22 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
     public async Task<Object> GetAsync(string id, User user)
     {
-        var path = await HasAccessAsync(id, user, new List<string>());
         var group = await _commonGroupQueries.GetAsync(id, _context.Groups.Include(g => g.Teacher));
         var folder = await base.GetFolderAsync(id, user);
         return new 
         {
             Name = folder.Name,
             Type = folder.Type,
-            Path = folder.Path,
             Guid = folder.Guid,
+            Path = folder.Path,
             Children = folder.Children,
             CreationTime = folder.CreationTime,
-            Teacher = group?.Teacher,
+            Teacher = new {
+                Id = group?.Teacher.Id,
+                FirstName = group?.Teacher.FirstName,
+                LastName = group?.Teacher.LastName,
+                Patronymic = group?.Teacher.Patronymic
+            },
             Data = user.Role.Name == "Student" || group == null ? null : GetGroupData(group, user)
         };
     }

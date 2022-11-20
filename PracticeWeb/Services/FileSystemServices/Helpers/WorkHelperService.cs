@@ -36,15 +36,14 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
     public async Task<Object> GetAsync(string id, User user)
     {
-        var path = await HasAccessAsync(id, user, new List<string>());
         var work = await _commonWorkQueries.GetAsync(id, _context.Works.Include(w => w.Subject));
         var folder = await base.GetFolderAsync(id, user);
         return new 
         {
             Name = folder.Name,
             Type = folder.Type,
-            Path = folder.Path,
             Guid = folder.Guid,
+            Path = folder.Path,
             Children = folder.Children,
             CreationTime = folder.CreationTime,
             Mark = work?.Subject,
