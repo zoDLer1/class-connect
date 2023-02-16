@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import Index from 'pages/index';
+import Login from 'pages/login';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
@@ -12,6 +13,7 @@ root.render(
     <BrowserRouter>
       <Routes>
         <Route  path='/' element={<Index />}></Route>
+        <Route  path='/login' element={<Login />}></Route>
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
