@@ -1,10 +1,10 @@
 import RegisterForm from "components/forms/register-form"
-import css from './register.module.css'
+import pagesCss from '../pages.module.css'
 
 
 function Register() {
     return (
-        <div className={css.block}>
+        <div className={[pagesCss.default_background, pagesCss.content_position_center].join(' ')}>
             <RegisterForm />
         </div>
         

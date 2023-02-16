@@ -1,7 +1,9 @@
-.block{
+.default_background{
     background-color: #E6F0F9;
+    height: 100%;
+}
+.content_position_center{
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
 }
