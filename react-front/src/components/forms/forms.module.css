@@ -1,0 +1,30 @@
+.block{
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    padding-bottom: 35px;
+    box-shadow: 0px 10px 135px rgb(0 87 184 / 25%);
+    border-radius: 0 0 10px 10px;
+
+}
+.inputs{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 20px 40px;
+}
+.text{
+    color: #6D6D6D;
+}
+.group{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    
+}
+.group_between{
+    justify-content: space-between;
+}
+.group_center{
+    justify-content: center;
+}
