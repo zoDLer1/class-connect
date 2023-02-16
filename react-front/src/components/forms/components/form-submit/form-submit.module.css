@@ -1,0 +1,18 @@
+.block{
+    display: flex;
+    justify-content: center;
+    padding: 15px 0;
+}
+.checkbox{
+
+}
+.title{
+    background-color: #003FB8;
+    color: #fff;
+    padding: 10px 40px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 16px;
+    font-family: 'Ubuntu';
+    box-shadow: 0px 5px 15px rgb(0 0 0 / 25%);
+}
