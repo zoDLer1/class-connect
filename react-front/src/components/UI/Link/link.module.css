@@ -1,0 +1,16 @@
+.block{
+    color: #0388D4;
+    cursor: pointer;
+}
+.size-1{
+    font-size: 14px;
+}
+.size-2{
+    font-size: 16px;
+}
+.size-3{
+    font-size: 18px;
+}
+.size-4{
+    font-size: 20px;
+}
