@@ -1,0 +1,23 @@
+.block{
+  
+}
+.checkbox{
+
+}
+.title{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+}
+.title::before{
+    content: '';
+    border: 2px solid #003FB8;
+    width: 12px;
+    height: 12px;
+}
+.checkbox:checked + .title::before{
+    background-image: url('http://localhost:3000/imgs/check-solid.svg');
+}
