@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import Index from 'pages/index';
 import Login from 'pages/login';
+import Register from 'pages/register';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
@@ -14,6 +15,7 @@ root.render(
       <Routes>
         <Route  path='/' element={<Index />}></Route>
         <Route  path='/login' element={<Login />}></Route>
+        <Route  path='/register' element={<Register />}></Route>
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
