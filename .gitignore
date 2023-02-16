@@ -1,11 +1,11 @@
 .DS_Store
 node_modules
 /dist
-/css
-/html
-/imgs
-/js
-/project
+/css/
+/html/
+/imgs/
+/js/
+/project/
 
 
 # local env files
