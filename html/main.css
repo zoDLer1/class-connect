@@ -1,12 +1,12 @@
 @import url('css/main/files.css');
-@import url('css/main/header.css');
+@import url('/css/main/header.css');
 @import url('css/main/form.css');
 @import url('css/main/link.css');
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Ubuntu:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Ubuntu:wght@300;400;500;700&display=swap');
 @import url('css/main/inner-header.css');
 @import url('css/main/directories.css');
 @import url('css/main/file-branch.css');
-@import url('css/main/info.css');
+@import url('/css/main/info.css');
 
 
 *{
@@ -47,5 +47,4 @@ a{
 
 h1, h2, h3, h4, h5, h6{
     font-family: 'Ubuntu', sans-serif;
-    
 }

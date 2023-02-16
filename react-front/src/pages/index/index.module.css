@@ -1,0 +1,37 @@
+.block{
+    height: 100%;
+    background-image: url('http://localhost:3000/imgs/image.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 80% 20%;
+    background-attachment: fixed;
+    display: block;
+}
+.info{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 200px;
+}
+.body{
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 40px;
+    margin-bottom: 10px;
+}
+.logo{
+
+}
+.title{
+    color: #fff;
+}
+.links{
+    
+}
+.link{
+    font-size: 20px;  
+    font-weight: 500;
+}

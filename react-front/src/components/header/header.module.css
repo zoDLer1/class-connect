@@ -1,0 +1,25 @@
+.block{
+    display: flex;
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 30px 300px;
+}
+
+/* ELEMS */
+.links{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+}
+.link a, 
+.link{
+    color: #fff;
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.link a:hover{
+    text-decoration: underline;
+}
