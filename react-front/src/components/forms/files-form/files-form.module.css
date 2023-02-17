@@ -1,0 +1,25 @@
+.block{
+    background-color: var(--light-color);
+    width: 1445px;
+    height: 800px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 10px;
+}
+.header{
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.username{
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--light-gray-text-color);
+}
+.body{
+    height: 100%;
+    display: flex;
+}

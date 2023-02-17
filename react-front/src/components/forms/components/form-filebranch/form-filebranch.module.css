@@ -1,0 +1,8 @@
+.block{
+    display: flex;
+    flex-direction: column;
+    padding: 10px 20px;
+    width: 360px;
+    border-right: 3px solid rgba(182, 178, 177, 0.2); /* !!! */
+    height: 100%;
+}
