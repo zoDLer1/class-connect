@@ -1,0 +1,16 @@
+.block{
+    color: #000;
+    font-weight: 600;
+    font-size: 24px;
+    padding: 5px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    max-width: 230px;
+    overflow: hidden;
+    white-space: nowrap;
+    user-select: none;
+    text-overflow: ellipsis;
+}
+.block:hover{
+    background-color: rgba(0, 0, 0, 0.1);
+}
