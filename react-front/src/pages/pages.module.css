@@ -1,5 +1,5 @@
 .default_background{
-    background-color: #E6F0F9;
+    background-color: var(--light-primay-color);
     height: 100%;
 }
 .content_position_center{

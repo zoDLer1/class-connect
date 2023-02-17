@@ -13,7 +13,7 @@
 }
 .input{
     outline: none;
-    box-shadow: inset 0px 0px 8px rgb(0 87 184 / 20%);
+    box-shadow: inset 0px 0px 8px var(--primary-op25-color);
     border: none;
     width: 200px;
     padding: 5px 10px;

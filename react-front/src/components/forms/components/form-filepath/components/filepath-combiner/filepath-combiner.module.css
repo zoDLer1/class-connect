@@ -1,5 +1,5 @@
 .block{
-    color: #000;
+    color: var(--dark-color);
     font-weight: 600;
     font-size: 24px;
     padding: 5px 10px;
@@ -8,20 +8,20 @@
     user-select: none;
 }
 .block:hover{
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: var(--dark-op10-color);
 }
 .body{
     position: relative;
 }
 .items{
     position: absolute;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--dark-op10-color);
     border-radius: 10px;
     top: 30px;
     left: -35px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 25px var(--dark-op20-color);
     padding: 10px;
-    background-color: #fff;
+    background-color: var(--light-color);
 }
 .item:last-child{
     border: none;
@@ -32,10 +32,10 @@
     align-items: center;
     gap: 15px;
     cursor: pointer;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.1);;
+    border-bottom: 2px solid var(--dark-op10-color);
 }
 .item:hover{
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: var(--dark-op10-color);
 }
 .text{
     font-weight: 500;
@@ -45,7 +45,7 @@
     overflow: hidden;
 }
 .icon{
-    color: #F4B43F;
+    color: var(--warning-color);
     font-size: 20px;
     
 }

@@ -1,5 +1,5 @@
 .block{
-    color: #0388D4;
+    color: var(--faded-primary-color);
     cursor: pointer;
 }
 .size-1{

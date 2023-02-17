@@ -1,13 +1,13 @@
 .block{
     width: 100%;
-    background-color: #0057B8;
+    background-color: var(--primary-color);
     padding: 21px 0;
-    border-bottom: 3px solid #B6B2B1;
+    border-bottom: 3px solid var(--light-gray-text-color);
 }
 .title{
     text-align: center;
     font-weight: bold;
     letter-spacing: 3px;
-    color: #fff;
+    color: var(--light-color);
     font-size: 24px;
 }
