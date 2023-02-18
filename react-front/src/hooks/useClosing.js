@@ -8,12 +8,11 @@ function useClosing() {
     
 
     const add = (item) => {
-        set([...items, item])
-        
+        set((items) => [...items, item])   
     }
     
     const remove = (id) =>{
-        set([...[...items].filter(item => item.id !== id)])
+        set((items) => [...[...items].filter(item => item.id !== id)])
     }
 
     const closeAll = () =>{
@@ -22,7 +21,7 @@ function useClosing() {
         }
     }
 
-    return { add, remove, closeAll}
+    return { itms: items, add, remove, closeAll}
 }
 
 export default useClosing

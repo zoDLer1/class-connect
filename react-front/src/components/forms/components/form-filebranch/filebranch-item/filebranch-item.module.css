@@ -1,3 +1,21 @@
+@keyframes load {
+    10%{
+        width: 15%;
+        left: 20%;
+    }
+   
+    90%{
+        width: 15%;
+        left: 86%;
+    }
+    100%{
+        width: 0%;
+        left: 100%;
+    }
+}
+
+
+
 .block{
     padding: 10px 20px;
     display: flex;
@@ -5,10 +23,24 @@
     justify-content: space-between;
     border-bottom: 2px solid var(--dark-op10-color);
     width: 320px;
-    
+    user-select: none;
+    position: relative;
 }
+.block::before{
+    display: none;
+    position: absolute;
+    content: '';
+    width: 0;
+    left: 0;
+    bottom: -2px;
+    height: 2px;
+    background-color: var(--success-color);
+    animation: load 1s linear infinite
+}
+
 .block *{
     cursor: pointer;
+    
 }
 .body{
     display: flex;

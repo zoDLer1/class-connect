@@ -11,12 +11,13 @@ function App() {
 
     return (
     <ClosingContext.Provider value={{add, remove}}>
+        
         <BrowserRouter >
         <Routes>
           <Route  path='/' element={<Index />}></Route>
           <Route  path='/login' element={<Login />}></Route>
           <Route  path='/register' element={<Register />}></Route>
-          <Route  path='/files' element={<Files onClick={ () => closeAll() } />}></Route>
+          <Route  path='/files' element={<Files  onContextMenu={() => closeAll()} onClick={() => closeAll()} />}></Route>
         </Routes>
       </BrowserRouter>
     </ClosingContext.Provider>

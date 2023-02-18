@@ -1,9 +1,9 @@
 import pagesCss from '../pages.module.css'
 import FilesForm from 'components/forms/files-form'
 
-function Files( { onClick } ) {
+function Files( props ) {
     return (
-        <div onClick={onClick} className={[pagesCss.default_background, pagesCss.content_position_center].join(' ')}>
+        <div {...props} className={[pagesCss.default_background, pagesCss.content_position_center].join(' ')}>
             <FilesForm />
             
         </div>

@@ -6,12 +6,14 @@
     border-radius: 10px;
     cursor: pointer;
     user-select: none;
+    
 }
 .block:hover{
     background-color: var(--dark-op10-color);
 }
 .body{
     position: relative;
+    z-index: 1;
 }
 .items{
     position: absolute;

@@ -120,7 +120,7 @@ function FilesForm() {
                 <p className={css.username}>Username</p>
             </div>
             <div className={css.body}>
-                <FormFileBranch items={filesInfo.children}/>
+                <FormFileBranch data={filesInfo.children}/>
                 <div></div>
             </div>
 
