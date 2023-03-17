@@ -4,7 +4,7 @@ namespace PracticeWeb.Services.FileSystemServices.Helpers;
 
 public interface IFileSystemHelper
 {
-    Task<List<string>> HasAccessAsync(string id, User user, List<string> path);
+    Task<ItemAccess> HasAccessAsync(string id, User user, List<string> path);
     Task<Object> GetAsync(string id, User user);
     Task<Object> GetChildItemAsync(string id, User user);
     Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null);

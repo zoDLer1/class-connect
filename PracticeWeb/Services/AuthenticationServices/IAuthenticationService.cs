@@ -3,7 +3,7 @@ using PracticeWeb.Models;
 namespace PracticeWeb.Services.AuthenticationServices;
 
 /// <summary>
-/// Сервис авторизации пользователей
+/// Сервис аутентификации пользователей
 /// </summary>
 public interface IAuthenticationService 
 {
@@ -14,5 +14,5 @@ public interface IAuthenticationService
         string? patronymic,
         string email, 
         string password, 
-        int roleId);
+        UserRole role);
 }

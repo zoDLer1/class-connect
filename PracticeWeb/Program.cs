@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using PracticeWeb;
 using PracticeWeb.Models;
 using PracticeWeb.Exceptions;
@@ -17,15 +19,19 @@ var builder = WebApplication.CreateBuilder(args);
 var connection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<Context>(options => options
     .UseMySql(connection, ServerVersion.AutoDetect(connection)));
-builder.Services.AddCors(options => 
+builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "test", policy => {
         policy.AllowAnyOrigin();
         policy.AllowAnyHeader();
         policy.AllowAnyMethod();
-    }); 
+    });
 });
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson(options => {
+    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+});
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
         options.RequireHttpsMetadata = true;

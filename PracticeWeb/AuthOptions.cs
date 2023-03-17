@@ -7,7 +7,7 @@ public class AuthOptions
 {
     public const string ISSUER = "PracticeWebServer";
     public const string AUDIENCE = "PracticeWebClient";
-    public const int LIFETIME = 1;
+    public const int LIFETIME = 10;
     private const string KEY = "testkey&0^iv!HgVs3*8H'k[IjiPJxIlWd&Q|uk-PQv57.yd0z1t'Me)";
 
     public static SymmetricSecurityKey GetSymmetricSecurityKey()

@@ -10,7 +10,7 @@ public class User : IntegerIdCommonModel
 
     public long RegTime { get; set; }
 
-    public int RoleId { get; set; }
+    public UserRole RoleId { get; set; }
     public Role Role { get; set; } = null!;
 
     public string? RefreshTokenId { get; set; }

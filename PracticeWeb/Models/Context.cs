@@ -16,13 +16,15 @@ public class Context : DbContext
 
     public DbSet<Group> Groups { get; set; } = null!;
     public DbSet<Subject> Subjects { get; set; } = null!;
-    public DbSet<GroupStudent> GroupStudents { get; set; } = null!;
+    public DbSet<TaskEntity> Tasks { get; set; } = null!;
     public DbSet<Work> Works { get; set; } = null!;
     public DbSet<WorkItem> WorkItems { get; set; } = null!;
 
+    public DbSet<Access> Accesses { get; set; } = null!;
+
     public Context(DbContextOptions<Context> options) : base(options)
     {
-        
+
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -41,54 +43,45 @@ public class Context : DbContext
             t.ParentId, t.ChildId
         });
 
-        builder.Entity<GroupStudent>().HasKey(t => new {
-            t.GroupId, t.StudentId
-        });
-
-        builder.Entity<GroupStudent>()
-            .HasIndex(g => g.StudentId)
-            .IsUnique();
-
         builder.Entity<RefreshToken>().HasKey(t => new {
             t.Token
         });
 
-        builder.Entity<WorkItem>().HasKey(t => new {
-            t.WorkId, t.ItemId
+
+        builder.Entity<Access>().HasKey(t => new {
+            t.ItemId, t.UserId
         });
 
         builder.Entity<Role>().HasData(
-            new Role { Id = 1, Name = "Student", Title = "Студент" },
-            new Role { Id = 2, Name = "Teacher", Title = "Преподаватель" },
-            new Role { Id = 3, Name = "Administrator", Title = "Администратор" }
+            new Role { Id = UserRole.Student, Name = "Student", Title = "Студент" },
+            new Role { Id = UserRole.Teacher, Name = "Teacher", Title = "Преподаватель" },
+            new Role { Id = UserRole.Administrator, Name = "Administrator", Title = "Администратор" }
         );
 
         builder.Entity<User>().HasData(
-            new User { Id = 1, FirstName = "Админ", LastName = "Админов", Email = "admin@admin.admin", RoleId = 3, Password = "$2a$11$vZJfXw2NUiLp43m/lkoc6.uW5W6ibxwKHFHlKlcoJmHrFvRwk.yWG", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()},
-            new User { Id = 2, FirstName = "Валенок", LastName = "Купцов", Patronymic = "Анатольевич", Email = "test@test.test", RoleId = 2, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()},
-            new User { Id = 3, FirstName = "Валентин", LastName = "Купцов", Patronymic = "Анатольевич", Email = "teacher", RoleId = 2, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()},
-            new User { Id = 4, FirstName = "Другой", LastName = "Препод", Email = "anotherTeacher", RoleId = 2, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()}
+            new User { Id = 1, FirstName = "Админ", LastName = "Админов", Email = "admin@admin.admin", RoleId = UserRole.Administrator, Password = "$2a$11$vZJfXw2NUiLp43m/lkoc6.uW5W6ibxwKHFHlKlcoJmHrFvRwk.yWG", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()},
+            new User { Id = 2, FirstName = "Валенок", LastName = "Купцов", Patronymic = "Анатольевич", Email = "test@test.test", RoleId = UserRole.Teacher, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()},
+            new User { Id = 3, FirstName = "Валентин", LastName = "Купцов", Patronymic = "Анатольевич", Email = "teacher", RoleId = UserRole.Teacher, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()},
+            new User { Id = 4, FirstName = "Другой", LastName = "Препод", Email = "anotherTeacher", RoleId = UserRole.Teacher, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()}
         );
 
         builder.Entity<ItemType>().HasData(
-            new ItemType { Id = 1, Name = "Folder" },
-            new ItemType { Id = 2, Name = "File" },
-            new ItemType { Id = 3, Name = "Group" },
-            new ItemType { Id = 4, Name = "Subject" },
-            new ItemType { Id = 5, Name = "Task" },
-            new ItemType { Id = 6, Name = "Work" }
+            new ItemType { Id = Type.Folder, Name = "Folder" },
+            new ItemType { Id = Type.File, Name = "File" },
+            new ItemType { Id = Type.Group, Name = "Group" },
+            new ItemType { Id = Type.Subject, Name = "Subject" },
+            new ItemType { Id = Type.Task, Name = "Task" },
+            new ItemType { Id = Type.Work, Name = "Work" }
         );
 
         builder.Entity<Item>().HasData(
-            new Item { Id = "25aba956-b6c8-473f-b114-8ed881adf6c5", TypeId = 3, Name = "ИСП-564", CreationTime = DateTime.Now, CreatorId = 1 },
-            new Item { Id = "7989dbf3-35a0-4efa-9a2f-5fe40e4b7c27", TypeId = 3, Name = "Группа 1", CreationTime = DateTime.Now, CreatorId = 1 }
+            new Item { Id = "25aba956-b6c8-473f-b114-8ed881adf6c5", TypeId = Type.Group, Name = "ИСП-564", CreationTime = DateTime.Now, CreatorId = 1 },
+            new Item { Id = "7989dbf3-35a0-4efa-9a2f-5fe40e4b7c27", TypeId = Type.Group, Name = "Группа 1", CreationTime = DateTime.Now, CreatorId = 1 }
         );
 
         builder.Entity<Group>().HasData(
             new Group { Id = "25aba956-b6c8-473f-b114-8ed881adf6c5", Name = "ИСП-564", TeacherId = 3 },
             new Group { Id = "7989dbf3-35a0-4efa-9a2f-5fe40e4b7c27", Name = "Группа 1", TeacherId = 2 }
         );
-
-        
     }
 }

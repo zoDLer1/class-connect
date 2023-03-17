@@ -30,7 +30,7 @@ public class AuthenticationService : IAuthenticationService
         string? patronymic,
         string email, 
         string password,
-        int roleId)
+        UserRole roleId)
     {
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
         var user = new User() {

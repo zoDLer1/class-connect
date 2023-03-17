@@ -7,33 +7,43 @@ namespace PracticeWeb.Services.FileSystemServices.Helpers;
 public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
 {
     private CommonQueries<string, Group> _commonGroupQueries;
-    
+
     public GroupHelperService(
-        IHostEnvironment env, 
-        ServiceResolver serviceAccessor, 
+        IHostEnvironment env,
+        ServiceResolver serviceAccessor,
         Context context) : base(env, serviceAccessor, context)
     {
         _commonGroupQueries = new CommonQueries<string, Group>(_context);
     }
 
-    public async Task<List<string>> HasAccessAsync(string id, User user, List<string> path)
+    public async Task<ItemAccess> HasAccessAsync(string id, User user, List<string> path)
     {
         var group = await _commonGroupQueries.GetAsync(id, _context.Groups);
         if (group == null)
             throw new ItemNotFoundException();
 
-        // Проверяем, является ли преподаватель руководителем группы или ведёт ли какой-нибудь предмет
-        if (user.Role.Name == "Teacher" && !(group.TeacherId == user.Id || 
-            await _context.Subjects.FirstOrDefaultAsync(s => s.TeacherId == user.Id && s.GroupId == group.Id) != null))
-            throw new AccessDeniedException();
-        // Проверяем, есть ли студент в данной группе
-        if (user.Role.Name == "Student" && 
-            await _context.GroupStudents.FirstOrDefaultAsync(s => s.StudentId == user.Id && s.GroupId == group.Id) == null)
+        var access = await HasUserAccessToParentAsync(id, user, path);
+        var permission = await GetPermission(user.Id, group.Id);
+
+        // Обнуляем доступ, поскольку родитель является корнем и весь трафик идёт через группу
+        if (access.Permission < Permission.Write)
+            access.Permission = Permission.None;
+
+        // Установлен ли доступ пользователю?
+        if (permission != Permission.None)
+            access.Permission = permission;
+
+        // Ведёт ли преподаватель предмет?
+        if (Permission.Write > access.Permission && await _context.Subjects.FirstOrDefaultAsync(s => s.TeacherId == user.Id && s.GroupId == group.Id) != null)
+            access.Permission = Permission.Read;
+
+        Console.WriteLine($"group access: {access.Permission} or {permission} in {id}");
+
+        if (access.Permission == Permission.None)
             throw new AccessDeniedException();
 
-        await HasUserAccessToParentAsync(id, user, path);
-        path.Add(group.Id);
-        return path;
+        access.Path.Add(group.Id);
+        return access;
     }
 
     private Object GetGroupData(Group group, User user)
@@ -41,20 +51,20 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         var subjects = _context.Subjects.Where(s => s.GroupId == group.Id);
         if (group.TeacherId != user.Id)
             subjects = subjects.Where(s => s.TeacherId == user.Id);
-        return new 
+        return new
         {
-            Subjects = subjects.Select(s => new 
+            Subjects = subjects.Select(s => new
             {
                 Id = s.Id,
                 Name = s.Name
             }),
-            Students = _context.GroupStudents
-                .Where(s => s.GroupId == group.Id)
+            Students = _context.Accesses
+                .Where(s => s.ItemId == group.Id && s.Permission == Permission.Read)
                 .ToList()
                 .Select(s => {
-                    var user = _context.Users.First(u => u.Id == s.StudentId);
-                    return new { 
-                        Id = user.Id, 
+                    var user = _context.Users.First(u => u.Id == s.UserId);
+                    return new {
+                        Id = user.Id,
                         Name = string.Join(' ', new[] { user.FirstName, user.LastName, user.Patronymic })
                     };
                 })
@@ -64,9 +74,10 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
     public async Task<Object> GetAsync(string id, User user)
     {
+        var access = await HasAccessAsync(id, user, new List<string>());
         var group = await _commonGroupQueries.GetAsync(id, _context.Groups.Include(g => g.Teacher));
         var folder = await base.GetFolderAsync(id, user);
-        return new 
+        return new
         {
             Name = folder.Name,
             Type = folder.Type,
@@ -80,31 +91,36 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
                 LastName = group?.Teacher.LastName,
                 Patronymic = group?.Teacher.Patronymic
             },
-            Data = user.Role.Name == "Student" || group == null ? null : GetGroupData(group, user)
+            Data = user.Role.Id == UserRole.Student || group == null ? null : GetGroupData(group, user)
         };
     }
 
     public async Task<Object> GetChildItemAsync(string id, User user)
     {
-        var path = await HasAccessAsync(id, user, new List<string>());
+        var access = await HasAccessAsync(id, user, new List<string>());
         var group = await _commonGroupQueries.GetAsync(id, _context.Groups);
         var folderItem = await base.GetFolderInfoAsync(id);
-        return new 
+        return new
         {
             Name = folderItem.Name,
             Type = folderItem.Type,
             Guid = folderItem.Guid,
             CreationTime = folderItem.CreationTime,
             Teacher = group?.TeacherId,
-            Data = user.Role.Name == "Student" || group == null ? null : GetGroupData(group, user)
+            Data = user.Role.Id == UserRole.Student || group == null ? null : GetGroupData(group, user)
         };
     }
 
     public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
     {
-        Console.WriteLine(user.Role.Name);
-        if (user.Role.Name != "Administrator")
+        var access = await _context.Accesses.FirstOrDefaultAsync((a) => a.ItemId == parentId && a.UserId == user.Id);
+        if (access == null || access.Permission != Permission.Write)
             throw new AccessDeniedException();
+
+        var parent = await TryGetItemAsync(parentId);
+        // Проверка допустимости типов
+        if (!TypeDependence.Group.Contains(parent.TypeId))
+            throw new InvalidPathException();
 
         Console.WriteLine($"is root {_rootGuid}: {await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == parentId) == null} {parentId == _rootGuid}");
         // Проверяем, является ли родитель корнем
@@ -117,7 +133,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
         if (parameters?.ContainsKey("TeacherId") == false)
             throw new NullReferenceException();
-        
+
         int teacherId = 0;
         if (!int.TryParse(parameters?["TeacherId"], out teacherId))
             throw new NullReferenceException();
@@ -126,10 +142,10 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (teacher == null)
             throw new UserNotFoundException();
 
-        if (teacher.Role.Name != "Teacher")
+        if (teacher.Role.Id != UserRole.Teacher)
             throw new InvalidUserRoleException();
-        
-        var (itemPath, item) = await base.CreateAsync(parentId, name, 3, user);
+
+        var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Group, user);
         var group = new Group
         {
             Id = item.Guid,
@@ -137,12 +153,20 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             TeacherId = teacherId,
         };
         await _commonGroupQueries.CreateAsync(group);
+        var teacherAccess = new Access {
+            Permission = Permission.Write,
+            ItemId = group.Id,
+            UserId = teacher.Id,
+        };
+        _context.Accesses.Add(teacherAccess);
+        await _context.SaveChangesAsync();
         return (itemPath, await GetChildItemAsync(item.Guid, user));
     }
 
     public async override Task<FolderItem> UpdateAsync(string id, string newName, User user)
     {
-        if (user.Role.Name != "Administrator")
+        var access = await HasAccessAsync(id, user, new List<string>());
+        if (access.Permission != Permission.Write)
             throw new AccessDeniedException();
 
         var group = await _commonGroupQueries.GetAsync(id, _context.Groups);

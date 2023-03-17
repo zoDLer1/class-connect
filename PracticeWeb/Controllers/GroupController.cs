@@ -56,14 +56,15 @@ public class GroupController : ControllerBase
         if (user == null)
             return BadRequest(new { errorText = "Студент не найден" });
 
-        if (await _context.GroupStudents.FirstOrDefaultAsync(s => s.StudentId == user.Id) != null)
+        if (await _context.Accesses.FirstOrDefaultAsync(s => s.UserId == user.Id) != null)
             return BadRequest(new { errorText = "Данный пользователь уже добавлен в группу" });
 
-        var student = new GroupStudent{
-            GroupId = group.Id,
-            StudentId = user.Id
+        var studentAccess = new Access{
+            Permission = Permission.Read,
+            ItemId = group.Id,
+            UserId = user.Id
         };
-        await _context.GroupStudents.AddAsync(student);
+        await _context.Accesses.AddAsync(studentAccess);
         await _context.SaveChangesAsync();
         return Ok();
     }
@@ -94,11 +95,11 @@ public class GroupController : ControllerBase
         if (group.TeacherId != teacher.Id && teacher.Role.Name == "Teacher")
             return BadRequest(new { errorText = "Пользователь не является преподавателем этой группы" });
         
-        var groupStudent = await _context.GroupStudents.FirstOrDefaultAsync(s => s.StudentId == student.Id && s.GroupId == group.Id);
-        if (groupStudent == null)
+        var studentAccess = await _context.Accesses.FirstOrDefaultAsync(s => s.UserId == student.Id && s.ItemId == group.Id);
+        if (studentAccess == null)
             return BadRequest(new { errorText = "Студента нет в группе" });
 
-        _context.GroupStudents.Remove(groupStudent);
+        _context.Accesses.Remove(studentAccess);
         await _context.SaveChangesAsync();
         return Ok();
     }

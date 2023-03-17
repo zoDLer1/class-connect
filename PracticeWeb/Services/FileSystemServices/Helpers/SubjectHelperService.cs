@@ -8,9 +8,9 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
 {
     private CommonQueries<string, Group> _commonGroupQueries;
     private CommonQueries<string, Subject> _commonSubjectQueries;
-    
+
     public SubjectHelperService(
-        IHostEnvironment env, 
+        IHostEnvironment env,
         ServiceResolver serviceAccessor,
         Context context) : base(env, serviceAccessor, context)
     {
@@ -18,26 +18,38 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         _commonSubjectQueries = new CommonQueries<string, Subject>(_context);
     }
 
-    public async Task<List<string>> HasAccessAsync(string id, User user, List<string> path)
+    public async Task<ItemAccess> HasAccessAsync(string id, User user, List<string> path)
     {
         var subject = await _commonSubjectQueries.GetAsync(id, _context.Subjects.Include(s => s.Group));
         if (subject == null)
             throw new ItemNotFoundException();
 
-        // Проверяем, является ли преподаватель руководителем группы или ведёт ли данный предмет
-        if (user.Role.Name == "Teacher" && !(subject.Group.TeacherId == user.Id || subject.TeacherId == user.Id))
+        var access = await HasUserAccessToParentAsync(id, user, path);
+        var permission = await GetPermission(user.Id, subject.Id);
+
+        // Если это преподаватель и он не имеет доступ к группе на запись и не имеет доступ на запись к предмету
+        if (user.RoleId == UserRole.Teacher && Permission.Write > access.Permission && permission == Permission.None)
+            access.Permission = Permission.None;
+
+        Console.WriteLine($"subject access: {access.Permission} or {permission} in {id}");
+
+        if (access.Permission == Permission.None)
             throw new AccessDeniedException();
 
-        await HasUserAccessToParentAsync(id, user, path);
-        path.Add(subject.Id);
-        return path;
+        // Установлен ли доступ пользователю?
+        if (permission != Permission.None)
+            access.Permission = permission;
+
+        access.Path.Add(subject.Id);
+        return access;
     }
 
     public async Task<Object> GetAsync(string id, User user)
     {
+        var access = await HasAccessAsync(id, user, new List<string>());
         var subject = await _commonSubjectQueries.GetAsync(id, _context.Subjects.Include(s => s.Group));
         var folder = await base.GetFolderAsync(id, user);
-        return new 
+        return new
         {
             Name = folder.Name,
             Type = folder.Type,
@@ -53,10 +65,10 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
     public async virtual Task<Object> GetChildItemAsync(string id, User user)
     {
-        var path = await HasAccessAsync(id, user, new List<string>());
+        var access = await HasAccessAsync(id, user, new List<string>());
         var subject = await _commonSubjectQueries.GetAsync(id, _context.Subjects.Include(s => s.Group).Include(s => s.Teacher));
         var folderItem = await base.GetFolderInfoAsync(id);
-        return new 
+        return new
         {
             Name = folderItem.Name,
             Type = folderItem.Type,
@@ -75,9 +87,15 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
     public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
     {
-        if (user.Role.Name != "Administrator")
+        var access = await HasUserAccessToParentAsync(parentId, user, new List<string>());
+        if (access == null || access.Permission != Permission.Write)
             throw new AccessDeniedException();
-        
+
+        var parent = await TryGetItemAsync(parentId);
+        // Проверка допустимости типов
+        if (!TypeDependence.Subject.Contains(parent.TypeId))
+            throw new InvalidPathException();
+
         // Проверяем, является ли родитель папкой
         var group = await _commonGroupQueries.GetAsync(parentId, _context.Groups);
         if (group == null)
@@ -91,7 +109,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
         if (parameters?.ContainsKey("TeacherId") == false)
         throw new NullReferenceException();
-        
+
         int teacherId = 0;
         if (!int.TryParse(parameters?["TeacherId"], out teacherId))
             throw new NullReferenceException();
@@ -100,10 +118,10 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (teacher == null)
             throw new UserNotFoundException();
 
-        if (teacher.Role.Name != "Teacher")
+        if (teacher.Role.Id != UserRole.Teacher)
             throw new InvalidUserRoleException();
-        
-        var (itemPath, item) = await base.CreateAsync(parentId, name, 4, user);
+
+        var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Subject, user);
         var subject = new Subject
         {
             Id = item.Guid,
@@ -113,6 +131,13 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Description = parameters?.ContainsKey("Description") == true ? parameters["Description"] : null
         };
         await _commonSubjectQueries.CreateAsync(subject);
+        var teacherAccess = new Access {
+            Permission = Permission.Write,
+            ItemId = subject.Id,
+            UserId = subject.TeacherId,
+        };
+        _context.Accesses.Add(teacherAccess);
+        await _context.SaveChangesAsync();
         return (itemPath, await GetChildItemAsync(item.Guid, user));
     }
 

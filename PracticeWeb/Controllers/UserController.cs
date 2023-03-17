@@ -162,8 +162,8 @@ public class UserController : ControllerBase
             var folder = _fileSystemService.RootGuid;
             if (user.Role.Name == "Student")
             {
-                var group = await _context.GroupStudents.FirstOrDefaultAsync(s => s.StudentId == user.Id);
-                folder = group?.GroupId;
+                var group = await _context.Accesses.FirstOrDefaultAsync(s => s.UserId == user.Id);
+                folder = group?.ItemId;
             }
 
             return new JsonResult(
@@ -206,7 +206,7 @@ public class UserController : ControllerBase
         if (await IsEmailUsedAsync(email))
             return BadRequest(new { errorText = "Данная почта уже используется" });
 
-        await _authenticationService.RegisterAsync(firstName, lastName, patronymic, email, password, 1);
+        await _authenticationService.RegisterAsync(firstName, lastName, patronymic, email, password, UserRole.Student);
         return Ok();
     }
 }
