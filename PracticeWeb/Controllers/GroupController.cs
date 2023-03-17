@@ -24,17 +24,17 @@ public class GroupController : ControllerBase
     }
 
     [Authorize(Roles = "Administrator")]
-    [HttpGet("teachers")]
+    [HttpGet]
     public IActionResult GetGroups()
     {
         var groups = _context.Groups
-            .Select(g => new 
+            .Select(g => new
                 {
                     Id = g.Id,
                     Name = g.Name
                 }
             );
-        return new JsonResult(groups);   
+        return new JsonResult(groups);
     }
 
     [Authorize(Roles = "Student")]
@@ -47,11 +47,11 @@ public class GroupController : ControllerBase
         var group = await _commonGroupQueries.GetAsync(groupId, _context.Groups);
         if (group == null)
             return NotFound(new { errorText = "Группа не найдена" });
-        
+
         var email = User.FindFirst(ClaimTypes.Email)?.Value;
         if (email == null)
             return Unauthorized(new { errorText = "Пользователь не найден" });
-        
+
         var user = await _userService.GetByEmailAsync(email);
         if (user == null)
             return BadRequest(new { errorText = "Студент не найден" });
@@ -83,18 +83,18 @@ public class GroupController : ControllerBase
         var student = await _userService.GetAsync((int) studentId);
         if (student == null)
             return NotFound(new { errorText = "Студент не найден" });
-        
+
         var email = User.FindFirst(ClaimTypes.Email)?.Value;
         if (email == null)
             return Unauthorized(new { errorText = "Пользователь не найден" });
-        
+
         var teacher = await _userService.GetByEmailAsync(email);
         if (teacher == null)
             return BadRequest(new { errorText = "Преподаватель не найден" });
 
-        if (group.TeacherId != teacher.Id && teacher.Role.Name == "Teacher")
+        if (group.TeacherId != teacher.Id && teacher.RoleId == UserRole.Teacher)
             return BadRequest(new { errorText = "Пользователь не является преподавателем этой группы" });
-        
+
         var studentAccess = await _context.Accesses.FirstOrDefaultAsync(s => s.UserId == student.Id && s.ItemId == group.Id);
         if (studentAccess == null)
             return BadRequest(new { errorText = "Студента нет в группе" });

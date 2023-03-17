@@ -135,8 +135,9 @@ public abstract class FileSystemQueriesHelper
     public async virtual Task<Folder> GetFolderAsync(string id, User user)
     {
         var item = await GetFolderInfoAsync(id);
-        if (item.Type.Name == "File")
+        if (item.Type.Id == Type.File)
             throw new ItemTypeException();
+
         Console.WriteLine($"Item type name is {item.Type.Name}");
         var access = await _serviceAccessor(item.Type.Name).HasAccessAsync(id, user, new List<string>());
         if (access.Permission == Permission.None)

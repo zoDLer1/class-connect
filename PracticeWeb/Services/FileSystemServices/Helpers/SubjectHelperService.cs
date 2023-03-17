@@ -143,7 +143,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
     public async override Task<FolderItem> UpdateAsync(string id, string newName, User user)
     {
-        if (user.Role.Name != "Administrator")
+        if (user.RoleId != UserRole.Administrator)
             throw new AccessDeniedException();
 
         var subject = await _commonSubjectQueries.GetAsync(id, _context.Subjects);

@@ -27,8 +27,8 @@ public class UserController : ControllerBase
 
     public UserController(
         Context context,
-        IAuthenticationService authenticationService, 
-        IUserService userService, 
+        IAuthenticationService authenticationService,
+        IUserService userService,
         IFileSystemService fileSystemService)
     {
         _context = context;
@@ -43,8 +43,8 @@ public class UserController : ControllerBase
     public IActionResult GetTeachers()
     {
         var teachers = _context.Users.Include(u => u.Role)
-            .Where(u => u.Role.Name == "Teacher")
-            .Select(u => new 
+            .Where(u => u.RoleId == UserRole.Teacher)
+            .Select(u => new
                 {
                     Id = u.Id,
                     FirstName = u.FirstName,
@@ -52,7 +52,7 @@ public class UserController : ControllerBase
                     Patronymic = u.Patronymic
                 }
             );
-        return new JsonResult(teachers);   
+        return new JsonResult(teachers);
     }
 
     private async Task<bool> IsEmailUsedAsync(string email)
@@ -71,9 +71,9 @@ public class UserController : ControllerBase
             new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.Name)
         };
         ClaimsIdentity identity = new ClaimsIdentity(
-            claims, 
-            "Token", 
-            ClaimsIdentity.DefaultNameClaimType, 
+            claims,
+            "Token",
+            ClaimsIdentity.DefaultNameClaimType,
             ClaimsIdentity.DefaultRoleClaimType);
         return identity;
     }
@@ -92,7 +92,7 @@ public class UserController : ControllerBase
             signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)
         );
         var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-        return new 
+        return new
         {
             Token = encodedJwt,
             Created = now,
@@ -116,7 +116,7 @@ public class UserController : ControllerBase
     {
         if (token == null)
             return BadRequest(new { errorText = "Недостаточно параметров" });
-        
+
         var user = await _context.Users
             .Include(u => u.Role)
             .Include(u => u.RefreshToken)
@@ -160,7 +160,7 @@ public class UserController : ControllerBase
             await _userService.UpdateAsync(user);
 
             var folder = _fileSystemService.RootGuid;
-            if (user.Role.Name == "Student")
+            if (user.RoleId == UserRole.Student)
             {
                 var group = await _context.Accesses.FirstOrDefaultAsync(s => s.UserId == user.Id);
                 folder = group?.ItemId;
@@ -173,7 +173,7 @@ public class UserController : ControllerBase
                         token = refreshToken.Token,
                         created = refreshToken.Created,
                         expires = refreshToken.Expires
-                    }, 
+                    },
                     user = new {
                         firstName = user.FirstName,
                         lastName = user.LastName,
@@ -195,10 +195,10 @@ public class UserController : ControllerBase
 
     [HttpPost("signup")]
     public async Task<IActionResult> Signup(
-        [FromForm] string? firstName, 
-        [FromForm] string? lastName, 
+        [FromForm] string? firstName,
+        [FromForm] string? lastName,
         [FromForm] string? patronymic,
-        [FromForm] string? email, 
+        [FromForm] string? email,
         [FromForm] string? password)
     {
         if (firstName == null || lastName == null || email == null || password == null)
