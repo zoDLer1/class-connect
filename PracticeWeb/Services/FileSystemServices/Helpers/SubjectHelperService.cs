@@ -77,8 +77,8 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Group = subject?.Group.Name,
             Teacher = new {
                 Id = subject?.Teacher.Id,
-                FirstName = subject?.Teacher.FirstName,
-                LastName = subject?.Teacher.LastName,
+                FirstName = subject?.Teacher.Name,
+                LastName = subject?.Teacher.Surname,
                 Patronymic = subject?.Teacher.Patronymic
             },
             Description = subject?.Description

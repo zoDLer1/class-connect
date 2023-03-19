@@ -146,7 +146,7 @@ public class FileSystemController : ControllerBase
             object result;
             if (user.RoleId == UserRole.Student)
             {
-                var fullUserName = string.Join(' ', new[] { user.FirstName, user.LastName, user.Patronymic });
+                var fullUserName = string.Join(' ', new[] { user.Name, user.Surname, user.Patronymic });
                 result = await _fileSystemService.CreateWorkAsync(parentId, fullUserName, "Work", uploadedFile, user);
             }
             else

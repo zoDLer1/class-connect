@@ -65,7 +65,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
                     var user = _context.Users.First(u => u.Id == s.UserId);
                     return new {
                         Id = user.Id,
-                        Name = string.Join(' ', new[] { user.FirstName, user.LastName, user.Patronymic })
+                        Name = string.Join(' ', new[] { user.Name, user.Surname, user.Patronymic })
                     };
                 })
                 .ToList()
@@ -87,8 +87,8 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             CreationTime = folder.CreationTime,
             Teacher = new {
                 Id = group?.Teacher.Id,
-                FirstName = group?.Teacher.FirstName,
-                LastName = group?.Teacher.LastName,
+                FirstName = group?.Teacher.Name,
+                LastName = group?.Teacher.Surname,
                 Patronymic = group?.Teacher.Patronymic
             },
             Data = user.Role.Id == UserRole.Student || group == null ? null : GetGroupData(group, user)

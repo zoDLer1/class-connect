@@ -59,10 +59,10 @@ public class Context : DbContext
         );
 
         builder.Entity<User>().HasData(
-            new User { Id = 1, FirstName = "Админ", LastName = "Админов", Email = "admin@admin.admin", RoleId = UserRole.Administrator, Password = "$2a$11$vZJfXw2NUiLp43m/lkoc6.uW5W6ibxwKHFHlKlcoJmHrFvRwk.yWG", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()},
-            new User { Id = 2, FirstName = "Валенок", LastName = "Купцов", Patronymic = "Анатольевич", Email = "test@test.test", RoleId = UserRole.Teacher, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()},
-            new User { Id = 3, FirstName = "Валентин", LastName = "Купцов", Patronymic = "Анатольевич", Email = "teacher", RoleId = UserRole.Teacher, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()},
-            new User { Id = 4, FirstName = "Другой", LastName = "Препод", Email = "anotherTeacher", RoleId = UserRole.Teacher, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTimeOffset.Now.ToUnixTimeSeconds()}
+            new User { Id = 1, Name = "Админ", Surname = "Админов", Email = "admin@admin.admin", RoleId = UserRole.Administrator, Password = "$2a$11$vZJfXw2NUiLp43m/lkoc6.uW5W6ibxwKHFHlKlcoJmHrFvRwk.yWG", RegTime = DateTime.Now },
+            new User { Id = 2, Name = "Валенок", Surname = "Купцов", Patronymic = "Анатольевич", Email = "test@test.test", RoleId = UserRole.Teacher, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTime.Now },
+            new User { Id = 3, Name = "Валентин", Surname = "Купцов", Patronymic = "Анатольевич", Email = "teacher@test.test", RoleId = UserRole.Teacher, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTime.Now },
+            new User { Id = 4, Name = "Другой", Surname = "Препод", Email = "anotherTeacher@test.test", RoleId = UserRole.Teacher, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTime.Now }
         );
 
         builder.Entity<ItemType>().HasData(

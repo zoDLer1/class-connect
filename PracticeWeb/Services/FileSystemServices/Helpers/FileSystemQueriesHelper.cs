@@ -82,7 +82,7 @@ public abstract class FileSystemQueriesHelper
             Guid = item.Id,
             Type = item.Type,
             CreationTime = item.CreationTime,
-            CreatorName = $"{item.Creator.FirstName} {item.Creator.LastName}"
+            CreatorName = $"{item.Creator.Name} {item.Creator.Surname}"
         };
     }
 

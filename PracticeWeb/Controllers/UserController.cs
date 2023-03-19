@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using PracticeWeb.Controllers.Models;
 using PracticeWeb.Exceptions;
 using PracticeWeb.Models;
 using PracticeWeb.Services;
@@ -47,8 +48,8 @@ public class UserController : ControllerBase
             .Select(u => new
                 {
                     Id = u.Id,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName,
+                    FirstName = u.Name,
+                    LastName = u.Surname,
                     Patronymic = u.Patronymic
                 }
             );
@@ -62,12 +63,11 @@ public class UserController : ControllerBase
 
     private ClaimsIdentity GetIdentity(User user)
     {
-        Console.WriteLine($"{user.Email} {user.FirstName} {user.LastName}");
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimsIdentity.DefaultNameClaimType, user.FirstName),
-            new Claim(ClaimTypes.Surname, user.LastName),
+            new Claim(ClaimsIdentity.DefaultNameClaimType, user.Name),
+            new Claim(ClaimTypes.Surname, user.Surname),
             new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.Name)
         };
         ClaimsIdentity identity = new ClaimsIdentity(
@@ -112,20 +112,20 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("refreshToken")]
-    public async Task<IActionResult> RefreshToken([FromForm] string? token)
+    public async Task<IActionResult> RefreshToken([FromBody] TokenModel? model)
     {
-        if (token == null)
-            return BadRequest(new { errorText = "Недостаточно параметров" });
+        if (model == null)
+            return BadRequest(new { errorText = "Неверный RefreshToken" });
 
         var user = await _context.Users
             .Include(u => u.Role)
             .Include(u => u.RefreshToken)
-            .FirstOrDefaultAsync(u => u.RefreshTokenId == token);
-        Console.WriteLine($"{user?.FirstName} — \"{token}\" {user?.RefreshTokenId}: {user?.RefreshToken}");
+            .FirstOrDefaultAsync(u => u.RefreshTokenId == model.Token);
+
         if (user == null || user.RefreshToken == null)
-            return Unauthorized("Неверный RefreshToken");
+            return Unauthorized(new { errorText = "Неверный RefreshToken" });
         else if (user.RefreshToken.Expires < DateTime.Now)
-            return Unauthorized("RefreshToken истёк");
+            return Unauthorized(new { errorText = "RefreshToken истёк" });
 
         var jwt = CreateToken(user);
         var newRefreshToken = GenerateRefreshToken();
@@ -145,14 +145,11 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromForm] string? email, [FromForm] string? password)
+    public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        if (email == null || password == null)
-            return BadRequest(new { errorText = "Недостаточно параметров" });
-
         try
         {
-            var user = await _authenticationService.LoginAsync(email, password);
+            var user = await _authenticationService.LoginAsync(model.Email, model.Password);
             var jwt = CreateToken(user);
 
             var refreshToken = GenerateRefreshToken();
@@ -175,8 +172,8 @@ public class UserController : ControllerBase
                         expires = refreshToken.Expires
                     },
                     user = new {
-                        firstName = user.FirstName,
-                        lastName = user.LastName,
+                        name = user.Name,
+                        surname = user.Surname,
                         role = user.Role.Name,
                         folder = folder,
                     }
@@ -185,28 +182,24 @@ public class UserController : ControllerBase
         }
         catch (UserNotFoundException)
         {
-            return NotFound(new { errorText = "Пользователь не найден" });
+            return NotFound(new { Errors = new { Email = new List<string> { "Пользователь не найден" } } });
         }
         catch (InvalidPasswordException)
         {
-            return BadRequest(new { errorText = "Неправильный пароль" });
+            return BadRequest(new { Errors = new { Email = new List<string> { "Неправильный пароль" } } });
         }
     }
 
     [HttpPost("signup")]
-    public async Task<IActionResult> Signup(
-        [FromForm] string? firstName,
-        [FromForm] string? lastName,
-        [FromForm] string? patronymic,
-        [FromForm] string? email,
-        [FromForm] string? password)
+    public async Task<IActionResult> Signup([FromBody] SignupModel model)
     {
-        if (firstName == null || lastName == null || email == null || password == null)
-            return BadRequest(new { errorText = "Недостаточно параметров" });
-        if (await IsEmailUsedAsync(email))
-            return BadRequest(new { errorText = "Данная почта уже используется" });
+        if (model.Patronymic != string.Empty && model.Patronymic.Length < 5)
+            return BadRequest(new { Errors = new { Patronymic = new List<string> { "Используйте не менее 5 символов" } } });
 
-        await _authenticationService.RegisterAsync(firstName, lastName, patronymic, email, password, UserRole.Student);
+        if (await IsEmailUsedAsync(model.Email))
+            return BadRequest(new { Errors = new { Email = new List<string> { "Данная почта уже используется" } } });
+
+        await _authenticationService.RegisterAsync(model.Name, model.Surname, model.Patronymic, model.Email, model.Password, UserRole.Student);
         return Ok();
     }
 }
