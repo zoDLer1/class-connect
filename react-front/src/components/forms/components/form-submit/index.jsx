@@ -1,11 +1,11 @@
 import css from './form-submit.module.css'
 
 
-function FormSubmit({ id, text, ...props }) {
+function FormSubmit({ text, ...props }) {
+
     return (
         <div className={css.block}>
-            <input {...props} hidden className={css.submit} type="submit" id={id} />
-            <label for={id} className={css.title}>{text}</label>
+            <div {...props} className={css.title}>{text}</div>
         </div>
     )
 }

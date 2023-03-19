@@ -5,3 +5,8 @@
     padding-top: 10px;
     gap: 5px;
 }
+.error{
+    text-align: center;
+    color: var(--error-color);
+    font-size: 14px;
+}

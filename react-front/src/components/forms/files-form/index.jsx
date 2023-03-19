@@ -1,7 +1,8 @@
 import css from './files-form.module.css'
 import FormFilePath from '../components/form-filepath'
 import FormFileBranch from '../components/form-filebranch'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useList } from 'hooks/useList'
 
 
 function FilesForm() {
@@ -109,9 +110,53 @@ function FilesForm() {
             ],
             "students": []
         }
-    }
+        }
     )
-
+    const [branchItems, branchItemsAtions, branchItemsStateActions] = useList((current)=>console.log(current))
+   
+    useEffect(()=>{
+        branchItemsAtions.setItems([
+            {
+                "name": "Графический дизайн",
+                "type": {
+                    "name": "Subject",
+                    "id": 4
+                },
+                "guid": "2b322bfd-21a1-4b23-81e5-16294f5b4651",
+                "creationTime": "2022-11-16T13:23:18.893789",
+                "group": "Группа 1",
+                "teacher": 3,
+                "description": null
+            },
+            {
+                "name": "sdfgosdifhjfgsdifgguiogsdhjfg",
+                "type": {
+                    "name": "Subject",
+                    "id": 4
+                },
+                "guid": "2b322bfd-21a1-4b23-81e5-16294f5b4652",
+                "creationTime": "2022-11-16T13:23:18.893789",
+                "group": "Группа 1",
+                "teacher": 3,
+                "description": null
+            },
+            {
+                "name": "Графический дизайн2",
+                "type": {
+                    "name": "Subject",
+                    "id": 4
+                },
+                "guid": "2b322bfd-21a1-4b23-81e5-16294f5b4653",
+                "creationTime": "2022-11-16T13:23:18.893789",
+                "group": "Группа 1",
+                "teacher": 3,
+                "description": null
+            },
+            
+        ])
+        // !!!
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     return (
         <div className={css.block}>
@@ -120,7 +165,7 @@ function FilesForm() {
                 <p className={css.username}>Username</p>
             </div>
             <div className={css.body}>
-                <FormFileBranch data={filesInfo.children}/>
+                <FormFileBranch items={branchItems} actions={branchItemsAtions} state={branchItemsStateActions}/>
                 <div></div>
             </div>
 

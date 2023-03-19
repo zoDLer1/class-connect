@@ -1,0 +1,59 @@
+@keyframes opening {
+    10%{
+        top: 40px;
+    }
+    90%{
+        top: 40px;
+    }
+    100%{
+        top: -60px;
+        
+    }
+}
+
+@keyframes loading {
+    0%{
+        width: 100%;
+    }
+    100%{
+        width: 0%;
+    }
+    
+}
+
+
+.block{
+
+    background-color: #fff;
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    padding: 15px 30px;
+    font-weight: 500;
+    font-size: 18px;
+    min-width: 200px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0px 5px 15px rgb(0 0 0 / 25%);
+    overflow: hidden;
+    animation: opening 4s ease-in-out forwards;
+
+}
+.block::after{
+    content: '';
+    background-color: #0057B8;
+    width: 100%;
+    left: 0;
+    bottom: 0px;
+    height: 3px;
+    position: absolute;
+    animation: loading 3.6s linear forwards;
+}
+.block:hover::after{
+    animation-play-state: paused;
+}
+.block:hover{
+    animation-play-state: paused;
+}
+

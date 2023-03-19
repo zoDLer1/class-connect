@@ -1,6 +1,5 @@
 import css from './form-filepath.module.css'
 import FilePathItem from './components/file-path-item'
-import FilePathSeporator from './components/filepath-seporator'
 import FilePathCombiner from './components/filepath-combiner'
 import { useEffect, useState } from 'react'
 
@@ -26,21 +25,7 @@ function FormFilePath({ path }) {
     return (
         <div className={css.block}>
             {
-                localPath.map((item, index) => {
-                    let result = null
-                    if (Array.isArray(item))
-                        result = <FilePathCombiner items={item} />
-                    else
-                        result = <FilePathItem  {...item} />
-            
-                    return <>
-                        {result}
-                        {localPath.length-1 !== index 
-                        ? <FilePathSeporator />
-                        : ''}
-                    </>
-            
-                })
+                localPath.map((item, index) => Array.isArray(item) ? <FilePathCombiner key={'FPC'}  items={item} /> : <FilePathItem key={item.guid} {...item} />)
             }
             
         </div>

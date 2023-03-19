@@ -1,4 +1,4 @@
-.block{
+.body{
     color: var(--dark-color);
     font-weight: 600;
     font-size: 24px;
@@ -9,8 +9,26 @@
     overflow: hidden;
     white-space: nowrap;
     user-select: none;
+    /* margin-right: 8px; */
     text-overflow: ellipsis;
 }
-.block:hover{
+.body:hover{
     background-color: var(--dark-op10-color);
+}
+.block{
+    display: flex;
+}
+.block:after{
+    content: '';
+    background-color: var(--light-gray-text-color);
+    border-radius: 1px;
+
+    width: 3px;
+    margin: 9px 8px;
+    transform: rotate(19deg);
+    display: block;
+   
+}
+.block:last-child:after{
+    display: none;
 }

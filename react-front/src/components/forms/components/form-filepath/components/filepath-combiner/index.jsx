@@ -1,5 +1,5 @@
 import css from './filepath-combiner.module.css'
-import useOpen from 'hooks/useOpen'
+import { useOpen } from 'hooks/useOpen'
 
 
 
