@@ -1,4 +1,4 @@
-.block{
+.main{
     color: var(--dark-color);
     font-weight: 600;
     font-size: 24px;
@@ -6,9 +6,28 @@
     border-radius: 10px;
     cursor: pointer;
     user-select: none;
+    display: flex;
     
 }
-.block:hover{
+
+.block{
+    display: flex;
+}
+.block:after{
+    content: '';
+    background-color: var(--light-gray-text-color);
+    border-radius: 1px;
+
+    width: 3px;
+    margin: 9px 10px;
+    transform: rotate(19deg);
+    display: block;
+    
+   
+}
+
+
+.main:hover{
     background-color: var(--dark-op10-color);
 }
 .body{

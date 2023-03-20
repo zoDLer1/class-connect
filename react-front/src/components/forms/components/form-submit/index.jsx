@@ -1,11 +1,12 @@
 import css from './form-submit.module.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 
-
-function FormSubmit({ text, ...props }) {
+function FormSubmit({ text, onClick, loading = false, ...props }) {
 
     return (
         <div className={css.block}>
-            <div {...props} className={css.title}>{text}</div>
+            <button {...props} onClick={(evt)=>{evt.preventDefault(); onClick()}} className={css.title}>{loading ? <FontAwesomeIcon icon={faSpinner} size="lg" spinPulse /> : text}</button>
         </div>
     )
 }

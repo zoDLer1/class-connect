@@ -2,8 +2,10 @@ import axios from "axios";
 import user from "store/user";
 import AuthService from "services/authService";
 
+
+
+
 export const DOMAIN = 'https://localhost:7231'
-export const BAESDOMAIN = 'https://localhost:7231'
 // axios.defaults.timeout = 1000 * 100;
 
 export const Defaultconfig = {
@@ -30,6 +32,7 @@ DefaultApiInstanse.interceptors.response.use(
                 await AuthService.refresh_token()
                 return DefaultApiInstanse.request(error.config)
             }
+            
         }
         catch {
             // console.log(error)

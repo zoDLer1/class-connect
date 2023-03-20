@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import { AlertContext } from 'contexts/alertContext'
 
 
@@ -6,10 +6,11 @@ import { AlertContext } from 'contexts/alertContext'
 
 export const useRequest = (func = async () => null) => {
     const alertShow = useContext(AlertContext)
-                    
+    const [waitingForResponse, setWaiting] = useState(false)     
 
     const send = async (data, statuses) => {
-        return await func(data).then(
+        setWaiting(true)
+        const response = await func(data).then(
             (success) => {
                 const func = statuses[success.request.status]
                 if (func) func(success) 
@@ -22,8 +23,10 @@ export const useRequest = (func = async () => null) => {
                 if (func) func(error)
             }
         )
+        setWaiting(false)
+        return response
     }
 
-    return { send }
+    return { send, waitingForResponse }
 
 }

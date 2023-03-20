@@ -10,7 +10,10 @@ function FilePathCombiner({ items }) {
         <>
 
         <div className={css.block} onClick={toggle}>
-            ... 
+            <div className={css.main}>
+                ...
+            </div>
+             
         </div>
         {condition &&
             <div className={css.body}>

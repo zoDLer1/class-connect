@@ -33,3 +33,7 @@
     bottom: -19px;
     /* left: 0; */
 }
+.input:disabled{
+    box-shadow: inset 0px 0px 8px var(--dark-op25-color);
+    color: var(--light-gray-text-color);
+}

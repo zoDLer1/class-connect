@@ -3,7 +3,7 @@ import FilePathItem from './components/file-path-item'
 import FilePathCombiner from './components/filepath-combiner'
 import { useEffect, useState } from 'react'
 
-function FormFilePath({ path }) {
+function FormFilePath({ path, loading }) {
 
     const [localPath, setPath] = useState([])
     
@@ -25,7 +25,7 @@ function FormFilePath({ path }) {
     return (
         <div className={css.block}>
             {
-                localPath.map((item, index) => Array.isArray(item) ? <FilePathCombiner key={'FPC'}  items={item} /> : <FilePathItem key={item.guid} {...item} />)
+                localPath.map((item, index) => Array.isArray(item) ? <FilePathCombiner key={'FPC'}  items={item} /> : <FilePathItem key={item.guid} loading={loading} {...item} />)
             }
             
         </div>
