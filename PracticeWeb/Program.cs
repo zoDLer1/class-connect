@@ -68,17 +68,17 @@ builder.Services.AddTransient<ServiceResolver>(serviceProvider => key =>
     };
     switch (key)
     {
-        case "File":
+        case PracticeWeb.Type.File:
             return GetService<FileHelperService>();
-        case "Folder":
+        case PracticeWeb.Type.Folder:
             return GetService<FolderHelperService>();
-        case "Group":
+        case PracticeWeb.Type.Group:
             return GetService<GroupHelperService>();
-        case "Subject":
+        case PracticeWeb.Type.Subject:
             return GetService<SubjectHelperService>();
-        case "Task":
+        case PracticeWeb.Type.Task:
             return GetService<TaskHelperService>();
-        case "Work":
+        case PracticeWeb.Type.Work:
             return GetService<WorkHelperService>();
         default:
             throw new KeyNotFoundException();

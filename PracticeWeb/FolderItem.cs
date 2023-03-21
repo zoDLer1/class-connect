@@ -2,7 +2,7 @@ using PracticeWeb.Models;
 
 namespace PracticeWeb;
 
-public class FolderItem 
+public class FolderItem
 {
     public string Name { get; set; } = null!;
     public string Guid { get; set; } = null!;

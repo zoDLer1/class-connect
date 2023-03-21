@@ -2,7 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PracticeWeb.Controllers.Models;
 
-public class LoginModel {
+public class LoginModel
+{
     [Required(ErrorMessage = "Укажите email")]
     [StringLength(50, ErrorMessage = "Используйте менее 50 символов")]
     [EmailAddress(ErrorMessage = "Некорректный email")]

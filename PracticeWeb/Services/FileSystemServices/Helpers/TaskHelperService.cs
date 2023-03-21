@@ -28,7 +28,7 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return access;
     }
 
-    public async Task<Object> GetAsync(string id, User user)
+    public async Task<object> GetAsync(string id, User user)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
         var task = await _commonTaskQueries.GetAsync(id, _context.Tasks);
@@ -52,7 +52,7 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async virtual Task<Object> GetChildItemAsync(string id, User user)
+    public async virtual Task<object> GetChildItemAsync(string id, User user)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
         var task = await _commonTaskQueries.GetAsync(id, _context.Tasks);
@@ -68,14 +68,14 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
+    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
     {
         // Если пытаемся создать файл в руте
         if (parentId == _rootGuid)
             throw new InvalidPathException();
 
         var parent = await TryGetItemAsync(parentId);
-        var access = await _serviceAccessor(parent.Type.Name).HasAccessAsync(parent.Id, user, new List<string>());
+        var access = await _serviceAccessor(parent.Type.Id).HasAccessAsync(parent.Id, user, new List<string>());
 
         if (access.Permission != Permission.Write)
             throw new AccessDeniedException();
@@ -85,11 +85,17 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
             throw new InvalidPathException();
 
         DateTime? until = null;
-        DateTime untilTemp;
         if (parameters?.ContainsKey("Until") == true)
-            if (DateTime.TryParse(parameters["Until"], out untilTemp))
-                if (untilTemp > DateTime.Now)
-                    until = untilTemp;
+        {
+            until = parameters["Until"] as DateTime?;
+
+            if (until == null)
+                throw new InvalidDataException();
+
+            until = ((DateTime) until).AddHours(3);
+            if (until <= DateTime.Now.AddHours(2))
+                throw new InvalidDataException();
+        }
 
         var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Task, user);
         var task = new TaskEntity

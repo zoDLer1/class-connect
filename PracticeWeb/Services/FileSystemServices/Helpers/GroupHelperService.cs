@@ -46,33 +46,35 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return access;
     }
 
-    private Object GetGroupData(Group group, User user)
+    private object GetGroupData(Group group, User user)
     {
         var subjects = _context.Subjects.Where(s => s.GroupId == group.Id);
         if (group.TeacherId != user.Id)
             subjects = subjects.Where(s => s.TeacherId == user.Id);
         return new
         {
-            Subjects = subjects.Select(s => new
+            Subjects = subjects
+            .ToList()
+            .Select(async s => new
             {
                 Id = s.Id,
-                Name = s.Name
-            }),
-            Students = _context.Accesses
-                .Where(s => s.ItemId == group.Id && s.Permission == Permission.Read)
-                .ToList()
-                .Select(s => {
-                    var user = _context.Users.First(u => u.Id == s.UserId);
-                    return new {
-                        Id = user.Id,
-                        Name = string.Join(' ', new[] { user.Name, user.Surname, user.Patronymic })
-                    };
-                })
-                .ToList()
+                Name = (await TryGetItemAsync(s.Id)).Name,
+                Students = _context.Accesses
+                    .Where(s => s.ItemId == group.Id && s.Permission == Permission.Read)
+                    .ToList()
+                    .Select(s => {
+                        var user = _context.Users.FirstOrDefault(u => u.Id == s.UserId);
+                        return new {
+                            Id = user?.Id,
+                            Name = string.Join(' ', new[] { user?.Name, user?.Surname, user?.Patronymic })
+                        };
+                    })
+            })
+            .Select(s => s.Result)
         };
     }
 
-    public async Task<Object> GetAsync(string id, User user)
+    public async Task<object> GetAsync(string id, User user)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
         var group = await _commonGroupQueries.GetAsync(id, _context.Groups.Include(g => g.Teacher));
@@ -95,7 +97,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async Task<Object> GetChildItemAsync(string id, User user)
+    public async Task<object> GetChildItemAsync(string id, User user)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
         var group = await _commonGroupQueries.GetAsync(id, _context.Groups);
@@ -111,7 +113,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
+    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
     {
         var access = await _context.Accesses.FirstOrDefaultAsync((a) => a.ItemId == parentId && a.UserId == user.Id);
         if (access == null || access.Permission != Permission.Write)
@@ -128,19 +130,16 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             throw new InvalidPathException();
 
         // Проверяем, есть ли группа с таким же названием
-        if (await _context.Groups.FirstOrDefaultAsync(g => g.Name == name) != null)
+        if (await _context.Items.Where(i => i.TypeId == Type.Group).FirstOrDefaultAsync(g => g.Name == name) != null)
             throw new InvalidGroupNameException();
 
         if (parameters?.ContainsKey("TeacherId") == false)
             throw new NullReferenceException();
 
-        int teacherId = 0;
-        if (!int.TryParse(parameters?["TeacherId"], out teacherId))
-            throw new NullReferenceException();
-
+        int? teacherId = parameters?["TeacherId"] as int?;
         var teacher = _context.Users.Include(s => s.Role).FirstOrDefault(s => s.Id == teacherId);
         if (teacher == null)
-            throw new UserNotFoundException();
+            throw new TeacherNotFoundException();
 
         if (teacher.Role.Id != UserRole.Teacher)
             throw new InvalidUserRoleException();
@@ -149,8 +148,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         var group = new Group
         {
             Id = item.Guid,
-            Name = name,
-            TeacherId = teacherId,
+            TeacherId = teacher.Id,
         };
         await _commonGroupQueries.CreateAsync(group);
         var teacherAccess = new Access {
@@ -173,12 +171,11 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (group == null)
             throw new ItemNotFoundException();
 
-        var anotherGroup = await _context.Groups.FirstOrDefaultAsync(s => s.Name == newName);
+        var anotherGroup = await _context.Items.Where(i => i.TypeId == Type.Group).FirstOrDefaultAsync(s => s.Name == newName);
         if (anotherGroup != null)
             throw new InvalidGroupNameException();
 
         var item = await base.UpdateAsync(id, newName, user);
-        group.Name = newName;
         await _commonGroupQueries.UpdateAsync(group);
         return item;
     }

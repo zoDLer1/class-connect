@@ -38,7 +38,7 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return parentAccess;
     }
 
-    public async Task<Object> GetAsync(string id, User user)
+    public async Task<object> GetAsync(string id, User user)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
         // Проверяем, если запрос от студента и он обращается ли к корню
@@ -50,7 +50,7 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return folder;
     }
 
-    public async Task<Object> GetChildItemAsync(string id, User user)
+    public async Task<object> GetChildItemAsync(string id, User user)
     {
         // Проверяем, если запрос от студента и он обращается ли к корню
         var access = await HasAccessAsync(id, user, new List<string>());
@@ -60,14 +60,14 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return await base.GetFolderInfoAsync(id);
     }
 
-    public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
+    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
     {
         // Если пытаемся создать папку в руте
         if (parentId == _rootGuid)
             throw new InvalidPathException();
 
         var parent = await TryGetItemAsync(parentId);
-        var access = await _serviceAccessor(parent.Type.Name).HasAccessAsync(parent.Id, user, new List<string>());
+        var access = await _serviceAccessor(parent.Type.Id).HasAccessAsync(parent.Id, user, new List<string>());
 
         if (access.Permission != Permission.Write)
             throw new AccessDeniedException();

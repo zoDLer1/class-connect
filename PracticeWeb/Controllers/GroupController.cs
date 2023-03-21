@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PracticeWeb.Controllers.Models;
 using PracticeWeb.Models;
 using PracticeWeb.Services;
 using PracticeWeb.Services.UserServices;
@@ -27,7 +28,8 @@ public class GroupController : ControllerBase
     [HttpGet]
     public IActionResult GetGroups()
     {
-        var groups = _context.Groups
+        var groups = _context.Items
+            .Where(i => i.TypeId == Type.Group)
             .Select(g => new
                 {
                     Id = g.Id,
@@ -39,12 +41,9 @@ public class GroupController : ControllerBase
 
     [Authorize(Roles = "Student")]
     [HttpPost("enter")]
-    public async Task<IActionResult> EnterGroup([FromForm] string? groupId)
+    public async Task<IActionResult> EnterGroup([FromBody] ItemModel model)
     {
-        if (groupId == null)
-            return BadRequest(new { errorText = "Недостаточно параметров" });
-
-        var group = await _commonGroupQueries.GetAsync(groupId, _context.Groups);
+        var group = await _commonGroupQueries.GetAsync(model.Id, _context.Groups);
         if (group == null)
             return NotFound(new { errorText = "Группа не найдена" });
 
@@ -71,16 +70,13 @@ public class GroupController : ControllerBase
 
     [Authorize(Roles = "Teacher,Administrator")]
     [HttpPost("remove")]
-    public async Task<IActionResult> RemoveStudent([FromForm] string? groupId, [FromForm] int? studentId)
+    public async Task<IActionResult> RemoveStudent([FromBody] StudentModel model)
     {
-        if (groupId == null || studentId == null)
-            return BadRequest(new { errorText = "Недостаточно параметров" });
-
-        var group = await _commonGroupQueries.GetAsync(groupId, _context.Groups);
+        var group = await _commonGroupQueries.GetAsync(model.Id, _context.Groups);
         if (group == null)
             return NotFound(new { errorText = "Группа не найдена" });
 
-        var student = await _userService.GetAsync((int) studentId);
+        var student = await _userService.GetAsync((int) model.StudentId);
         if (student == null)
             return NotFound(new { errorText = "Студент не найден" });
 

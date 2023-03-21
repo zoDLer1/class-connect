@@ -2,7 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PracticeWeb.Controllers.Models;
 
-public class SignupModel {
+public class SignupModel
+{
     [Required(ErrorMessage = "Укажите имя")]
     [StringLength(30, ErrorMessage = "Используйте менее 30 символов")]
     [MinLength(2, ErrorMessage = "Используйте не менее 2 символов")]

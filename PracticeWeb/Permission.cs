@@ -1,6 +1,6 @@
 namespace PracticeWeb;
 
-public enum Permission 
+public enum Permission
 {
     None,
     Read,

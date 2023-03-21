@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using PracticeWeb.Controllers.Models;
 using PracticeWeb.Exceptions;
 using PracticeWeb.Models;
 using PracticeWeb.Services.FileSystemServices;
@@ -24,11 +24,6 @@ public class FileSystemController : ControllerBase
         _context = context;
     }
 
-    private void CreateDirectory(string path)
-    {
-        Directory.CreateDirectory(path);
-    }
-
     private async Task<User> GetUserAsync()
     {
         var email = User.FindFirst(ClaimTypes.Email)?.Value;
@@ -42,29 +37,14 @@ public class FileSystemController : ControllerBase
         return user;
     }
 
-    private string PreparePath(string? path)
-    {
-        if (path == null)
-            throw new NullReferenceException();
-
-        if (path.StartsWith("/"))
-            path = path.TrimStart('/');
-        if (path.EndsWith("/"))
-            path = path.TrimEnd('/');
-        return path;
-    }
-
     [Authorize]
     [HttpGet]
-    public async Task<IActionResult> GetAsync(string? id)
+    public async Task<IActionResult> GetAsync([FromQuery] ItemModel model)
     {
-        if (id == null)
-            return BadRequest(new { errorText = "Недостаточно параметров" });
-
         try
         {
             var user = await GetUserAsync();
-            var resultObject = await _fileSystemService.GetObjectAsync(id, user);
+            var resultObject = await _fileSystemService.GetObjectAsync(model.Id, user);
             if (resultObject is IActionResult result)
                 return result;
             return new JsonResult(resultObject);
@@ -83,97 +63,7 @@ public class FileSystemController : ControllerBase
         }
         catch (UserNotFoundException)
         {
-            return NotFound(new { errorText = "Пользователь не найден" });
-        }
-        catch (AccessDeniedException)
-        {
-            return Forbid();
-        }
-    }
-
-    [Authorize]
-    [HttpPost("{workId}")]
-    public async Task<IActionResult> MarkWork(string? workId, [FromForm] int? mark)
-    {
-        if (workId == null)
-            return BadRequest(new { errorText = "Недостаточно параметров" });
-
-        try
-        {
-            var user = await GetUserAsync();
-            object result;
-            if (user.RoleId == UserRole.Student)
-            {
-                result = await _fileSystemService.SubmitWork(workId, user);
-            }
-            else
-            {
-                if (mark == null)
-                    return BadRequest(new { errorText = "Недостаточно параметров" });
-
-                if (mark < 2 || mark > 5)
-                    return BadRequest(new { errorText = "Некорректное значение" });
-                result = await _fileSystemService.MarkWork(workId, (int)mark, user);
-            }
-            return new JsonResult(result);
-        }
-        catch (AccessDeniedException)
-        {
-            return Forbid();
-        }
-        catch (ItemNotFoundException)
-        {
-            return NotFound(new { errorText = "Объект не найден" });
-        }
-        catch (ItemTypeException)
-        {
-            return BadRequest(new { errorText = "Передан объект с неправильным типом" });
-        }
-    }
-
-    [Authorize]
-    [HttpPost("file")]
-    public async Task<IActionResult> UploadFileAsync(
-        [FromForm] string? parentId,
-        [FromForm] IFormFile uploadedFile)
-    {
-        if (parentId == null || uploadedFile == null)
-            return BadRequest(new { errorText = "Недостаточно параметров" });
-
-        try
-        {
-            var user = await GetUserAsync();
-            object result;
-            if (user.RoleId == UserRole.Student)
-            {
-                var fullUserName = string.Join(' ', new[] { user.Name, user.Surname, user.Patronymic });
-                result = await _fileSystemService.CreateWorkAsync(parentId, fullUserName, "Work", uploadedFile, user);
-            }
-            else
-            {
-                result = await _fileSystemService.CreateFileAsync(parentId, uploadedFile, user);
-            }
-            return new JsonResult(result);
-        }
-        catch (UserNotFoundException)
-        {
-            return NotFound(new { errorText = "Пользователь не найден" });
-        }
-        catch (ItemNotFoundException)
-        {
-            return NotFound(new { errorText = "Объект не найден" });
-        }
-        catch (ItemTypeException)
-        {
-            return BadRequest(new { errorText = "Передан объект с неправильным типом" });
-        }
-        catch (FolderNotFoundException)
-        {
-            return NotFound(new { errorText = "Папка не найдена" });
-        }
-        catch (InvalidPathException)
-        {
-            return BadRequest(new { errorText = "Передан неправильный родитель" });
+            return BadRequest(new { errorText = "Пользователь не найден" });
         }
         catch (AccessDeniedException)
         {
@@ -183,24 +73,41 @@ public class FileSystemController : ControllerBase
 
     [Authorize(Roles = "Teacher,Administrator")]
     [HttpPost]
-    public async Task<IActionResult> CreateFolderAsync(
-        [FromForm] string? parentId,
-        [FromForm] string? name,
-        [FromForm] string? type,
-        [FromForm] Dictionary<string, string>? parameters)
+    public async Task<IActionResult> CreateFolderAsync([FromBody] FolderModel model)
     {
-        if (parentId == null || name == null || type == null)
-            return BadRequest(new { errorText = "Недостаточно параметров" });
+        var parameters = new Dictionary<string, object>();
+        if (model.TeacherId != null)
+            parameters["TeacherId"] = model.TeacherId;
+
+        if (model.Description != null)
+            parameters["Description"] = model.Description;
+
+        if (model.Until != null)
+            parameters["Until"] = model.Until;
 
         try
         {
             var user = await GetUserAsync();
-            var item = await _fileSystemService.CreateFolderAsync(parentId, name, type, user, parameters);
+            var item = await _fileSystemService.CreateFolderAsync(
+                model.Id,
+                model.Name,
+                (Type)Enum.Parse(typeof(Type), model.Type),
+                user,
+                parameters
+            );
             return new JsonResult(item);
         }
         catch (UserNotFoundException)
         {
-            return NotFound(new { errorText = "Пользователь не найден" });
+            return BadRequest(new { errorText = "Пользователь не найден" });
+        }
+        catch (TeacherNotFoundException)
+        {
+            return BadRequest(new { Errors = new { TeacherId = new List<string> { "Преподаватель не найден" } } });
+        }
+        catch (InvalidDateException)
+        {
+            return BadRequest(new { Errors = new { Until = new List<string> { "Некорректная дата" } } });
         }
         catch (ItemNotFoundException)
         {
@@ -216,11 +123,11 @@ public class FileSystemController : ControllerBase
         }
         catch (InvalidGroupNameException)
         {
-            return BadRequest(new { errorText = "Неправильное название группы" });
+            return BadRequest(new { Errors = new { Name = new List<string> { "Неправильное название группы" } } });
         }
         catch (InvalidSubjectNameException)
         {
-            return BadRequest(new { errorText = "Неправильное название предмета" });
+            return BadRequest(new { Errors = new { Name = new List<string> { "Неправильное название предмета" } } });
         }
         catch (InvalidUserRoleException)
         {
@@ -228,7 +135,7 @@ public class FileSystemController : ControllerBase
         }
         catch (KeyNotFoundException)
         {
-            return BadRequest(new { errorText = "Невалидное значение параметра Type" });
+            return BadRequest(new { Errors = new { Type = new List<string> { "Некорректное значение параметра Type" } } });
         }
         catch (NullReferenceException)
         {
@@ -241,21 +148,104 @@ public class FileSystemController : ControllerBase
     }
 
     [Authorize]
-    [HttpPatch]
-    public async Task<IActionResult> RenameAsync(string? id, string? newName)
+    [HttpPost("file")]
+    public async Task<IActionResult> UploadFileAsync([FromForm] FileModel model)
     {
-        Console.WriteLine($"{id} {newName}");
-        if (id == null || newName == null)
-            return BadRequest(new { errorText = "Недостаточно параметров" });
-
         try
         {
             var user = await GetUserAsync();
-            await _fileSystemService.RenameAsync(id, newName, user);
+            object result;
+            if (user.RoleId == UserRole.Student)
+            {
+                var fullUserName = string.Join(' ', new[] { user.Name, user.Surname, user.Patronymic });
+                result = await _fileSystemService.CreateWorkAsync(model.Id, fullUserName, model.UploadedFile, user);
+            }
+            else
+            {
+                result = await _fileSystemService.CreateFileAsync(model.Id, model.UploadedFile, user);
+            }
+            return new JsonResult(result);
         }
         catch (UserNotFoundException)
         {
-            return NotFound(new { errorText = "Пользователь не найден" });
+            return BadRequest(new { errorText = "Пользователь не найден" });
+        }
+        catch (ItemNotFoundException)
+        {
+            return NotFound(new { errorText = "Объект не найден" });
+        }
+        catch (ItemTypeException)
+        {
+            return BadRequest(new { errorText = "Передан объект с неправильным типом" });
+        }
+        catch (FolderNotFoundException)
+        {
+            return NotFound(new { errorText = "Папка не найдена" });
+        }
+        catch (InvalidPathException)
+        {
+            return BadRequest(new { errorText = "Передан неправильный родитель" });
+        }
+        catch (AccessDeniedException)
+        {
+            return Forbid();
+        }
+    }
+
+    [Authorize]
+    [HttpPost("mark")]
+    public async Task<IActionResult> MarkWork([FromBody] WorkModel model)
+    {
+        try
+        {
+            var user = await GetUserAsync();
+            object result;
+            if (user.RoleId == UserRole.Student)
+            {
+                result = await _fileSystemService.SubmitWork(model.Id, user);
+            }
+            else
+            {
+                if (model.Mark == null)
+                    return BadRequest(new { Errors = new { Mark = new List<string> { "Укажите оценку" } } });
+
+                if (model.Mark < 2 || model.Mark > 5)
+                    return BadRequest(new { Errors = new { Mark = new List<string> { "Некорректное значение оценки" } } });
+
+                result = await _fileSystemService.MarkWork(model.Id, (int) model.Mark, user);
+            }
+            return new JsonResult(result);
+        }
+        catch (UserNotFoundException)
+        {
+            return BadRequest(new { errorText = "Пользователь не найден" });
+        }
+        catch (AccessDeniedException)
+        {
+            return Forbid();
+        }
+        catch (ItemNotFoundException)
+        {
+            return NotFound(new { errorText = "Объект не найден" });
+        }
+        catch (ItemTypeException)
+        {
+            return BadRequest(new { errorText = "Передан объект с неправильным типом" });
+        }
+    }
+
+    [Authorize]
+    [HttpPatch]
+    public async Task<IActionResult> RenameAsync([FromQuery] NewNameItemModel model)
+    {
+        try
+        {
+            var user = await GetUserAsync();
+            await _fileSystemService.RenameAsync(model.Id, model.Name, user);
+        }
+        catch (UserNotFoundException)
+        {
+            return BadRequest(new { errorText = "Пользователь не найден" });
         }
         catch (ItemNotFoundException)
         {
@@ -263,11 +253,11 @@ public class FileSystemController : ControllerBase
         }
         catch (InvalidGroupNameException)
         {
-            return BadRequest(new { errorText = "Неправильное название группы" });
+            return BadRequest(new { Errors = new { Name = new List<string> { "Неправильное название группы" } } });
         }
         catch (InvalidSubjectNameException)
         {
-            return BadRequest(new { errorText = "Неправильное название предмета" });
+            return BadRequest(new { Errors = new { Name = new List<string> { "Неправильное название предмета" } } });
         }
         catch (InvalidPathException)
         {
@@ -283,19 +273,16 @@ public class FileSystemController : ControllerBase
 
     [Authorize(Roles = "Teacher,Administrator")]
     [HttpPatch("type")]
-    public async Task<IActionResult> UpdateTypeAsync(string? id, string? newType)
+    public async Task<IActionResult> UpdateTypeAsync([FromQuery] NewTypeItemModel model)
     {
-        if (id == null || newType == null)
-            return BadRequest(new { errorText = "Недостаточно параметров" });
-
         try
         {
             var user = await GetUserAsync();
-            await _fileSystemService.UpdateTypeAsync(id, newType, user);
+            await _fileSystemService.UpdateTypeAsync(model.Id, (Type)Enum.Parse(typeof(Type), model.Type), user);
         }
         catch (UserNotFoundException)
         {
-            return NotFound(new { errorText = "Пользователь не найден" });
+            return BadRequest(new { errorText = "Пользователь не найден" });
         }
         catch (ItemNotFoundException)
         {
@@ -303,7 +290,7 @@ public class FileSystemController : ControllerBase
         }
         catch (ItemTypeException)
         {
-            return BadRequest(new { errorText = "Передан неправильный тип" });
+            return BadRequest(new { Errors = new { Type = new List<string> { "Некорректное значение параметра Type" } } });
         }
         catch (InvalidPathException)
         {
@@ -319,19 +306,16 @@ public class FileSystemController : ControllerBase
 
     [Authorize]
     [HttpDelete]
-    public async Task<IActionResult> DeleteAsync(string? id)
+    public async Task<IActionResult> DeleteAsync([FromQuery] ItemModel model)
     {
-        if (id == null)
-            return BadRequest(new { errorText = "Недостаточно параметров" });
-
         try
         {
             var user = await GetUserAsync();
-            await _fileSystemService.RemoveAsync(id, user);
+            await _fileSystemService.RemoveAsync(model.Id, user);
         }
         catch (UserNotFoundException)
         {
-            return NotFound(new { errorText = "Пользователь не найден" });
+            return BadRequest(new { errorText = "Пользователь не найден" });
         }
         catch (ItemNotFoundException)
         {

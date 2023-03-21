@@ -20,11 +20,12 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public async Task<ItemAccess> HasAccessAsync(string id, User user, List<string> path)
     {
         var access = await HasUserAccessToParentAsync(id, user, path);
+        Console.WriteLine($"file access: {access.Permission} in {id}");
         access.Path.Add(id);
         return access;
     }
 
-    public async Task<Object> GetAsync(string id, User user)
+    public async Task<object> GetAsync(string id, User user)
     {
         await HasAccessAsync(id, user, new List<string>());
         var item = await base.GetAsync(id);
@@ -45,7 +46,7 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return new FileStreamResult(filestream, fileEntity.MimeType) { FileDownloadName = name };
     }
 
-    public async virtual Task<Object> GetChildItemAsync(string id, User user)
+    public async virtual Task<object> GetChildItemAsync(string id, User user)
     {
         await HasAccessAsync(id, user, new List<string>());
         var folderItem = await base.GetFolderInfoAsync(id);
@@ -61,24 +62,28 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
+    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
     {
         // Если пытаемся создать файл в руте
         if (parentId == _rootGuid)
             throw new InvalidPathException();
 
         var parent = await TryGetItemAsync(parentId);
-        var access = await _serviceAccessor(parent.Type.Name).HasAccessAsync(parent.Id, user, new List<string>());
+        var access = await _serviceAccessor(parent.Type.Id).HasAccessAsync(parent.Id, user, new List<string>());
+
+        Console.WriteLine($"{access.Permission} {user.RoleId}");
 
         // Если не имеет доступа и это не студент, пытающийся загрузить файл в свою работу
         if (access.Permission != Permission.Write)
             throw new AccessDeniedException();
 
+        Console.WriteLine($"{access.Permission} {user.RoleId}");
+
         // Проверка допустимости типов
         if (!TypeDependence.File.Contains(parent.TypeId))
             throw new InvalidPathException();
 
-        var (itemPath, item) = await base.CreateAsync(parentId, name, Type.File, user);
+        var (itemPath, item) = await base.CreateAsync(parentId, name.Substring(0, 70), Type.File, user);
         var fileEntity = new FileEntity
         {
             Id = item.Guid,

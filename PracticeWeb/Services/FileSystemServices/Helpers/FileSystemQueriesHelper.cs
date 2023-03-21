@@ -44,7 +44,7 @@ public abstract class FileSystemQueriesHelper
         var parent = await TryGetItemAsync(connection.ParentId);
         // Проверяем, имеет ли пользователь доступ к родителю
         Console.WriteLine($"{parent.Type.Name}: {parent.Id} – {parent.Name}");
-        return await _serviceAccessor(parent.Type.Name).HasAccessAsync(parent.Id, user, path);
+        return await _serviceAccessor(parent.Type.Id).HasAccessAsync(parent.Id, user, path);
     }
 
     protected string CombineWithFileSystemPath(string path) => Path.Combine(_fileSystemPath, path);
@@ -86,9 +86,9 @@ public abstract class FileSystemQueriesHelper
         };
     }
 
-    protected async Task<List<Object>> PrepareChildrenAsync(List<string> itemIds, User user)
+    protected async Task<List<object>> PrepareChildrenAsync(List<string> itemIds, User user)
     {
-        var children = new List<Object>();
+        var children = new List<object>();
         Console.WriteLine($"There is {itemIds.Count}");
         foreach (var id in itemIds)
         {
@@ -98,7 +98,7 @@ public abstract class FileSystemQueriesHelper
                 var item = await TryGetItemAsync(id);
                 try
                 {
-                    var child = await _serviceAccessor(item.Type.Name).GetChildItemAsync(item.Id, user);
+                    var child = await _serviceAccessor(item.Type.Id).GetChildItemAsync(item.Id, user);
                     children.Add(child);
                 }
                 catch (AccessDeniedException)
@@ -139,7 +139,7 @@ public abstract class FileSystemQueriesHelper
             throw new ItemTypeException();
 
         Console.WriteLine($"Item type name is {item.Type.Name}");
-        var access = await _serviceAccessor(item.Type.Name).HasAccessAsync(id, user, new List<string>());
+        var access = await _serviceAccessor(item.Type.Id).HasAccessAsync(id, user, new List<string>());
         if (access.Permission == Permission.None)
             throw new AccessDeniedException();
         var children = await _context.Connections.Where(c => c.ParentId == item.Guid).Select(i => i.ChildId).ToListAsync();
@@ -156,7 +156,7 @@ public abstract class FileSystemQueriesHelper
         return folder;
     }
 
-    protected async Task<Object?> GetWorkData(string id, User user)
+    protected async Task<object?> GetWorkData(string id, User user)
     {
         var work = await _context.Works.FirstOrDefaultAsync(w => w.Id == id);
         if (work == null)
@@ -253,7 +253,7 @@ public abstract class FileSystemQueriesHelper
         return await PrepareItemAsync(item.Id);
     }
 
-    public async virtual Task<FolderItem> UpdateTypeAsync(string id, string newType, User user)
+    public async virtual Task<FolderItem> UpdateTypeAsync(string id, Type newType, User user)
     {
         var access = await HasUserAccessToParentAsync(id, user, new List<string>());
         var item = await TryGetItemAsync(id);
@@ -275,14 +275,10 @@ public abstract class FileSystemQueriesHelper
         if (item.TypeId != Type.Folder && !(item.TypeId == Type.Task && workChildrenCount == 0))
             throw new ItemTypeException();
 
-        var type = await _context.ItemTypes.FirstOrDefaultAsync(t => t.Name == newType);
-
-        Console.WriteLine($"new type is {type?.Id}");
-
-        if (type == null || type.Id != Type.Folder && type.Id != Type.Task)
+        if (newType != Type.Folder && newType != Type.Task)
             throw new ItemTypeException();
 
-        item.TypeId = type.Id;
+        item.TypeId = newType;
         await _common.UpdateAsync(item);
         return await PrepareItemAsync(item.Id);
     }

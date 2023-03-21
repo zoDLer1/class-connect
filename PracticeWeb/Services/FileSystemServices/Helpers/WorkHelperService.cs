@@ -50,7 +50,7 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return access;
     }
 
-    public async Task<Object> GetAsync(string id, User user)
+    public async Task<object> GetAsync(string id, User user)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
         var work = await _commonWorkQueries.GetAsync(id, _context.Works);
@@ -73,7 +73,7 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async virtual Task<Object> GetChildItemAsync(string id, User user)
+    public async virtual Task<object> GetChildItemAsync(string id, User user)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
         var work = await _commonWorkQueries.GetAsync(id, _context.Works);
@@ -94,10 +94,10 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async Task<(string, Object)> CreateAsync(string parentId, string name, User user, Dictionary<string, string>? parameters=null)
+    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
     {
         var parent = await TryGetItemAsync(parentId);
-        var access = await _serviceAccessor(parent.Type.Name).HasAccessAsync(parent.Id, user, new List<string>());
+        var access = await _serviceAccessor(parent.Type.Id).HasAccessAsync(parent.Id, user, new List<string>());
 
         Console.WriteLine($"the user {user.Id} with role {user.RoleId} has access level {access.Permission}");
         if (user.RoleId != UserRole.Student)

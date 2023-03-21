@@ -78,7 +78,7 @@ public class UserController : ControllerBase
         return identity;
     }
 
-    private Object CreateToken(User user)
+    private object CreateToken(User user)
     {
         var identity = GetIdentity(user);
         var now = DateTime.UtcNow;
