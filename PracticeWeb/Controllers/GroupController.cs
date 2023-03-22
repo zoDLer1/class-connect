@@ -40,8 +40,8 @@ public class GroupController : ControllerBase
     }
 
     [Authorize(Roles = "Student")]
-    [HttpPost("enter")]
-    public async Task<IActionResult> EnterGroup([FromBody] ItemModel model)
+    [HttpGet("enter")]
+    public async Task<IActionResult> EnterGroup([FromQuery] ItemModel model)
     {
         var group = await _commonGroupQueries.GetAsync(model.Id, _context.Groups);
         if (group == null)
@@ -69,8 +69,8 @@ public class GroupController : ControllerBase
     }
 
     [Authorize(Roles = "Teacher,Administrator")]
-    [HttpPost("remove")]
-    public async Task<IActionResult> RemoveStudent([FromBody] StudentModel model)
+    [HttpDelete("remove")]
+    public async Task<IActionResult> RemoveStudent([FromQuery] StudentModel model)
     {
         var group = await _commonGroupQueries.GetAsync(model.Id, _context.Groups);
         if (group == null)
