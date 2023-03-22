@@ -92,6 +92,7 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
             if (until == null)
                 throw new InvalidDataException();
 
+            // Учитываем текущий часовой пояс
             until = ((DateTime) until).AddHours(3);
             if (until <= DateTime.Now.AddHours(2))
                 throw new InvalidDataException();

@@ -60,7 +60,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Path = folder.Path,
             Children = folder.Children,
             CreationTime = folder.CreationTime,
-            Group = (await TryGetItemAsync(subject.GroupId)).Name,
+            Group = subject.Group.Item.Name,
             Teacher = subject.TeacherId,
             Description = subject.Description
         };
@@ -69,7 +69,8 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public async virtual Task<object> GetChildItemAsync(string id, User user)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
-        var subject = await _commonSubjectQueries.GetAsync(id, _context.Subjects.Include(s => s.Group).Include(s => s.Teacher));
+        var subject = await _commonSubjectQueries
+            .GetAsync(id, _context.Subjects.Include(s => s.Group).ThenInclude(g => g.Item).Include(s => s.Teacher));
         if (subject == null)
             throw new ItemNotFoundException();
 
@@ -80,7 +81,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Type = folderItem.Type,
             Guid = folderItem.Guid,
             CreationTime = folderItem.CreationTime,
-            Group = (await TryGetItemAsync(subject.GroupId)).Name,
+            Group = subject.Group.Item.Name,
             Teacher = new {
                 Id = subject?.Teacher.Id,
                 FirstName = subject?.Teacher.Name,
@@ -107,12 +108,12 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (group == null)
             throw new InvalidPathException();
 
-        // Проверяем, есть ли у данной группы такой предмет
-        var groupSubjects = await _context.Subjects.Where(s => s.GroupId == parentId).ToListAsync();
-        var anotherSubject = groupSubjects
-            .Select(async g => await TryGetItemAsync(g.Id))
-            .Select(g => g.Result)
-            .FirstOrDefault(g => g.Name == name);
+        // Проверяем, есть ли у данной группы предмет с таким же названием
+        var anotherSubject = _context
+            .Subjects
+            .Where(s => s.GroupId == parentId)
+            .Include(s => s.Item)
+            .FirstOrDefault(s => s.Item.Name == name);
         if (anotherSubject != null)
             throw new InvalidSubjectNameException();
 
@@ -155,12 +156,12 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (subject == null)
             throw new ItemNotFoundException();
 
-        // Проверяем, есть ли у данной группы такой предмет
-        var groupSubjects = await _context.Subjects.Where(s => s.GroupId == subject.GroupId).ToListAsync();
-        var anotherSubject = groupSubjects
-            .Select(async g => await TryGetItemAsync(g.Id))
-            .Select(g => g.Result)
-            .FirstOrDefault(g => g.Name == newName);
+        // Проверяем, есть ли у данной группы предмет с таким же названием
+        var anotherSubject = _context
+            .Subjects
+            .Where(s => s.GroupId == subject.GroupId)
+            .Include(s => s.Item)
+            .FirstOrDefault(s => s.Item.Name == newName);
         if (anotherSubject != null)
             throw new InvalidSubjectNameException();
 

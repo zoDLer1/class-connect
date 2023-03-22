@@ -8,7 +8,7 @@ namespace PracticeWeb.Services;
 
 public class CommonQueries<TId, T>
     where TId : IEquatable<TId>
-    where T : class, CommonModel<TId>
+    where T : CommonModel<TId>
 {
     private Context _context;
 

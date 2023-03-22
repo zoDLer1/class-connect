@@ -35,6 +35,31 @@ public class Context : DbContext
             .HasIndex(g => g.RefreshTokenId)
             .IsUnique();
 
+        builder.Entity<FileEntity>()
+            .HasOne(f => f.Item)
+            .WithMany()
+            .HasForeignKey(f => f.Id);
+
+        builder.Entity<Group>()
+            .HasOne(g => g.Item)
+            .WithMany()
+            .HasForeignKey(g => g.Id);
+
+        builder.Entity<Subject>()
+            .HasOne(s => s.Item)
+            .WithMany()
+            .HasForeignKey(s => s.Id);
+
+        builder.Entity<TaskEntity>()
+            .HasOne(t => t.Item)
+            .WithMany()
+            .HasForeignKey(t => t.Id);
+
+        builder.Entity<Work>()
+            .HasOne(w => w.Item)
+            .WithMany()
+            .HasForeignKey(w => w.Id);
+
         builder.Entity<Connection>().HasKey(t => new {
             t.ParentId, t.ChildId
         });
@@ -42,7 +67,6 @@ public class Context : DbContext
         builder.Entity<RefreshToken>().HasKey(t => new {
             t.Token
         });
-
 
         builder.Entity<Access>().HasKey(t => new {
             t.ItemId, t.UserId

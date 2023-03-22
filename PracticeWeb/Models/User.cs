@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PracticeWeb.Models;
 
-public class User : IntegerIdCommonModel
+public class User : CommonModel<int>
 {
     [StringLength(30)]
     public string Name { get; set; } = null!;

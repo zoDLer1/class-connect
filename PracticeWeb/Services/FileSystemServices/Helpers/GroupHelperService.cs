@@ -130,7 +130,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             throw new InvalidPathException();
 
         // Проверяем, есть ли группа с таким же названием
-        if (await _context.Items.Where(i => i.TypeId == Type.Group).FirstOrDefaultAsync(g => g.Name == name) != null)
+        if (await _context.Groups.Include(g => g.Item).FirstOrDefaultAsync(g => g.Item.Name == name) != null)
             throw new InvalidGroupNameException();
 
         if (parameters?.ContainsKey("TeacherId") == false)
@@ -171,8 +171,8 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (group == null)
             throw new ItemNotFoundException();
 
-        var anotherGroup = await _context.Items.Where(i => i.TypeId == Type.Group).FirstOrDefaultAsync(s => s.Name == newName);
-        if (anotherGroup != null)
+        // Проверяем, есть ли группа с таким же названием
+        if (await _context.Groups.Include(g => g.Item).FirstOrDefaultAsync(g => g.Item.Name == newName) != null)
             throw new InvalidGroupNameException();
 
         var item = await base.UpdateAsync(id, newName, user);

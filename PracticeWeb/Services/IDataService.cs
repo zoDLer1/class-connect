@@ -7,7 +7,7 @@ namespace PracticeWeb.Services;
 
 public interface IDataService<TId,T>
     where TId : IEquatable<TId>
-    where T : class, CommonModel<TId>
+    where T : CommonModel<TId>
 {
     /// <summary>
     /// Добавить сущность

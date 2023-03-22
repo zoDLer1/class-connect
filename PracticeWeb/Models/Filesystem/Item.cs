@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PracticeWeb.Models;
 
-public class Item : StringIdCommonModel
+public class Item : CommonModel<string>
 {
     public Type TypeId { get; set; }
     public ItemType Type { get; set; } = null!;

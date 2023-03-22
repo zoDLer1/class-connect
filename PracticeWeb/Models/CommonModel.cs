@@ -1,6 +1,6 @@
 namespace PracticeWeb.Models;
 
-public interface CommonModel<TId>
+public class CommonModel<TId>
 {
-    public TId Id { get; set; }
+    public TId Id { get; set; } = default(TId)!;
 }
