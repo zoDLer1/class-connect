@@ -175,7 +175,6 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public async new Task DeleteAsync(string id, User user)
     {
         var path = await base.DeleteAsync(id, user);
-        await _commonSubjectQueries.DeleteAsync(id);
         Directory.Delete(path, true);
     }
 }

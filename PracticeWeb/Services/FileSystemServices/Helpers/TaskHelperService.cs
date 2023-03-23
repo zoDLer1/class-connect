@@ -111,7 +111,6 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public async new Task DeleteAsync(string id, User user)
     {
         var path = await base.DeleteAsync(id, user);
-        await _commonTaskQueries.DeleteAsync(id);
         Directory.Delete(path, true);
     }
 }

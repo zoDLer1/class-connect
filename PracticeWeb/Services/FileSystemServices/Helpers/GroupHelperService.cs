@@ -184,7 +184,6 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public async new Task DeleteAsync(string id, User user)
     {
         var path = await base.DeleteAsync(id, user);
-        await _commonGroupQueries.DeleteAsync(id);
         Directory.Delete(path, true);
     }
 }
