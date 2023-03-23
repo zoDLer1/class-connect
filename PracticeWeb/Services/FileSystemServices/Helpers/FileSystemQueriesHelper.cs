@@ -203,6 +203,14 @@ public abstract class FileSystemQueriesHelper
         if (work == null)
             return null;
 
+        var parentConnection = await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == id);
+        if (parentConnection == null)
+            throw new ItemNotFoundException();
+
+        var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == parentConnection.ParentId);
+        if (task == null)
+            throw new ItemNotFoundException();
+
         var items = _context.WorkItems
             .Where(w => w.WorkId == work.Id)
             .ToList()
@@ -224,6 +232,7 @@ public abstract class FileSystemQueriesHelper
         return new
         {
             Guid = work.Id,
+            IsLate = work.SubmitDate > task.Until,
             IsSubmitted = work.IsSubmitted,
             Mark = work.Mark,
             Files = items

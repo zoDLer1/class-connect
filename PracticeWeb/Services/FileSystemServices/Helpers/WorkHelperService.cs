@@ -58,6 +58,15 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
         // Если доступ запрашивает не студент и работа сдана, то показываем
         if (!(work?.IsSubmitted == true && user.RoleId != UserRole.Student))
             throw new AccessDeniedException();
+
+        var parentConnection = await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == id);
+        if (parentConnection == null)
+            throw new ItemNotFoundException();
+
+        var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == parentConnection.ParentId);
+        if (task == null)
+            throw new ItemNotFoundException();
+
         var folder = await base.GetFolderAsync(id, user);
         return new
         {
@@ -70,6 +79,7 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
             CreatorName = folder.CreatorName,
             Mark = work?.Mark,
             SubmitTime = work?.SubmitDate,
+            IsLate = work?.SubmitDate > task.Until,
             Access = folder.Access
         };
     }
@@ -84,6 +94,14 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (!(work?.IsSubmitted == true && user.RoleId != UserRole.Student))
             throw new AccessDeniedException();
 
+        var parentConnection = await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == id);
+        if (parentConnection == null)
+            throw new ItemNotFoundException();
+
+        var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == parentConnection.ParentId);
+        if (task == null)
+            throw new ItemNotFoundException();
+
         var folderItem = await base.GetFolderInfoAsync(id);
         return new
         {
@@ -93,7 +111,9 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
             CreationTime = folderItem.CreationTime,
             CreatorName = folderItem.CreatorName,
             Mark = work?.Mark,
-            IsEditable = false
+            IsEditable = false,
+            SubmitTime = work?.SubmitDate,
+            IsLate = work?.SubmitDate > task.Until
         };
     }
 
