@@ -166,7 +166,7 @@ public abstract class FileSystemQueriesHelper
         return await TryGetItemAsync(id);
     }
 
-    public async virtual Task<FolderItem> GetFolderInfoAsync(string id)
+    public async Task<FolderItem> GetFolderInfoAsync(string id)
     {
         return await PrepareItemAsync(id);
     }
@@ -215,7 +215,8 @@ public abstract class FileSystemQueriesHelper
                     Id = w.Id,
                     Name = item?.Name,
                     Type = item?.Type,
-                    MimeType = file?.MimeType
+                    MimeType = file?.MimeType,
+                    IsEditable = user.Id == item?.CreatorId
                 };
             })
             .Select(r => r.Result)
@@ -277,6 +278,9 @@ public abstract class FileSystemQueriesHelper
         await _context.SaveChangesAsync();
         return (Path.Combine(path, item.Id), await PrepareItemAsync(item.Id));
     }
+
+    protected Boolean CanEdit(Item item, User user, Permission permission) =>
+        !(permission < Permission.Write || !(user.Role.Id == UserRole.Administrator || item.CreatorId == user.Id));
 
     public async virtual Task<FolderItem> UpdateAsync(string id, string newName, User user)
     {
@@ -356,7 +360,7 @@ public abstract class FileSystemQueriesHelper
         var access = await HasUserAccessToParentAsync(id, user, new List<string>());
         var parentConnection = await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == id);
         if (parentConnection == null)
-            throw new AccessDeniedException();
+            throw new FolderNotFoundException();
 
         var parent = await TryGetItemAsync(parentConnection.ParentId);
         Console.WriteLine($"the user {user.Id} with role {user.RoleId} has access {access.Permission}. can write {(user.RoleId == UserRole.Student && parent.TypeId == Type.Work && access.Permission == Permission.Read)} in {parent.TypeId}");

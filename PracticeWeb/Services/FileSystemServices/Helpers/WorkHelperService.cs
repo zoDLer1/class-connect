@@ -77,6 +77,7 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public async virtual Task<object> GetChildItemAsync(string id, User user)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
+        var item = await TryGetItemAsync(id);
         var work = await _commonWorkQueries.GetAsync(id, _context.Works);
 
         // Если доступ запрашивает не студент и работа сдана, то показываем
@@ -91,7 +92,8 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Guid = folderItem.Guid,
             CreationTime = folderItem.CreationTime,
             CreatorName = folderItem.CreatorName,
-            Mark = work?.Mark
+            Mark = work?.Mark,
+            IsEditable = false
         };
     }
 

@@ -64,7 +64,10 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (user.Role.Id != UserRole.Teacher && access.Permission == Permission.None || access.Path.Count() == 0)
             throw new AccessDeniedException();
 
-        return await base.GetFolderInfoAsync(id);
+        var item = await TryGetItemAsync(id);
+        var folder = await base.GetFolderInfoAsync(id);
+        folder.IsEditable = CanEdit(item, user, access.Permission);
+        return folder;
     }
 
     public async Task CheckIfCanCreateAsync(string parentId, User user)

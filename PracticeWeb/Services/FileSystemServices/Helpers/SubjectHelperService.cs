@@ -70,6 +70,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public async virtual Task<object> GetChildItemAsync(string id, User user)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
+        var item = await TryGetItemAsync(id);
         var subject = await _commonSubjectQueries
             .GetAsync(id, _context.Subjects.Include(s => s.Group).ThenInclude(g => g.Item).Include(s => s.Teacher));
         if (subject == null)
@@ -89,7 +90,8 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
                 LastName = subject?.Teacher.Surname,
                 Patronymic = subject?.Teacher.Patronymic
             },
-            Description = subject?.Description
+            Description = subject?.Description,
+            IsEditable = CanEdit(item, user, access.Permission) && user.RoleId == UserRole.Administrator
         };
     }
 

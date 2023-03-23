@@ -59,6 +59,7 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public async virtual Task<object> GetChildItemAsync(string id, User user)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
+        var item = await TryGetItemAsync(id);
         var task = await _commonTaskQueries.GetAsync(id, _context.Tasks);
         var folderItem = await base.GetFolderInfoAsync(id);
         return new
@@ -68,7 +69,8 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Guid = folderItem.Guid,
             CreationTime = folderItem.CreationTime,
             CreatorName = folderItem.CreatorName,
-            Until = task?.Until
+            Until = task?.Until,
+            IsEditable = CanEdit(item, user, access.Permission)
         };
     }
 

@@ -101,6 +101,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public async Task<object> GetChildItemAsync(string id, User user)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
+        var item = await TryGetItemAsync(id);
         var group = await _commonGroupQueries.GetAsync(id, _context.Groups);
         var folderItem = await base.GetFolderInfoAsync(id);
         return new
@@ -110,7 +111,8 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Guid = folderItem.Guid,
             CreationTime = folderItem.CreationTime,
             Teacher = group?.TeacherId,
-            Data = user.Role.Id == UserRole.Student || group == null ? null : GetGroupData(group, user)
+            Data = user.Role.Id == UserRole.Student || group == null ? null : GetGroupData(group, user),
+            IsEditable = CanEdit(item, user, access.Permission)
         };
     }
 

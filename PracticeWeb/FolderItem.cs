@@ -12,4 +12,6 @@ public class FolderItem
 
     public DateTime CreationTime { get; set; }
     public string CreatorName { get; set; } = null!;
+
+    public Boolean IsEditable { get; set; }
 }
