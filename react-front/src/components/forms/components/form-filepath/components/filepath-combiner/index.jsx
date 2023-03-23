@@ -1,36 +1,40 @@
 import css from './filepath-combiner.module.css'
 import { useOpen } from 'hooks/useOpen'
+import { types } from 'types'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import typesCss from '../../../types.module.css'
 
+function FilePathCombiner({ items, setFolder }) {
 
-
-function FilePathCombiner({ items }) {
-
-    const { condition, toggle } = useOpen() 
+    const { condition, toggle } = useOpen()
     return (
         <>
 
-        <div className={css.block} onClick={toggle}>
-            <div className={css.main}>
-                ...
-            </div>
-             
-        </div>
-        {condition &&
-            <div className={css.body}>
-                <div className={css.items}>
-                    {items.map((item, index) =>{
-                    return  <div key={item.guid} className={css.item}>
-                                <i className={`${css.icon} fa-solid fa-folder`}></i>
-                                <p className={css.text}>{item.name}</p>  
-                            </div>
-                    })}
-                    
+            <div className={css.block} onClick={toggle}>
+                <div className={css.main}>
+                    ...
                 </div>
+
             </div>
-        }
+            {condition &&
+                <div className={css.body}>
+                    <div className={css.items}>
+                        {items.map((item) => {
+                            return <div key={item.guid} onClick={() => setFolder(item.guid)} className={css.item}>
+                                <div className={[css.icon, typesCss[`icon--${item.type.name.toLowerCase()}`]].join(' ')}>
+                                    <FontAwesomeIcon icon={types[item.type.name].icon}/>
+                                </div>
+
+                                <p className={css.text}>{item.name}</p>
+                            </div>
+                        })}
+
+                    </div>
+                </div>
+            }
         </>
-        
-        
+
+
     )
 }
 

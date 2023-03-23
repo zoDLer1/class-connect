@@ -48,8 +48,8 @@
     align-items: center;
     gap: 18px;
 }
+
 .icon{
-    color: var(--warning-color);
     font-size: 30px;
 }
 .title{
@@ -66,8 +66,8 @@
 }
 .block:has(input:checked){
     background-color: rgba(3, 136, 212, 0.2);
-    border-color: #0388D4;
+    border-color: var(--faded-primary-color);
 }
 .block:has(input:checked) > .arrow{
-    color: #0388D4;
+    color: var(--faded-primary-color);
 }

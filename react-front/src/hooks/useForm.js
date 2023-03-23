@@ -1,16 +1,22 @@
 import { useState } from 'react'
 import { useRequest } from 'hooks/useRequest'
 
-function useForm(InputsData, request, statuses={} ) {
+function useForm(InputsData, request = async () => null, statuses = {}) {
 
 
     const DEFAULT_STATUSES = {
         400: (response) => handleServerErrors(response.response.data.errors)
     }
     
-    const { send, waitingForResponse } = useRequest(request)
+
+    const [ send, waitingForResponse ] = useRequest(request, { ...DEFAULT_STATUSES, ...statuses })
     const [inputs, setInputs] = useState(InputsData)
     const [errors, setErrors] = useState({})
+    const addInput = (name, input_data) =>{
+        const newInputsData = {...InputsData}
+        newInputsData[name] = input_data
+        setInputs(newInputsData)
+    }
 
     const changeError = (inputName, error) => {
         setErrors((errors) => {
@@ -33,7 +39,7 @@ function useForm(InputsData, request, statuses={} ) {
 
     const getInput = (inputName) => {
         return {
-            onChange: (evt) => setInputValue(inputName, evt.target.value),
+            onChange: (value) => setInputValue(inputName, value),
             value: inputs[inputName].value,
             validate: () => validateInput(inputName),
             error: errors[inputName],
@@ -74,28 +80,28 @@ function useForm(InputsData, request, statuses={} ) {
         return validatedData
 
     }
-    const handleServerErrors = (errors) =>{
-        for (const key in errors){
+    const handleServerErrors = (errors) => {
+        for (const key in errors) {
             changeError(key, errors[key][0])
         }
     }
-    const getSubmit = () =>{
+    const getSubmit = () => {
         return {
             onClick: onSubmit,
             loading: waitingForResponse
         }
     }
 
-    const onSubmit = async () =>{
+    const onSubmit = async () => {
         const validated_data = getValidatedData()
-        if(Object.keys(validated_data).length){
-            await send(validated_data, {...DEFAULT_STATUSES, ...statuses})
+        if (Object.keys(validated_data).length) {
+            await send(validated_data)
         }
-        
+
     }
 
 
-    return { getSubmit, handleServerErrors, getInput, getValidatedData }
+    return { InputsData, getSubmit, handleServerErrors, getInput, getValidatedData, addInput }
 
 }
 

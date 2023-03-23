@@ -18,9 +18,11 @@
   --warning-color: #F4B43F;
   --light-color: #FFFFFF;
   --gray-text-color: #6D6D6D;
+  --orange-color: #D44E03;
   --light-gray-text-color: #B6B2B1;
   --title-font: 'Ubuntu', sans-serif;
-  --primary-font: 'Roboto', sans-serif
+  --primary-font: 'Roboto', sans-serif;
+  
 }
 
 *{

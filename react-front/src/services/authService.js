@@ -1,4 +1,4 @@
-import DefaultApiInstanse, { AuthApiInstanse } from "api";
+import { AuthApiInstanse } from "api";
 import user from "store/user";
 
 
@@ -21,10 +21,11 @@ class AuthService {
     }
 
     static async refresh_token(){
-        return DefaultApiInstanse.post('/User/refreshToken/', {refresh:user.refresh}).then(
+        const response = await AuthApiInstanse.post('/User/refreshToken/', {token:user.refresh})
+        response.then(
             (s) => user.access_token(s.data.access),
-            
         )
+        return response
     }
 
     static async register(email, password){

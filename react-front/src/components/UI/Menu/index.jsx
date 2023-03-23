@@ -1,4 +1,7 @@
 import css from './menu.module.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
+
 
 
 function Menu({ current, coords, condition, items }) {
@@ -15,8 +18,11 @@ function Menu({ current, coords, condition, items }) {
                                         item.action(current); 
                                         if (item.noneAutoClose)
                                             evt.stopPropagation()
-                                        }} key={index} className={css.item} >
-                                        <i className={`${item.icon} ${css.icon}`}></i>
+                                        }} key={index} className={css.item}>
+                                        <div className={css.icon}>
+                                            <FontAwesomeIcon icon={item.icon} size='xl'/>
+                                        </div>
+                                        
                                         <p className={css.text}>{item.text}</p>
                                     </div>
                             })}

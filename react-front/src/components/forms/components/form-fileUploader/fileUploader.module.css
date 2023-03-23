@@ -1,0 +1,32 @@
+.block{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.uploaded{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-radius: 10px;
+    border: 1px dashed  var(--dark-op20-color);
+    padding: 10px;
+    
+    
+}
+.uploaded *{
+    cursor: pointer;
+}
+.addfile{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    
+    
+}
+.addfile > *{
+    color: var(--dark-op25-color);
+    font-weight: 400;
+    font-size: 15px;
+}

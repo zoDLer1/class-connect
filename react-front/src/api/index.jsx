@@ -29,7 +29,10 @@ DefaultApiInstanse.interceptors.response.use(
         try {
             if (error.response.status === 401) {
 
-                await AuthService.refresh_token()
+                await AuthService.refresh_token().then(
+                    ()=>null,
+                    ()=>null
+                )
                 return DefaultApiInstanse.request(error.config)
             }
             

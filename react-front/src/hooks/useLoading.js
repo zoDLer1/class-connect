@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export function useLoading(func = async ()=>null, defaultLoad=true) {
+export function useLoading(func = async () => null, defaultLoad=true) {
     const [isLoading, setLoading] = useState(defaultLoad)
 
     const startLoading = () => setLoading(true)

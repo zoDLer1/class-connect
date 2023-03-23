@@ -12,15 +12,18 @@ import { useLoading } from 'hooks/useLoading'
 
 function FilesForm() {
 
+    const [fileInfo, setFileInfo] = useState()
 
-    const changeFolder = async (id) => {
+    const setFolder = async (id) => {
         const response = await FilesService.get_folder(id)
-        setFilePath(response.data.path)
-        branchItemsAtions.setItems(response.data.children)
+        const { children, path, ...fileInfo } = response.data
+        setFilePath(path)
+        branchItemsAtions.setItems(children)
+        setFileInfo(fileInfo)
     }
 
     const { isLoading } = useLoading(
-        async () => await changeFolder(user.data.folder)
+        async () => await setFolder(user.data.folder)
     )
 
 
@@ -51,22 +54,23 @@ function FilesForm() {
         }
     ],
     )
-    const [branchItems, branchItemsAtions, branchItemsStateActions] = useList((current) => console.log(current))
-
+    const [branchItems, branchItemsAtions, branchItemsStateActions, branchStoreActions] = useList((current) => console.log(current))
 
 
     return (
         <div className={css.block}>
             <div className={css.header}>
-                <FormFilePath loading={isLoading} path={filePath} />
-                <p className={css.username}>Username</p>
+                <FormFilePath setFolder={setFolder} loading={isLoading} path={filePath} />
+                <div className={css.user_info}>
+                    <p className={[css.role, css[`role--${user.data.role.toLowerCase()}`]].join(' ')}>{user.data.role}</p>
+                    <p className={css.username}>{user.data.name} {user.data.surname}</p>
+                </div>
+                
             </div>
             <div className={css.body}>
-                <FormFileBranch loading={isLoading} items={branchItems} actions={branchItemsAtions} state={branchItemsStateActions} />
+                <FormFileBranch setFolder={setFolder} current={fileInfo} loading={isLoading} store={branchStoreActions} items={branchItems} actions={branchItemsAtions} state={branchItemsStateActions} />
                 <div></div>
             </div>
-
-
         </div>
     )
 }

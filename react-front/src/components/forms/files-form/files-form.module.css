@@ -14,11 +14,31 @@
     justify-content: space-between;
     margin-bottom: 20px;
 }
+.user_info{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.role{
+    font-family: var(--title-font);
+    font-weight: 500;
+}
+.role--administrator{
+    color: var(--error-color);
+}
+.role--teacher{
+    color: var(--success-color);
+}
 .username{
     cursor: pointer;
     font-size: 18px;
     color: var(--light-gray-text-color);
 }
+.username:hover{
+    color: var(--primary-color);
+}
+
 .body{
     height: 100%;
     display: flex;

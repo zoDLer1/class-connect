@@ -1,0 +1,11 @@
+.icon--group,
+.icon--subject,
+.icon--file{
+    color: var(--primary-color);
+}
+.icon--folder{
+    color: var(--warning-color);
+}
+.icon--task{
+    color: var(--orange-color);
+}

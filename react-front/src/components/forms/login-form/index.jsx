@@ -25,7 +25,7 @@ function LoginForm() {
         },
         password: {
             value: 'admin',
-            validators: [REQUIRED(), MIN_LENGTH(4)]
+            validators: [REQUIRED(), MIN_LENGTH(0)]
         }
     },
         async (data) => await AuthService.login(data),

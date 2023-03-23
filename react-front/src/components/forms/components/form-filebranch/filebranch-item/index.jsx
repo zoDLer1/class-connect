@@ -1,28 +1,27 @@
 import css from './filebranch-item.module.css'
-import _uniqueId from 'lodash/uniqueId';
-import { useState } from 'react';
-import FormInput from '../../form-input';
+import { useId } from 'react';
+import Input from 'components/UI/Input';
+import { types } from 'types';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import typesCss from '../../types.module.css'
 
-function FileBranchItem({ value, onMenu, state, actions }) {
+function FileBranchItem({ value, onMenu, state, actions, setFolder }) {
 
-    const [id] = useState(_uniqueId('FBI-'))
+    const id = useId()
 
     return (
         
-        <div className={css.block} onContextMenu={(evt) => {
+        <div className={css.block} onClick={(evt) => evt.stopPropagation()} onDoubleClick={ async ()=> await setFolder(value.guid)} onContextMenu={(evt) => {
             onMenu(evt, value, state.editMode)
-            
-            
-            // if(state.editMode){
-            //     evt.stopPropagation()
-            // }
         }}>
             <input type="radio" hidden id={id} name='filebrach-item' />
-
             <label htmlFor={id} className={css.body}>
-                <i className={`${css.icon} fa-solid fa-folder`}></i>
+                <div className={[css.icon, typesCss[`icon--${value.type.name.toLowerCase()}`]].join(' ')}>
+                    <FontAwesomeIcon icon={types[value.type.name].icon}/>
+                </div>
+                
                 {state.editMode
-                    ? <FormInput style={{ cursor: 'text' }} onClick={(evt) => evt.stopPropagation()} onChange={(evt)=>actions.setProp('name', evt.target.value)} value={value.name} />
+                    ? <Input style={{ cursor: 'text' }}  onChange={(evt)=>actions.setProp('name', evt.target.value)} value={value.name} />
                     : <p className={css.title}>{value.name}</p>
                 }
             </label>

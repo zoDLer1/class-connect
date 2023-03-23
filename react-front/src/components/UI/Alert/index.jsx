@@ -1,20 +1,21 @@
 import css from './alert.module.css'
 
 
-export default ({ hook }) =>  {
+const Alert = ({ isShowing, info, hide }) =>  {
 
 
     const AnimEnd = (evt) => {
         if (evt.animationName.startsWith('alert_opening'))
-        hook.hide()
+        hide()
     }
 
-    if (hook.isShowing){
+    if (isShowing){
         return (
             <div onAnimationEnd={AnimEnd} className={css.block}>
-                {hook.info}
+                {info}
             </div>
         )
     }
     
 }
+export default Alert

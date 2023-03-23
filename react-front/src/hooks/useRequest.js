@@ -1,32 +1,37 @@
 import { useContext, useState } from 'react'
-import { AlertContext } from 'contexts/alertContext'
+import { GlobalUIContext } from 'contexts/GlobalUIContext'
 
 
 
 
-export const useRequest = (func = async () => null) => {
-    const alertShow = useContext(AlertContext)
+export const useRequest = (func = async () => null, statuses={}) => {
+    const { alert } = useContext(GlobalUIContext)
+
     const [waitingForResponse, setWaiting] = useState(false)     
 
-    const send = async (data, statuses) => {
+
+    const handleResponse = (response, data) =>{
+        const func = statuses[response.request.status]
+        if (func) func(response, data)
+    }
+
+    const send = async (data) => {
         setWaiting(true)
         const response = await func(data).then(
             (success) => {
-                const func = statuses[success.request.status]
-                if (func) func(success) 
+                handleResponse(success)
             },
             (error) => {
                 if (error.code === 'ERR_NETWORK'){
-                    alertShow('Сервер недоступен')     
+                    alert.show('Сервер недоступен')     
                 }
-                const func = statuses[error.request.status]
-                if (func) func(error)
+                handleResponse(error)
             }
         )
         setWaiting(false)
         return response
     }
 
-    return { send, waitingForResponse }
+    return [send, waitingForResponse]
 
 }

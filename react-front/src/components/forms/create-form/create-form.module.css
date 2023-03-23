@@ -1,0 +1,13 @@
+.body{
+    min-width: 332px;
+    min-height: 124px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.file_uploader{
+    display: flex;
+    /* justify-content: center */
+    
+}

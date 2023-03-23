@@ -1,0 +1,14 @@
+.block{
+    padding: 10px 15px;
+    border: 1px solid var(--dark-op20-color);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.text{
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
