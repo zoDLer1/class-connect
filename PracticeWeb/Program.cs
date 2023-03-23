@@ -46,6 +46,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+
+            ClockSkew = TimeSpan.Zero
         };
     });
 builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();

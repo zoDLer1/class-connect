@@ -128,18 +128,12 @@ public class UserController : ControllerBase
             return Unauthorized(new { errorText = "RefreshToken истёк" });
 
         var jwt = CreateToken(user);
-        var newRefreshToken = GenerateRefreshToken();
-        user.RefreshToken = newRefreshToken;
         await _userService.UpdateAsync(user);
 
         return new JsonResult(
             new {
                 accessToken = jwt,
-                refreshToken = new {
-                    token = newRefreshToken.Token,
-                    created = newRefreshToken.Created,
-                    expires = newRefreshToken.Expires
-                }
+                refreshToken = user.RefreshToken
             }
         );
     }
