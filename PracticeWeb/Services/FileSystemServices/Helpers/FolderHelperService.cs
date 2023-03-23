@@ -30,12 +30,14 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
                     permission = Permission.Read;
             }
 
+            Console.WriteLine($"folder access: {permission} in {id}");
             return new ItemAccess { Permission = permission, Path = path };
         }
 
-        var parentAccess = await HasUserAccessToParentAsync(id, user, path);
+        var access = await HasUserAccessToParentAsync(id, user, path);
+        Console.WriteLine($"folder access: {access.Permission} in {id}");
         path.Add(item.Id);
-        return parentAccess;
+        return access;
     }
 
     public async Task<object> GetAsync(string id, User user)
@@ -46,7 +48,12 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
             throw new AccessDeniedException();
 
         var folder = await base.GetFolderAsync(id, user);
-        folder.Path = await MakePathAsync(access.Path);
+        // В корне можно создать только группы
+        if (user.RoleId == UserRole.Administrator && access.Path.Count() == 1)
+            folder.Access = new List<string> { "Group" };
+        else
+            folder.Access.Remove("Group");
+
         return folder;
     }
 
@@ -60,22 +67,17 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return await base.GetFolderInfoAsync(id);
     }
 
-    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    public async Task CheckIfCanCreateAsync(string parentId, User user)
     {
-        // Если пытаемся создать папку в руте
         if (parentId == _rootGuid)
             throw new InvalidPathException();
 
-        var parent = await TryGetItemAsync(parentId);
-        var access = await _serviceAccessor(parent.Type.Id).HasAccessAsync(parent.Id, user, new List<string>());
+        await base.CheckIfCanCreateAsync(parentId, Type.Folder, user);
+    }
 
-        if (access.Permission != Permission.Write)
-            throw new AccessDeniedException();
-
-        // Проверка допустимости типов
-        if (!TypeDependence.Folder.Contains(parent.TypeId))
-            throw new InvalidPathException();
-
+    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    {
+        await CheckIfCanCreateAsync(parentId, user);
         var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Folder, user);
         return (itemPath, await GetChildItemAsync(item.Guid, user));
     }

@@ -69,7 +69,8 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
             CreationTime = folder.CreationTime,
             CreatorName = folder.CreatorName,
             Mark = work?.Mark,
-            SubmitTime = work?.SubmitDate
+            SubmitTime = work?.SubmitDate,
+            Access = folder.Access
         };
     }
 
@@ -94,20 +95,34 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    public async Task CheckIfCanCreateAsync(string parentId, User user)
     {
-        var parent = await TryGetItemAsync(parentId);
-        var access = await _serviceAccessor(parent.Type.Id).HasAccessAsync(parent.Id, user, new List<string>());
-
-        Console.WriteLine($"the user {user.Id} with role {user.RoleId} has access level {access.Permission}");
         if (user.RoleId != UserRole.Student)
             throw new AccessDeniedException();
+
+        if (parentId == _rootGuid)
+            throw new InvalidPathException();
+
+        var parent = await TryGetItemAsync(parentId);
+        var access = await _serviceAccessor(parent.Type.Id).HasAccessAsync(parent.Id, user, new List<string>());
 
         // Проверка допустимости типов
         if (!TypeDependence.Work.Contains(parent.TypeId))
             throw new InvalidPathException();
 
-        // Если задание уже включает работу пользователя, то бросаем исключение
+        var oldWork = await _context.Connections.Include(c => c.Child).FirstOrDefaultAsync(c => c.ParentId == parentId && c.Child.CreatorId == user.Id);
+        if (oldWork != null)
+        {
+            var work = await _commonWorkQueries.GetAsync(oldWork.ChildId, _context.Works);
+            if (work?.IsSubmitted == true)
+                throw new AccessDeniedException();
+        }
+    }
+
+    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    {
+        await CheckIfCanCreateAsync(parentId, user);
+
         var oldWork = await _context.Connections.Include(c => c.Child).FirstOrDefaultAsync(c => c.ParentId == parentId && c.Child.CreatorId == user.Id);
         if (oldWork != null)
             throw new FolderNotFoundException();

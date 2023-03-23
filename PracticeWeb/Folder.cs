@@ -13,4 +13,6 @@ public class Folder
 
     public DateTime CreationTime { get; set; }
     public string CreatorName { get; set; } = null!;
+
+    public List<string> Access { get; set; } = null!;
 }

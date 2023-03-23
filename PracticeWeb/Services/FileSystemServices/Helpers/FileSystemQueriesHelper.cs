@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using PracticeWeb.Exceptions;
@@ -54,6 +55,30 @@ public abstract class FileSystemQueriesHelper
     protected bool IsFilePathValid(string path) => !HasReturns(path) && File.Exists(path);
 
     protected bool IsFolderPathValid(string path) => !HasReturns(path) && Directory.Exists(path);
+
+    private async Task<List<string>> GetCreatingTypesAsync(FolderItem item, User user, Permission permission)
+    {
+        var result = new List<string>();
+
+        Console.WriteLine($"getting access for {item.Type.Id} with {permission} {typeof(TypeDependence).GetProperties().Length}");
+
+        foreach (var prop in typeof(TypeDependence).GetProperties())
+        {
+            Console.WriteLine($"property: {prop.Name}");
+            var dependence = prop.GetValue(null, null) as HashSet<Type>;
+            if (dependence?.Contains(item.Type.Id) == false)
+                continue;
+
+            try
+            {
+                await _serviceAccessor((Type) Enum.Parse(typeof(Type), prop.Name)).CheckIfCanCreateAsync(item.Guid, user);
+                result.Add(prop.Name);
+            }
+            catch {}
+        }
+
+        return result;
+    }
 
     protected async Task<List<object>> MakePathAsync(List<string> ids)
     {
@@ -115,6 +140,20 @@ public abstract class FileSystemQueriesHelper
         return children;
     }
 
+    public async virtual Task CheckIfCanCreateAsync(string parentId, Type type, User user)
+    {
+        var parent = await TryGetItemAsync(parentId);
+        var access = await _serviceAccessor(parent.Type.Id).HasAccessAsync(parent.Id, user, new List<string>());
+
+        if (access.Permission != Permission.Write)
+            throw new AccessDeniedException();
+
+        // Проверка допустимости типов
+        var prop = typeof(TypeDependence).GetProperty(type.ToString())?.GetValue(null, null) as HashSet<Type>;
+        if (prop == null || !prop.Contains(parent.TypeId))
+            throw new InvalidPathException();
+    }
+
     public async virtual Task<Permission> GetPermission(int userId, string id) {
         var access = await _context.Accesses.FirstOrDefaultAsync((a) => a.UserId == userId && a.ItemId == id);
         if (access == null)
@@ -140,6 +179,7 @@ public abstract class FileSystemQueriesHelper
 
         Console.WriteLine($"Item type name is {item.Type.Name}");
         var access = await _serviceAccessor(item.Type.Id).HasAccessAsync(id, user, new List<string>());
+        var types = await GetCreatingTypesAsync(item, user, access.Permission);
         if (access.Permission == Permission.None)
             throw new AccessDeniedException();
         var children = await _context.Connections.Where(c => c.ParentId == item.Guid).Select(i => i.ChildId).ToListAsync();
@@ -152,6 +192,7 @@ public abstract class FileSystemQueriesHelper
             Children = await PrepareChildrenAsync(children, user),
             CreationTime = item.CreationTime,
             CreatorName = item.CreatorName,
+            Access = types
         };
         return folder;
     }

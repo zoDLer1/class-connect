@@ -93,7 +93,8 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
                 LastName = group?.Teacher.Surname,
                 Patronymic = group?.Teacher.Patronymic
             },
-            Data = user.Role.Id == UserRole.Student || group == null ? null : GetGroupData(group, user)
+            Data = user.Role.Id == UserRole.Student || group == null ? null : GetGroupData(group, user),
+            Access = folder.Access
         };
     }
 
@@ -113,23 +114,23 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    public async Task CheckIfCanCreateAsync(string parentId, User user)
     {
-        var access = await _context.Accesses.FirstOrDefaultAsync((a) => a.ItemId == parentId && a.UserId == user.Id);
-        if (access == null || access.Permission != Permission.Write)
+        if (user.RoleId != UserRole.Administrator)
             throw new AccessDeniedException();
 
-        var parent = await TryGetItemAsync(parentId);
-        // Проверка допустимости типов
-        if (!TypeDependence.Group.Contains(parent.TypeId))
-            throw new InvalidPathException();
+        await base.CheckIfCanCreateAsync(parentId, Type.Group, user);
 
-        Console.WriteLine($"is root {_rootGuid}: {await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == parentId) == null} {parentId == _rootGuid}");
-        // Проверяем, является ли родитель корнем
+        // Является ли родитель корнем
         if (await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == parentId) != null && parentId != _rootGuid)
             throw new InvalidPathException();
+    }
 
-        // Проверяем, есть ли группа с таким же названием
+    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    {
+        await CheckIfCanCreateAsync(parentId, user);
+
+        // Еесть ли группа с таким же названием
         if (await _context.Groups.Include(g => g.Item).FirstOrDefaultAsync(g => g.Item.Name == name) != null)
             throw new InvalidGroupNameException();
 
@@ -171,7 +172,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (group == null)
             throw new ItemNotFoundException();
 
-        // Проверяем, есть ли группа с таким же названием
+        // Есть ли группа с таким же названием
         if (await _context.Groups.Include(g => g.Item).FirstOrDefaultAsync(g => g.Item.Name == newName) != null)
             throw new InvalidGroupNameException();
 

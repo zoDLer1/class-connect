@@ -62,7 +62,8 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             CreationTime = folder.CreationTime,
             Group = subject.Group.Item.Name,
             Teacher = subject.TeacherId,
-            Description = subject.Description
+            Description = subject.Description,
+            Access = folder.Access
         };
     }
 
@@ -92,23 +93,24 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    public async Task CheckIfCanCreateAsync(string parentId, User user)
     {
-        var access = await HasUserAccessToParentAsync(parentId, user, new List<string>());
-        if (access == null || access.Permission != Permission.Write)
+        if (user.RoleId != UserRole.Administrator)
             throw new AccessDeniedException();
 
-        var parent = await TryGetItemAsync(parentId);
-        // Проверка допустимости типов
-        if (!TypeDependence.Subject.Contains(parent.TypeId))
-            throw new InvalidPathException();
+        await base.CheckIfCanCreateAsync(parentId, Type.Subject, user);
 
-        // Проверяем, является ли родитель папкой
+        // Является ли родитель группой
         var group = await _commonGroupQueries.GetAsync(parentId, _context.Groups);
         if (group == null)
             throw new InvalidPathException();
+    }
 
-        // Проверяем, есть ли у данной группы предмет с таким же названием
+    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    {
+        await CheckIfCanCreateAsync(parentId, user);
+
+        // Усть ли у данной группы предмет с таким же названием
         var anotherSubject = _context
             .Subjects
             .Where(s => s.GroupId == parentId)
@@ -132,7 +134,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         var subject = new Subject
         {
             Id = item.Guid,
-            GroupId = group.Id,
+            GroupId = parentId,
             TeacherId = teacher.Id,
             Description = parameters?.ContainsKey("Description") == true ? parameters["Description"] as string : null
         };
@@ -156,7 +158,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (subject == null)
             throw new ItemNotFoundException();
 
-        // Проверяем, есть ли у данной группы предмет с таким же названием
+        // Усть ли у данной группы предмет с таким же названием
         var anotherSubject = _context
             .Subjects
             .Where(s => s.GroupId == subject.GroupId)

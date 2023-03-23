@@ -38,6 +38,9 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
             .Include(c => c.Child)
             .FirstOrDefaultAsync(c => c.ParentId == id && c.Child.CreatorId == user.Id);
 
+        if (user.RoleId != UserRole.Student)
+            folder.Access.Remove("Work");
+
         return new
         {
             Name = folder.Name,
@@ -48,7 +51,8 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
             CreationTime = folder.CreationTime,
             CreatorName = folder.CreatorName,
             Until = task?.Until,
-            Work = workConnection != null ? await GetWorkData(workConnection.ChildId, user) : null
+            Work = workConnection != null ? await GetWorkData(workConnection.ChildId, user) : null,
+            Access = folder.Access
         };
     }
 
@@ -68,21 +72,17 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
     }
 
-    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    public async Task CheckIfCanCreateAsync(string parentId, User user)
     {
-        // Если пытаемся создать файл в руте
         if (parentId == _rootGuid)
             throw new InvalidPathException();
 
-        var parent = await TryGetItemAsync(parentId);
-        var access = await _serviceAccessor(parent.Type.Id).HasAccessAsync(parent.Id, user, new List<string>());
+        await base.CheckIfCanCreateAsync(parentId, Type.Task, user);
+    }
 
-        if (access.Permission != Permission.Write)
-            throw new AccessDeniedException();
-
-        // Проверка допустимости типов
-        if (!TypeDependence.Task.Contains(parent.TypeId))
-            throw new InvalidPathException();
+    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    {
+        await CheckIfCanCreateAsync(parentId, user);
 
         DateTime? until = null;
         if (parameters?.ContainsKey("Until") == true)
