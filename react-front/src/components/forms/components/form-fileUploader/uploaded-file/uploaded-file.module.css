@@ -5,10 +5,16 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    width: 200px;
+    height: 40px;
 }
 .text{
     max-width: 150px;
     white-space: nowrap;
     overflow: hidden;
+    font-size: 14px;
     text-overflow: ellipsis;
+}
+.close{
+    cursor: pointer;
 }

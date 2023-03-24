@@ -13,6 +13,17 @@ export const REQUIRED = (errorMessage = 'Поле не должно быть п�
     return (value) => !value ? errorMessage : ''
 }
 
-export const MIN_LENGTH = (length, errorMessage = `Минимальная длина ${length} символов`) =>{
+export const MIN_LENGTH = (length, errorMessage = `Минимальная длина ${length} символов`) => {
     return (value) => value.length < length ? errorMessage : ''
+}
+
+export const IS_EXTANTIONS = (extantions, errorMessage = `Недопустимое расширение`) => {
+    return (value) => {
+        for (const extantion of extantions){
+            if (extantion === value.type){
+                return ''
+            }
+        }
+        return errorMessage
+    }
 }

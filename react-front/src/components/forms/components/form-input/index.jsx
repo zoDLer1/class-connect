@@ -2,13 +2,12 @@ import useInput from 'hooks/useInput'
 import Input from 'components/UI/Input'
 
 
-function FormInput({ validate, value, onChange, ...props}) {
+function FormInput({ validate, value, onChange, hidden=false, ...props}) {
 
     const { getProps } = useInput({validate, value, onChange})
     
-    return (
-        <Input {...props} {...getProps()} />
-    )
+    return !hidden ? <Input {...props} {...getProps()} /> : null
+    
 }
 
 export default FormInput

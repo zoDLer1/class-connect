@@ -31,6 +31,7 @@
     color: var(--error-color);
     /* width: 100px; */
     bottom: -19px;
+    white-space: nowrap;
     /* left: 0; */
 }
 .input:disabled{

@@ -4,7 +4,7 @@ import FormInput from '../components/form-input';
 import FormSubmit from '../components/form-submit';
 import FormSelect from '../components/form-select';
 import useForm from 'hooks/useForm';
-import { REQUIRED, MIN_LENGTH } from 'validation';
+import { REQUIRED, MIN_LENGTH, IS_EXTANTIONS } from 'validation';
 import FilesService from 'services/filesService';
 import { useLoading } from 'hooks/useLoading';
 import { useRequest } from 'hooks/useRequest';
@@ -14,34 +14,39 @@ import css from './create-form.module.css'
 import { useState } from 'react';
 import { types } from 'types';
 import FileUploader from '../components/form-fileUploader';
-
+import { useEffect } from 'react';
 
 
 const CreateForm = ({ current, close, setFolder }) => {
-    const [teachersOptions, setTeachers] = useState([])
-    const [ send ] = useRequest(
+    const [teachersOptions, setTeachers] = useState([{id: null}])
+    const [send, isLoading] = useRequest(
         async () => await UsersService.teachers(),
         {
             200: (response) => {
                 const options = response.data.map(teacher => ({ id: teacher.id, text: [teacher.firstName, teacher.lastName, teacher.patronymic].join(' ') }))
-                addInput('teacherId', {
-                    value: options[0].id,
-                    validators: [REQUIRED()],
-                })
                 setTeachers(options)
+                InputShow('teacherId', String(options[0].id))
             },
-            0: ()=> close()
+            0: () => close()
         }
     )
-    const { isLoading } = useLoading(
+    useLoading(
         async () => {
-            if(current.access.includes('Subject') || current.access.includes('Group')){
+            if (current.access.includes('Subject') || current.access.includes('Group')) {
                 await send()
             }
         }
     )
 
-    const { InputsData, getInput, getSubmit, addInput } = useForm({
+
+    const { InputHide, InputShow, getInput, getSubmit } = useForm({
+
+        teacherId: {
+            value: teachersOptions[0].id,
+            validators: [REQUIRED()],
+            hidden: true
+        },
+
         name: {
             value: '',
             validators: [REQUIRED(), MIN_LENGTH(4)]
@@ -50,6 +55,11 @@ const CreateForm = ({ current, close, setFolder }) => {
             value: current.access[0],
             validators: [REQUIRED()]
         },
+        uploadedFile: {
+            value: null,
+            validators: [REQUIRED(), IS_EXTANTIONS(['image/jpeg'])],
+            hidden: true
+        }
 
     },
         async (validated_data) => FilesService.create(current.guid, validated_data),
@@ -61,23 +71,26 @@ const CreateForm = ({ current, close, setFolder }) => {
         }
     )
 
-    const formOptions = [...current.access.map(key => ({ id: key, text: types[key].title }))]
+    const selectConfig = getInput('type')
+
+    useEffect(()=>{
+        selectConfig.value === 'File' ?  InputShow('uploadedFile') : InputHide('uploadedFile')
+        selectConfig.value === 'Group' || selectConfig.value === 'Subject' ?  InputShow('teacherId') : InputHide('teacherId')
+        
+    }, [selectConfig.value])
+
+
+    const formOptions = [...current.access.map(key => ({ id: key, text: types[key].title }))] // {id: 'Group', text: 'testGroup'}
     return (
         <div className={formsCss.block}>
             <FormHeader text='Создать' />
             <div className={css.body}>
                 <FormLoader loading={isLoading}>
                     <div className={[formsCss.inputs, css.inputs].join(' ')}>
-                        {teachersOptions.length ? <FormSelect {...getInput('teacherId')} options={teachersOptions} title="Преподаватели:" />: ''}
-                        <FormSelect {...getInput('type')} options={formOptions} title="Тип:" />
-                        
-                       
-                        
+                        <FormSelect {...getInput('teacherId')} options={teachersOptions} title="Преподаватели:" />
+                        <FormSelect {...selectConfig} options={formOptions} title="Тип:" />
                         <FormInput {...getInput('name')} title="Имя:" />
-                        {getInput('type').value === 'File' ?
-                            <div className={css.file_uploader}>
-                                <FileUploader/>
-                            </div> :""}
+                        <FileUploader {...getInput('uploadedFile')} />
                     </div>
                     <FormSubmit text="Создать" {...getSubmit()} />
                 </FormLoader>

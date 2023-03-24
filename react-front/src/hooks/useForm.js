@@ -7,13 +7,13 @@ function useForm(InputsData, request = async () => null, statuses = {}) {
     const DEFAULT_STATUSES = {
         400: (response) => handleServerErrors(response.response.data.errors)
     }
-    
 
-    const [ send, waitingForResponse ] = useRequest(request, { ...DEFAULT_STATUSES, ...statuses })
+
+    const [send, waitingForResponse] = useRequest(request, { ...DEFAULT_STATUSES, ...statuses })
     const [inputs, setInputs] = useState(InputsData)
     const [errors, setErrors] = useState({})
-    const addInput = (name, input_data) =>{
-        const newInputsData = {...InputsData}
+    const addInput = (name, input_data) => {
+        const newInputsData = { ...InputsData }
         newInputsData[name] = input_data
         setInputs(newInputsData)
     }
@@ -37,23 +37,28 @@ function useForm(InputsData, request = async () => null, statuses = {}) {
     }
     const setInputValue = (inputName, value) => setInput(inputName, 'value', value)
 
+
+
     const getInput = (inputName) => {
         return {
             onChange: (value) => setInputValue(inputName, value),
             value: inputs[inputName].value,
             validate: () => validateInput(inputName),
             error: errors[inputName],
-            disabled: waitingForResponse
+            disabled: waitingForResponse,
+            hidden: inputs[inputName].hidden
 
         }
     }
     const validateInput = (inputName) => {
 
         for (const validator of inputs[inputName].validators) {
-            const errorMessage = validator(inputs[inputName].value)
-            changeError(inputName, errorMessage)
-            if (errorMessage) {
-                return true
+            if (!inputs[inputName].hidden) {
+                const errorMessage = validator(inputs[inputName].value)
+                changeError(inputName, errorMessage)
+                if (errorMessage) {
+                    return true
+                }
             }
         }
         return false
@@ -74,7 +79,9 @@ function useForm(InputsData, request = async () => null, statuses = {}) {
         const error = validateInputs()
         if (!error) {
             for (const key in inputs) {
-                validatedData[key] = inputs[key].value
+                if (!inputs[key].hidden) {
+                    validatedData[key] = inputs[key].value
+                }
             }
         }
         return validatedData
@@ -92,6 +99,23 @@ function useForm(InputsData, request = async () => null, statuses = {}) {
         }
     }
 
+    const InputHide = (inputName) => {
+        setInputs((newInputsData) => {
+            newInputsData[inputName].hidden = true
+            return newInputsData
+        })
+    }
+    const InputShow = (inputName, newValue) => {
+        setInputs((newInputsData) => {
+
+            newInputsData[inputName].hidden = false
+            if (newValue) {
+                newInputsData[inputName].value = newValue
+            }
+            return newInputsData
+        })
+    }
+
     const onSubmit = async () => {
         const validated_data = getValidatedData()
         if (Object.keys(validated_data).length) {
@@ -101,7 +125,7 @@ function useForm(InputsData, request = async () => null, statuses = {}) {
     }
 
 
-    return { InputsData, getSubmit, handleServerErrors, getInput, getValidatedData, addInput }
+    return { InputsData, InputHide, InputShow, getSubmit, handleServerErrors, getInput, getValidatedData, addInput }
 
 }
 
