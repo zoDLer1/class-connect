@@ -26,8 +26,6 @@ export const useList = (onAutoClose = () => null) => {
 
     const { add, remove } = useContext(CloseContext)
 
-
-
     const findItemIndex = (lst, id) => {
         return [...lst].findIndex(item => item.value.guid === id)
     }
@@ -85,7 +83,7 @@ export const useList = (onAutoClose = () => null) => {
         add({
             id, close: () => {
                 editModeOff(id)
-                onAutoClose(id)
+                onAutoClose(list[findItemIndex(list, id)])
             }
         })
     }
@@ -112,8 +110,6 @@ export const useList = (onAutoClose = () => null) => {
             return newList
         })
     }
-
-
     const getItem = (id) => {
         return {
             update: (data) => updateItem(id, data),
@@ -125,8 +121,6 @@ export const useList = (onAutoClose = () => null) => {
         }
 
     }
-
-
     const removeItem = (id) => {
         setList((list) => [...list].filter(item => item.value.guid !== id))
     }

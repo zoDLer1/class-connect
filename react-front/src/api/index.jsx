@@ -1,6 +1,6 @@
 import axios from "axios";
 import user from "store/user";
-import AuthService from "services/authService";
+// import AuthService from "services/authService";
 
 
 
@@ -27,14 +27,14 @@ DefaultApiInstanse.interceptors.response.use(
     },
     async (error) => {
         try {
-            if (error.response.status === 401) {
+            // if (error.response.status === 401) {
 
-                await AuthService.refresh_token().then(
-                    ()=>null,
-                    ()=>null
-                )
-                return DefaultApiInstanse.request(error.config)
-            }
+            //     await AuthService.refresh_token().then(
+            //         ()=>null,
+            //         ()=>null
+            //     )
+            //     return DefaultApiInstanse.request(error.config)
+            // }
             
         }
         catch {
