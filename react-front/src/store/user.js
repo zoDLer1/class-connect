@@ -1,5 +1,4 @@
 import { makeAutoObservable } from "mobx"
-import files from "./files"
 
 
 class User{
@@ -23,8 +22,7 @@ class User{
 
     set_user_data(data){
         this.data = data
-        
-        files.set_current_folder(data.folder)
+
         localStorage.setItem('user', JSON.stringify(data))
     } 
 }

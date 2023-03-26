@@ -1,0 +1,17 @@
+.block{
+
+}
+.header{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 2px solid var(--primary-color);
+    padding: 0 8px 6px 8px;
+}
+.title{
+    font-size: 20px;
+    font-weight: 700;
+}
+.icon{
+    color: var(--primary-color);
+}

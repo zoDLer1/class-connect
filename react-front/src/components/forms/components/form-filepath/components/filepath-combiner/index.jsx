@@ -3,8 +3,12 @@ import { useOpen } from 'hooks/useOpen'
 import { types } from 'types'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import typesCss from '../../../types.module.css'
+import { useNavigate } from 'react-router-dom'
 
-function FilePathCombiner({ items, setFolder }) {
+
+function FilePathCombiner({ items }) {
+
+    const navigate = useNavigate()
 
     const { condition, toggle } = useOpen()
     return (
@@ -20,7 +24,7 @@ function FilePathCombiner({ items, setFolder }) {
                 <div className={css.body}>
                     <div className={css.items}>
                         {items.map((item) => {
-                            return <div key={item.guid} onClick={() => setFolder(item.guid)} className={css.item}>
+                            return <div key={item.guid} onClick={() => navigate('/files/'+item.guid)} className={css.item}>
                                 <div className={[css.icon, typesCss[`icon--${item.type.name.toLowerCase()}`]].join(' ')}>
                                     <FontAwesomeIcon icon={types[item.type.name].icon}/>
                                 </div>

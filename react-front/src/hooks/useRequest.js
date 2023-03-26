@@ -1,12 +1,12 @@
 import { useContext, useState } from 'react'
 import { GlobalUIContext } from 'contexts/GlobalUIContext'
-// import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 
 
 export const useRequest = (func = async () => null, statuses={}) => {
     const { alert } = useContext(GlobalUIContext)
-    // const navigate = useNavigate()
+    const navigate = useNavigate()
     const [waitingForResponse, setWaiting] = useState(false)     
 
 
@@ -25,9 +25,10 @@ export const useRequest = (func = async () => null, statuses={}) => {
                 if (error.code === 'ERR_NETWORK'){
                     alert.show('Сервер недоступен')     
                 }
-                // if (error.status === 401){
-                //     navigate('/login')
-                // }
+                if(error.response.status === 401){
+                    navigate('/login')
+                }
+                
                 handleResponse(error)
             }
         )

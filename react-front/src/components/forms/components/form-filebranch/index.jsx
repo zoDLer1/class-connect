@@ -6,7 +6,7 @@ import { GlobalUIContext } from 'contexts/GlobalUIContext'
 import CreateForm from 'components/forms/create-form'
 import { Types } from './filebranch-item/types'
 
-function FormFileBranch({ current, items, actions, state, loading, store, setFolder, requests }) {
+function FormFileBranch({ current, items, actions, state, loading, store, requests }) {
 
     const { remove } = requests
 
@@ -35,7 +35,7 @@ function FormFileBranch({ current, items, actions, state, loading, store, setFol
     const PopupCreateFormOpen = (current) => {
         popup.open()
         popup.setCurrent(current)
-        popup.setContent(<CreateForm setFolder={setFolder} />)
+        popup.setContent(<CreateForm />)
     }
 
     const ItemsMenuOpen = (evt, data, editMode) => {
@@ -67,7 +67,7 @@ function FormFileBranch({ current, items, actions, state, loading, store, setFol
                     const Elem = Types[item.value.type.name] || Types.Folder
                     return <Elem
                         key={'FBI' + item.value.guid}
-                        setFolder={setFolder}
+                     
                         {...item}
                         actions={actions.getItem(item.value.guid)}
                         onMenu={(evt, data, editMode) => {

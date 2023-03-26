@@ -1,5 +1,5 @@
 import css from './header.module.css'
-
+import { Link } from 'react-router-dom'
 
 function Header() {
     const user = false
@@ -15,9 +15,9 @@ function Header() {
                     {!user 
                     ? 
                     <>
-                        <a href="/">Регистрация</a>
+                        <Link to="/login">Регистрация</Link>
                         |
-                        <a href="/">Войти</a>
+                        <Link to="/register">Войти</Link>
                     </>
                         
                     :

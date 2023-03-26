@@ -4,13 +4,19 @@ import FormFileBranch from '../components/form-filebranch'
 import { useState } from 'react'
 import { useList } from 'hooks/useList'
 import FilesService from 'services/filesService'
-import files from 'store/files'
-import { useLoading } from 'hooks/useLoading'
+
 import user from 'store/user'
 import { useRequest } from 'hooks/useRequest'
+import FormFileInfo from '../components/formFileInfo'
+import { useParams } from 'react-router-dom'
+import { useEffect } from 'react'                   
 
 
 function FilesForm() {
+
+    const { id } = useParams()
+
+    const [parentFileInfo, setParentFileInfo] = useState()
 
     const [fileInfo, setFileInfo] = useState()
 
@@ -31,24 +37,43 @@ function FilesForm() {
         }
     )
 
-    const [setFolder] = useRequest(
+    const [setFolder, isLoading] = useRequest(
         async (id) => await FilesService.get_folder(id),
         {
             200: (response) => {
+
+
+
                 const { children, path, ...fileInfo } = response.data
+              
                 setFilePath(path)
                 branchItemsAtions.setItems(children)
-                setFileInfo(fileInfo)
-                files.set_current_folder(fileInfo.guid)
+                setParentFileInfo(fileInfo)
+                if (fileInfo.name !== 'Группы'){
+                    // fileInfo.data['main'] = {}
+                    // fileInfo.data.main['teacher'] = fileInfo.teacher
+                    // fileInfo.data.main['creationTime'] = fileInfo.creationTime
+                    // delete fileInfo.creationTime
+                    // delete fileInfo.teacher
+                    setFileInfo({ data: fileInfo.data, name: fileInfo.name })
+                }
             }
+            // 400: ()
         }
     )
 
-    const { isLoading } = useLoading(
-        async () => await setFolder(files.current_folder)
-    )
+
+    useEffect(() => {
+        const renderFolder = async () =>{
+            await setFolder(id)
+        }
+        renderFolder()
 
 
+    }, [id]);
+
+
+    
     const [filePath, setFilePath] = useState([
         {
             "name": "",
@@ -82,7 +107,7 @@ function FilesForm() {
     return (
         <div className={css.block}>
             <div className={css.header}>
-                <FormFilePath setFolder={setFolder} loading={isLoading} path={filePath} />
+                <FormFilePath loading={isLoading} path={filePath} />
                 <div className={css.user_info}>
                     <p className={[css.role, css[`role--${user.data.role.toLowerCase()}`]].join(' ')}>{user.data.role}</p>
                     <p className={css.username}>{user.data.name} {user.data.surname}</p>
@@ -90,8 +115,8 @@ function FilesForm() {
 
             </div>
             <div className={css.body}>
-                <FormFileBranch setFolder={setFolder}
-                    current={fileInfo}
+                <FormFileBranch 
+                    current={parentFileInfo}
                     loading={isLoading}
                     store={branchStoreActions}
                     items={branchItems}
@@ -99,7 +124,7 @@ function FilesForm() {
                     state={branchItemsStateActions}
                     requests={{ remove }}
                 />
-                <div></div>
+                {/* <FormFileInfo {...fileInfo}/> */}
             </div>
         </div>
     )

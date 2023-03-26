@@ -30,7 +30,7 @@ function LoginForm() {
     },
         async (data) => await AuthService.login(data),
         {
-            200: () => navigate('/files'),
+            200: (response) => { console.log(response); navigate('/files/' + response.data.user.folder) },
             404: (response) => handleServerErrors(response.response.data.errors)
         }
     )

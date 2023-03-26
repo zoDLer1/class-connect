@@ -11,16 +11,19 @@ import GlobalUI from 'globalUI';
 const Router = () => {
     return (
 
-        <GlobalUI>
-            <BrowserRouter>
+
+        <BrowserRouter>
+            <GlobalUI>
                 <Routes>
                     <Route path='/' element={<Index />}></Route>
                     <Route path='/login' element={<Login />}></Route>
                     <Route path='/register' element={<Register />}></Route>
-                    <Route path='/files' element={<Files />}></Route>
+                    <Route path='/files/:id' element={<Files />}></Route>
                 </Routes>
-            </BrowserRouter>
-        </GlobalUI>
+            </GlobalUI>
+        </BrowserRouter>
+
+
     );
 }
 
