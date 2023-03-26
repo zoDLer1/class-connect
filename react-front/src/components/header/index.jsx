@@ -15,9 +15,9 @@ function Header() {
                     {!user 
                     ? 
                     <>
-                        <Link to="/login">Регистрация</Link>
+                        <Link to="/register">Регистрация</Link>
                         |
-                        <Link to="/register">Войти</Link>
+                        <Link to="/login">Войти</Link>
                     </>
                         
                     :

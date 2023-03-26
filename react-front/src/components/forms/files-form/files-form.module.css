@@ -1,7 +1,8 @@
 .block{
+    box-shadow: 0 10px 15px -3px var(--dark-op10-color), 0 4px 6px -4px var(--dark-op10-color);
     background-color: var(--light-color);
-    width: 1445px;
-    height: 800px;
+    width: 1245px;
+    height: 700px;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
