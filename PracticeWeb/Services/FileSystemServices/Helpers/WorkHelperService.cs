@@ -50,7 +50,7 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return access;
     }
 
-    public async Task<object> GetAsync(string id, User user)
+    public async Task<object> GetAsync(string id, User user, Boolean asChild)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
         var work = await _commonWorkQueries.GetAsync(id, _context.Works);
@@ -67,7 +67,7 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (task == null)
             throw new ItemNotFoundException();
 
-        var folder = await base.GetFolderAsync(id, user);
+        var folder = await base.GetFolderAsync(id, user, asChild);
         return new
         {
             Name = folder.Name,
@@ -75,45 +75,15 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Guid = folder.Guid,
             Path = folder.Path,
             Children = folder.Children,
-            CreationTime = folder.CreationTime,
-            CreatorName = folder.CreatorName,
-            Mark = work?.Mark,
-            SubmitTime = work?.SubmitDate,
-            IsLate = work?.SubmitDate > task.Until,
-            Access = folder.Access
-        };
-    }
-
-    public async virtual Task<object> GetChildItemAsync(string id, User user)
-    {
-        var access = await HasAccessAsync(id, user, new List<string>());
-        var item = await TryGetItemAsync(id);
-        var work = await _commonWorkQueries.GetAsync(id, _context.Works);
-
-        // Если доступ запрашивает не студент и работа сдана, то показываем
-        if (!(work?.IsSubmitted == true && user.RoleId != UserRole.Student))
-            throw new AccessDeniedException();
-
-        var parentConnection = await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == id);
-        if (parentConnection == null)
-            throw new ItemNotFoundException();
-
-        var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == parentConnection.ParentId);
-        if (task == null)
-            throw new ItemNotFoundException();
-
-        var folderItem = await base.GetFolderInfoAsync(id);
-        return new
-        {
-            Name = folderItem.Name,
-            Type = folderItem.Type,
-            Guid = folderItem.Guid,
-            CreationTime = folderItem.CreationTime,
-            CreatorName = folderItem.CreatorName,
-            Mark = work?.Mark,
-            IsEditable = false,
-            SubmitTime = work?.SubmitDate,
-            IsLate = work?.SubmitDate > task.Until
+            Data = new {
+                CreationTime = folder.Data.CreationTime,
+                CreatorName = folder.Data.CreatorName,
+                Mark = work?.Mark,
+                SubmitTime = work?.SubmitDate,
+                IsLate = work?.SubmitDate > task.Until,
+            },
+            Access = folder.Access,
+            IsEditable = false
         };
     }
 

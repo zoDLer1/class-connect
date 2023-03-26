@@ -125,7 +125,7 @@ public class FileSystemService : IFileSystemService
     {
         await CreateFileSystemIfNotExistsAsync();
         var item = await TryGetItemAsync(id);
-        return await _serviceAccessor(item.Type.Id).GetAsync(id, user);
+        return await _serviceAccessor(item.Type.Id).GetAsync(id, user, false);
     }
 
     public async Task<object> SubmitWork(string id, User user)
@@ -156,7 +156,7 @@ public class FileSystemService : IFileSystemService
         if (parentConnection == null)
             throw new ItemNotFoundException();
 
-        return await _serviceAccessor(Type.Task).GetAsync(parentConnection.ParentId, user);
+        return await _serviceAccessor(Type.Task).GetAsync(parentConnection.ParentId, user, false);
     }
 
     public async Task<object> MarkWork(string id, int mark, User user)
@@ -187,7 +187,7 @@ public class FileSystemService : IFileSystemService
 
         work.Mark = mark;
         await _commonWorkQueries.UpdateAsync(work);
-        return await _serviceAccessor(Type.Task).GetAsync(parentConnection.ParentId, user);
+        return await _serviceAccessor(Type.Task).GetAsync(parentConnection.ParentId, user, false);
     }
 
     public async Task<object> CreateWorkAsync(string parentId, string name, IFormFile file, User user)
@@ -228,13 +228,15 @@ public class FileSystemService : IFileSystemService
         };
         await _context.WorkItems.AddAsync(workItem);
         await _context.SaveChangesAsync();
-        return await _serviceAccessor(Type.Task).GetAsync(parentId, user);
+        return await _serviceAccessor(Type.Task).GetAsync(parentId, user, false);
     }
 
     public async Task<object> CreateFileAsync(string parentId, IFormFile file, User user)
     {
         await CreateFileSystemIfNotExistsAsync();
+        Console.WriteLine($"UPLOADING FILE {parentId}");
         var (path, item) = await _serviceAccessor(Type.File).CreateAsync(parentId, file.FileName.Trim(), user);
+        Console.WriteLine($"UPLOADING FILE {path}: {parentId}");
         using (var fileStream = new FileStream(path, FileMode.Create))
             await file.CopyToAsync(fileStream);
         return item;

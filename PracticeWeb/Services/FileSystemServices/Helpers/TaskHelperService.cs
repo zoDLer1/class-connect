@@ -28,11 +28,12 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return access;
     }
 
-    public async Task<object> GetAsync(string id, User user)
+    public async Task<object> GetAsync(string id, User user, Boolean asChild)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
+        var item = await TryGetItemAsync(id);
         var task = await _commonTaskQueries.GetAsync(id, _context.Tasks);
-        var folder = await base.GetFolderAsync(id, user);
+        var folder = await base.GetFolderAsync(id, user, asChild);
 
         var workConnection = await _context.Connections
             .Include(c => c.Child)
@@ -47,30 +48,15 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Type = folder.Type,
             Guid = folder.Guid,
             Path = folder.Path,
-            Children = folder.Children,
-            CreationTime = folder.CreationTime,
-            CreatorName = folder.CreatorName,
-            Until = task?.Until,
-            Work = workConnection != null ? await GetWorkData(workConnection.ChildId, user) : null,
-            Access = folder.Access
-        };
-    }
-
-    public async virtual Task<object> GetChildItemAsync(string id, User user)
-    {
-        var access = await HasAccessAsync(id, user, new List<string>());
-        var item = await TryGetItemAsync(id);
-        var task = await _commonTaskQueries.GetAsync(id, _context.Tasks);
-        var folderItem = await base.GetFolderInfoAsync(id);
-        return new
-        {
-            Name = folderItem.Name,
-            Type = folderItem.Type,
-            Guid = folderItem.Guid,
-            CreationTime = folderItem.CreationTime,
-            CreatorName = folderItem.CreatorName,
-            Until = task?.Until,
-            IsEditable = CanEdit(item, user, access.Permission)
+            Children = asChild ? null : folder.Children,
+            Data = new {
+                CreationTime = folder.Data.CreationTime,
+                CreatorName = folder.Data.CreatorName,
+                Until = task?.Until,
+                Work = workConnection != null ? await GetWorkData(workConnection.ChildId, user) : null,
+            },
+            Access = folder.Access,
+            IsEditable = folder.IsEditable
         };
     }
 
@@ -107,7 +93,7 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Until = until
         };
         await _commonTaskQueries.CreateAsync(task);
-        return (itemPath, await GetChildItemAsync(item.Guid, user));
+        return (itemPath, await GetAsync(item.Guid, user, true));
     }
 
     public async new Task DeleteAsync(string id, User user)

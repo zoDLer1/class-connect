@@ -44,54 +44,39 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return access;
     }
 
-    public async Task<object> GetAsync(string id, User user)
+    public async Task<object> GetAsync(string id, User user, Boolean asChild)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
-        var subject = await _commonSubjectQueries.GetAsync(id, _context.Subjects.Include(s => s.Group));
+        var item = await TryGetItemAsync(id);
+        var subject = await _commonSubjectQueries.GetAsync(id, _context
+            .Subjects
+            .Include(s => s.Group)
+            .ThenInclude(g => g.Item)
+            .Include(s => s.Teacher));
         if (subject == null)
             throw new ItemNotFoundException();
 
-        var folder = await base.GetFolderAsync(id, user);
+        var folder = await base.GetFolderAsync(id, user, asChild);
         return new
         {
             Name = folder.Name,
             Type = folder.Type,
             Guid = folder.Guid,
             Path = folder.Path,
-            Children = folder.Children,
-            CreationTime = folder.CreationTime,
-            Group = subject.Group.Item.Name,
-            Teacher = subject.TeacherId,
-            Description = subject.Description,
-            Access = folder.Access
-        };
-    }
-
-    public async virtual Task<object> GetChildItemAsync(string id, User user)
-    {
-        var access = await HasAccessAsync(id, user, new List<string>());
-        var item = await TryGetItemAsync(id);
-        var subject = await _commonSubjectQueries
-            .GetAsync(id, _context.Subjects.Include(s => s.Group).ThenInclude(g => g.Item).Include(s => s.Teacher));
-        if (subject == null)
-            throw new ItemNotFoundException();
-
-        var folderItem = await base.GetFolderInfoAsync(id);
-        return new
-        {
-            Name = folderItem.Name,
-            Type = folderItem.Type,
-            Guid = folderItem.Guid,
-            CreationTime = folderItem.CreationTime,
-            Group = subject.Group.Item.Name,
-            Teacher = new {
-                Id = subject?.Teacher.Id,
-                FirstName = subject?.Teacher.Name,
-                LastName = subject?.Teacher.Surname,
-                Patronymic = subject?.Teacher.Patronymic
+            Children = asChild ? null : folder.Children,
+            Data = new {
+                CreationTime = folder.Data.CreationTime,
+                Group = subject.Group.Item.Name,
+                Teacher = new {
+                    Id = subject.Teacher.Id,
+                    Name = subject.Teacher.Name,
+                    Surname = subject.Teacher.Surname,
+                    Patronymic = subject.Teacher.Patronymic
+                },
+                Description = subject.Description,
             },
-            Description = subject?.Description,
-            IsEditable = CanEdit(item, user, access.Permission) && user.RoleId == UserRole.Administrator
+            Access = folder.Access,
+            IsEditable = folder.IsEditable
         };
     }
 
@@ -148,7 +133,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
         _context.Accesses.Add(teacherAccess);
         await _context.SaveChangesAsync();
-        return (itemPath, await GetChildItemAsync(item.Guid, user));
+        return (itemPath, await GetAsync(item.Guid, user, true));
     }
 
     public async override Task<FolderItem> UpdateAsync(string id, string newName, User user)

@@ -25,7 +25,7 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return access;
     }
 
-    public async Task<object> GetAsync(string id, User user)
+    public async Task<object> GetAsync(string id, User user, Boolean asChild)
     {
         await HasAccessAsync(id, user, new List<string>());
         var item = await base.GetAsync(id);
@@ -36,30 +36,30 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (fileEntity == null)
             throw new ItemNotFoundException();
 
-        var pathItems = await GeneratePathAsync(item.Id);
-        var path = CombineWithFileSystemPath(string.Join(Path.DirectorySeparatorChar, pathItems));
-        if (!IsFilePathValid(path))
-            throw new ItemNotFoundException();
+        if (!asChild)
+        {
+            var pathItems = await GeneratePathAsync(item.Id);
+            var path = CombineWithFileSystemPath(string.Join(Path.DirectorySeparatorChar, pathItems));
+            if (!IsFilePathValid(path))
+                throw new ItemNotFoundException();
 
-        var filestream = new FileStream(path, FileMode.Open);
-        var name = Path.GetExtension(item.Name) == fileEntity.Extension ? item.Name : item.Name + fileEntity.Extension;
-        return new FileStreamResult(filestream, fileEntity.MimeType) { FileDownloadName = name };
-    }
+            var filestream = new FileStream(path, FileMode.Open);
+            var name = Path.GetExtension(item.Name) == fileEntity.Extension ? item.Name : item.Name + fileEntity.Extension;
+            return new FileStreamResult(filestream, fileEntity.MimeType) { FileDownloadName = name };
+        }
 
-    public async virtual Task<object> GetChildItemAsync(string id, User user)
-    {
         var access = await HasAccessAsync(id, user, new List<string>());
-        var item = await TryGetItemAsync(id);
         var folderItem = await base.GetFolderInfoAsync(id);
-        var fileEntity = await _commonFileQueries.GetAsync(id, _context.Files);
         return new
         {
             Name = folderItem.Name,
             Type = folderItem.Type,
             Guid = folderItem.Guid,
-            MimeType = fileEntity?.MimeType,
-            CreationTime = folderItem.CreationTime,
-            CreatorName = folderItem.CreatorName,
+            Data = new {
+                MimeType = fileEntity?.MimeType,
+                CreationTime = folderItem.Data.CreationTime,
+                CreatorName = folderItem.Data.CreatorName,
+            },
             IsEditable = CanEdit(item, user, access.Permission)
         };
     }
@@ -87,7 +87,7 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
             MimeType = MimeTypes.GetMimeType(item.Name)
         };
         await _commonFileQueries.CreateAsync(fileEntity);
-        return (itemPath, await GetChildItemAsync(item.Guid, user));
+        return (itemPath, await GetAsync(item.Guid, user, true));
     }
 
     public async new Task DeleteAsync(string id, User user)

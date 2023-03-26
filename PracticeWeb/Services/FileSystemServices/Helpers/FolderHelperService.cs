@@ -40,33 +40,20 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return access;
     }
 
-    public async Task<object> GetAsync(string id, User user)
+    public async Task<object> GetAsync(string id, User user, Boolean asChild)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
         // Проверяем, если запрос от студента и он обращается ли к корню
         if (user.Role.Id != UserRole.Teacher && access.Permission == Permission.None || access.Path.Count() == 0)
             throw new AccessDeniedException();
 
-        var folder = await base.GetFolderAsync(id, user);
+        var folder = await base.GetFolderAsync(id, user, asChild);
         // В корне можно создать только группы
         if (user.RoleId == UserRole.Administrator && access.Path.Count() == 1)
             folder.Access = new List<string> { "Group" };
         else
             folder.Access.Remove("Group");
 
-        return folder;
-    }
-
-    public async Task<object> GetChildItemAsync(string id, User user)
-    {
-        // Проверяем, если запрос от студента и он обращается ли к корню
-        var access = await HasAccessAsync(id, user, new List<string>());
-        if (user.Role.Id != UserRole.Teacher && access.Permission == Permission.None || access.Path.Count() == 0)
-            throw new AccessDeniedException();
-
-        var item = await TryGetItemAsync(id);
-        var folder = await base.GetFolderInfoAsync(id);
-        folder.IsEditable = CanEdit(item, user, access.Permission);
         return folder;
     }
 
@@ -82,7 +69,7 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
     {
         await CheckIfCanCreateAsync(parentId, user);
         var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Folder, user);
-        return (itemPath, await GetChildItemAsync(item.Guid, user));
+        return (itemPath, await GetAsync(item.Guid, user, true));
     }
 
     public async new Task DeleteAsync(string id, User user)

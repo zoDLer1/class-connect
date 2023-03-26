@@ -106,8 +106,10 @@ public abstract class FileSystemQueriesHelper
             Name = item.Name,
             Guid = item.Id,
             Type = item.Type,
-            CreationTime = item.CreationTime,
-            CreatorName = $"{item.Creator.Name} {item.Creator.Surname}"
+            Data = new FolderData {
+                CreationTime = item.CreationTime,
+                CreatorName = $"{item.Creator.Name} {item.Creator.Surname}"
+            }
         };
     }
 
@@ -123,7 +125,7 @@ public abstract class FileSystemQueriesHelper
                 var item = await TryGetItemAsync(id);
                 try
                 {
-                    var child = await _serviceAccessor(item.Type.Id).GetChildItemAsync(item.Id, user);
+                    var child = await _serviceAccessor(item.Type.Id).GetAsync(item.Id, user, true);
                     children.Add(child);
                 }
                 catch (AccessDeniedException)
@@ -171,7 +173,7 @@ public abstract class FileSystemQueriesHelper
         return await PrepareItemAsync(id);
     }
 
-    public async virtual Task<Folder> GetFolderAsync(string id, User user)
+    public async virtual Task<Folder> GetFolderAsync(string id, User user, Boolean asChild)
     {
         var item = await GetFolderInfoAsync(id);
         if (item.Type.Id == Type.File)
@@ -189,10 +191,13 @@ public abstract class FileSystemQueriesHelper
             Type = item.Type,
             Guid = item.Guid,
             Path = await MakePathAsync(access.Path),
-            Children = await PrepareChildrenAsync(children, user),
-            CreationTime = item.CreationTime,
-            CreatorName = item.CreatorName,
-            Access = types
+            Children = asChild ? null : await PrepareChildrenAsync(children, user),
+            Data = new FolderData {
+                CreationTime = item.Data.CreationTime,
+                CreatorName = item.Data.CreatorName
+            },
+            Access = types,
+            IsEditable = CanEdit(await TryGetItemAsync(id), user, access.Permission)
         };
         return folder;
     }

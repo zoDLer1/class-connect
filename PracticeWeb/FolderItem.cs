@@ -10,8 +10,5 @@ public class FolderItem
     public ItemType Type { get; set; } = null!;
     public string? MimeType { get; set; }
 
-    public DateTime CreationTime { get; set; }
-    public string CreatorName { get; set; } = null!;
-
-    public Boolean IsEditable { get; set; }
+    public FolderData Data { get; set; } = null!;
 }

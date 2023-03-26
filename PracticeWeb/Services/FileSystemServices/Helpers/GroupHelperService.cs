@@ -48,71 +48,59 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
     private object GetGroupData(Group group, User user)
     {
-        var subjects = _context.Subjects.Where(s => s.GroupId == group.Id);
-        if (group.TeacherId != user.Id)
+        var subjects = _context.Subjects.Include(s => s.Item).Where(s => s.GroupId == group.Id);
+        if (user.RoleId != UserRole.Administrator && group.TeacherId != user.Id)
             subjects = subjects.Where(s => s.TeacherId == user.Id);
+
         return new
         {
-            Subjects = subjects
-            .ToList()
-            .Select(async s => new
+            CreationTime = group.Item.CreationTime,
+            Teacher = new
             {
-                Id = s.Id,
-                Name = (await TryGetItemAsync(s.Id)).Name,
-                Students = _context.Accesses
-                    .Where(s => s.ItemId == group.Id && s.Permission == Permission.Read)
-                    .ToList()
-                    .Select(s => {
-                        var user = _context.Users.FirstOrDefault(u => u.Id == s.UserId);
-                        return new {
-                            Id = user?.Id,
-                            Name = string.Join(' ', new[] { user?.Name, user?.Surname, user?.Patronymic })
-                        };
-                    })
-            })
-            .Select(s => s.Result)
+                Id = group.Teacher.Id,
+                Name = group.Teacher.Name,
+                Surname = group.Teacher.Surname,
+                Patronymic = group.Teacher.Patronymic
+            },
+            Subjects = subjects
+                .Select(s => new
+                {
+                    Id = s.Id,
+                    Name = s.Item.Name,
+                }),
+            Students = new
+            {
+                IsEditable = user.Id == group.TeacherId || user.RoleId == UserRole.Administrator,
+                Items = _context.Accesses
+                .Where(s => s.ItemId == group.Id && s.Permission == Permission.Read)
+                .ToList()
+                .Select(s => {
+                    var user = _context.Users.FirstOrDefault(u => u.Id == s.UserId);
+                    return new {
+                        Id = user?.Id,
+                        Name = string.Join(' ', new[] { user?.Name, user?.Surname, user?.Patronymic })
+                    };
+                })
+            }
         };
     }
 
-    public async Task<object> GetAsync(string id, User user)
+    public async Task<object> GetAsync(string id, User user, Boolean asChild)
     {
         var access = await HasAccessAsync(id, user, new List<string>());
+        var item = await TryGetItemAsync(id);
         var group = await _commonGroupQueries.GetAsync(id, _context.Groups.Include(g => g.Teacher));
-        var folder = await base.GetFolderAsync(id, user);
+        var folder = await base.GetFolderAsync(id, user, asChild);
         return new
         {
             Name = folder.Name,
             Type = folder.Type,
             Guid = folder.Guid,
             Path = folder.Path,
-            Children = folder.Children,
-            CreationTime = folder.CreationTime,
-            Teacher = new {
-                Id = group?.Teacher.Id,
-                FirstName = group?.Teacher.Name,
-                LastName = group?.Teacher.Surname,
-                Patronymic = group?.Teacher.Patronymic
-            },
+            Children = asChild ? null : folder.Children,
             Data = user.Role.Id == UserRole.Student || group == null ? null : GetGroupData(group, user),
-            Access = folder.Access
-        };
-    }
-
-    public async Task<object> GetChildItemAsync(string id, User user)
-    {
-        var access = await HasAccessAsync(id, user, new List<string>());
-        var item = await TryGetItemAsync(id);
-        var group = await _commonGroupQueries.GetAsync(id, _context.Groups);
-        var folderItem = await base.GetFolderInfoAsync(id);
-        return new
-        {
-            Name = folderItem.Name,
-            Type = folderItem.Type,
-            Guid = folderItem.Guid,
-            CreationTime = folderItem.CreationTime,
-            Teacher = group?.TeacherId,
-            Data = user.Role.Id == UserRole.Student || group == null ? null : GetGroupData(group, user),
-            IsEditable = CanEdit(item, user, access.Permission)
+            Access = folder.Access,
+            IsEditable = folder.IsEditable
         };
     }
 
@@ -161,7 +149,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
         _context.Accesses.Add(teacherAccess);
         await _context.SaveChangesAsync();
-        return (itemPath, await GetChildItemAsync(item.Guid, user));
+        return (itemPath, await GetAsync(item.Guid, user, true));
     }
 
     public async override Task<FolderItem> UpdateAsync(string id, string newName, User user)
