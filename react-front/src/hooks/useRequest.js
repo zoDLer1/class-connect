@@ -11,6 +11,7 @@ export const useRequest = (func = async () => null, statuses={}) => {
 
 
     const handleResponse = (response, data) =>{
+        console.log(response)
         const func = statuses[response.request.status]
         if (func) func(response, data)
     }

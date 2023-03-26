@@ -17,7 +17,7 @@ import FileUploader from '../components/form-fileUploader';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const CreateForm = ({ current, close }) => {
+const CreateForm = ({ current, close, update }) => {
 
     const navigate = useNavigate()
     const [teachersOptions, setTeachers] = useState([{id: null}])
@@ -64,11 +64,13 @@ const CreateForm = ({ current, close }) => {
         }
 
     },
-        async (validated_data) => { FilesService.create(current.guid, validated_data)},
+        async (validated_data) => FilesService.create(current.guid, validated_data),
         {
             200: () => {
+                
+                update()
                 close()
-                navigate('/files/' + current.guid)
+                
             }
         }
     )

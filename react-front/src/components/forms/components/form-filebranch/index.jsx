@@ -8,7 +8,7 @@ import { Types } from './filebranch-item/types'
 
 function FormFileBranch({ current, items, actions, state, loading, store, requests }) {
 
-    const { remove } = requests
+    const { remove, update } = requests
 
     const { popup, menu } = useContext(GlobalUIContext)
 
@@ -35,7 +35,7 @@ function FormFileBranch({ current, items, actions, state, loading, store, reques
     const PopupCreateFormOpen = (current) => {
         popup.open()
         popup.setCurrent(current)
-        popup.setContent(<CreateForm />)
+        popup.setContent(<CreateForm update={update} />)
     }
 
     const ItemsMenuOpen = (evt, data, editMode) => {

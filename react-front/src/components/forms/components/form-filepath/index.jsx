@@ -10,8 +10,8 @@ function FormFilePath({ path, loading }) {
     useEffect(()=> {
         let tempPath = [...path]
         if (tempPath.length > 3){
-            let items = tempPath.splice(2, tempPath.length-3)
-            tempPath.splice(2, 0, items)
+            let items = tempPath.splice(1, tempPath.length-3)
+            tempPath.splice(1, 0, items)
             
         }
         setPath(tempPath)

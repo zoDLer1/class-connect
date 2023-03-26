@@ -61,6 +61,9 @@ function FilesForm() {
             // 400: ()
         }
     )
+    const updateInfo = async () => {
+        await setFolder(id)
+    }
 
 
     useEffect(() => {
@@ -122,7 +125,7 @@ function FilesForm() {
                     items={branchItems}
                     actions={branchItemsAtions}
                     state={branchItemsStateActions}
-                    requests={{ remove }}
+                    requests={{ remove, update:updateInfo }}
                 />
                 {/* <FormFileInfo {...fileInfo}/> */}
             </div>
