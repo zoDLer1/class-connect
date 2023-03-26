@@ -206,13 +206,10 @@ public class FileSystemController : ControllerBase
             }
             else
             {
-                if (model.Mark == null)
-                    return BadRequest(new { Errors = new { Mark = new List<string> { "Укажите оценку" } } });
-
-                if (model.Mark < 2 || model.Mark > 5)
+                if (model.Mark != null && model.Mark < 2 || model.Mark > 5)
                     return BadRequest(new { Errors = new { Mark = new List<string> { "Некорректное значение оценки" } } });
 
-                result = await _fileSystemService.MarkWork(model.Id, (int) model.Mark, user);
+                result = await _fileSystemService.MarkWork(model.Id, model.Mark, user);
             }
             return new JsonResult(result);
         }

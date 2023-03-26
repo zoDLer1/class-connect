@@ -159,7 +159,7 @@ public class FileSystemService : IFileSystemService
         return await _serviceAccessor(Type.Task).GetAsync(parentConnection.ParentId, user, false);
     }
 
-    public async Task<object> MarkWork(string id, int mark, User user)
+    public async Task<object> MarkWork(string id, int? mark, User user)
     {
         await CreateFileSystemIfNotExistsAsync();
         var item = await TryGetItemAsync(id);
@@ -185,7 +185,10 @@ public class FileSystemService : IFileSystemService
         if (!work.IsSubmitted)
             throw new ItemTypeException();
 
-        work.Mark = mark;
+        if (mark == null)
+            work.IsSubmitted = false;
+        else
+            work.Mark = mark;
         await _commonWorkQueries.UpdateAsync(work);
         return await _serviceAccessor(Type.Task).GetAsync(parentConnection.ParentId, user, false);
     }
