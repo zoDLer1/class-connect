@@ -196,7 +196,7 @@ public abstract class FileSystemQueriesHelper
                 CreationTime = item.Data.CreationTime,
                 CreatorName = item.Data.CreatorName
             },
-            Access = types,
+            Access = types.OrderBy(t => t).ToList(),
             IsEditable = CanEdit(await TryGetItemAsync(id), user, access.Permission)
         };
         return folder;

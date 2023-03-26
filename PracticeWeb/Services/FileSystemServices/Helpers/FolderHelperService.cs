@@ -69,7 +69,8 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
     {
         await CheckIfCanCreateAsync(parentId, user);
         var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Folder, user);
-        return (itemPath, await GetAsync(item.Guid, user, true));
+        var parent = await TryGetItemAsync(parentId);
+        return (itemPath, await _serviceAccessor(parent.TypeId).GetAsync(parentId, user, false));
     }
 
     public async new Task DeleteAsync(string id, User user)

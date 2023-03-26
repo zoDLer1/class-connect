@@ -93,7 +93,8 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Until = until
         };
         await _commonTaskQueries.CreateAsync(task);
-        return (itemPath, await GetAsync(item.Guid, user, true));
+        var parent = await TryGetItemAsync(parentId);
+        return (itemPath, await _serviceAccessor(parent.TypeId).GetAsync(parentId, user, false));
     }
 
     public async new Task DeleteAsync(string id, User user)

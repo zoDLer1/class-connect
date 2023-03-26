@@ -87,7 +87,8 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
             MimeType = MimeTypes.GetMimeType(item.Name)
         };
         await _commonFileQueries.CreateAsync(fileEntity);
-        return (itemPath, await GetAsync(item.Guid, user, true));
+        var parent = await TryGetItemAsync(parentId);
+        return (itemPath, await _serviceAccessor(parent.TypeId).GetAsync(parentId, user, false));
     }
 
     public async new Task DeleteAsync(string id, User user)

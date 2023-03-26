@@ -133,7 +133,8 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         };
         _context.Accesses.Add(teacherAccess);
         await _context.SaveChangesAsync();
-        return (itemPath, await GetAsync(item.Guid, user, true));
+        var parent = await TryGetItemAsync(parentId);
+        return (itemPath, await _serviceAccessor(parent.TypeId).GetAsync(parentId, user, false));
     }
 
     public async override Task<FolderItem> UpdateAsync(string id, string newName, User user)
