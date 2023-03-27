@@ -1,11 +1,16 @@
 .block{
     width: 100%;
-    padding: 10px 24px;
+    padding: 5px 24px;
     gap: 20px;
 
 }
 .title{
     font-size: 26px;
     font-weight: 700;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+}
+.body{
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
 }

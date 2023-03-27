@@ -26,10 +26,14 @@ function FormFileBranch({ current, items, actions, state, loading, store, reques
     }
 
     const MainMenuOpen = (evt) => {
-        menu.open()
-        menu.setCurrent(current)
-        menu.setItems([{ text: 'Создать', icon: faCirclePlus, action: PopupCreateFormOpen }])
-        menu.setCoords(evt.clientX, evt.clientY)
+        if (!loading && current.access.length){
+            menu.open()
+            menu.setCurrent(current)
+            menu.setItems([{ text: 'Создать', icon: faCirclePlus, action: PopupCreateFormOpen }])
+            menu.setCoords(evt.clientX, evt.clientY)
+        }
+        
+   
     }
 
     const PopupCreateFormOpen = (current) => {
@@ -62,12 +66,11 @@ function FormFileBranch({ current, items, actions, state, loading, store, reques
             MainMenuOpen(evt)
         }}>
         <FormLoader loading={loading}>
-            {items.map(
+            {items.sort((a, b) => a.value.type.id - b.value.type.id).map(
                 (item) => {
                     const Elem = Types[item.value.type.name] || Types.Folder
                     return <Elem
                         key={'FBI' + item.value.guid}
-                     
                         {...item}
                         actions={actions.getItem(item.value.guid)}
                         onMenu={(evt, data, editMode) => {

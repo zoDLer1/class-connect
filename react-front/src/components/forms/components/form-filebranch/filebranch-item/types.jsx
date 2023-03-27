@@ -9,7 +9,6 @@ export const Folder = ({ value, ...props }) => {
     return <FileBranchItem
         value={value}
         onDoubleClick={() => navigate('/files/' + value.guid)}
-        onClick={(evt) => evt.stopPropagation()}
         icon={faFolder}
         {...props}
     />
@@ -17,13 +16,12 @@ export const Folder = ({ value, ...props }) => {
 }
 
 
-export const Group = ({ value, ...props }) => {
+export const Group = ({  value, ...props }) => {
     const navigate = useNavigate()
-
+    
     return <FileBranchItem
         value={value}
         onDoubleClick={() => navigate('/files/' + value.guid)}
-        onClick={(evt) => evt.stopPropagation()}
         icon={faUsers}
         {...props}
     />
@@ -37,7 +35,6 @@ export const Subject = ({ value, ...props }) => {
     return <FileBranchItem
         value={value}
         onDoubleClick={() => navigate('/files/' + value.guid)}
-        onClick={(evt) => evt.stopPropagation()}
         icon={faCube}
         {...props}
     />
@@ -46,7 +43,6 @@ export const Subject = ({ value, ...props }) => {
 
 export const File = ({ ...props }) => {
     return <FileBranchItem
-        onClick={(evt) => evt.stopPropagation()}
         icon={faFile}
         {...props}
     />
@@ -60,9 +56,8 @@ export const Task = ({ value, ...props }) => {
 
     return <FileBranchItem
         value={value}
-        onDoubleClick={() => navigate('/files/' + value.guid)}
-        onClick={(evt) => evt.stopPropagation()}
-        icon={faFile}
+        onDoubleClick={ () => navigate('/files/' + value.guid)}
+        icon={faFolder}
         {...props}
     />
 

@@ -1,0 +1,27 @@
+.block{
+    display: flex;
+    gap: 15px;
+
+    padding: 10px 10px;
+    border-bottom: 2px solid var(--dark-op10-color);
+}
+.block:last-child{
+    border: none;
+}
+
+.icon{
+    color: var(--primary-color);
+    align-self: start;
+}
+.title{
+    font-weight: 500;
+    font-size: 17px;
+    width: 140px;
+    align-self: start;
+}
+.value{
+    align-self: center;
+    font-size: 16px;
+    max-width: 400px;
+    word-wrap: break-word;
+}

@@ -22,9 +22,16 @@
     align-items: center;
     justify-content: space-between;
     border-bottom: 2px solid var(--dark-op10-color);
-    width: 320px;
+
     user-select: none;
     position: relative;
+}
+.selected--true{
+    background-color: rgba(3, 136, 212, 0.2);
+    border-color: var(--faded-primary-color);
+}
+.selected--true > .arrow{
+    color: var(--faded-primary-color);
 }
 .block::before{
     display: none;
@@ -63,11 +70,4 @@
 }
 .arrow{
     color: var(--dark-op10-color);
-}
-.block:has(input:checked){
-    background-color: rgba(3, 136, 212, 0.2);
-    border-color: var(--faded-primary-color);
-}
-.block:has(input:checked) > .arrow{
-    color: var(--faded-primary-color);
 }

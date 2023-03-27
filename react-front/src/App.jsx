@@ -2,11 +2,12 @@ import { CloseContext } from 'contexts/сloseContext';
 import { useClose } from 'hooks/useClose';
 import Router from 'routes';
 
+
+
 function App() {
 
-  const { add, remove, closeAll } = useClose()
-
-
+  const { itms, add, remove, closeAll } = useClose()
+ 
 
 
   return (

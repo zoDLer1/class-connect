@@ -59,7 +59,7 @@ const CreateForm = ({ current, close, update }) => {
         },
         uploadedFile: {
             value: null,
-            validators: [REQUIRED(), IS_EXTANTIONS(['image/jpeg'])],
+            validators: [REQUIRED()],
             hidden: true
         }
 
@@ -78,7 +78,15 @@ const CreateForm = ({ current, close, update }) => {
     const selectConfig = getInput('type')
 
     useEffect(()=>{
-        selectConfig.value === 'File' ?  InputShow('uploadedFile') : InputHide('uploadedFile')
+        if (selectConfig.value === 'File'){
+            InputShow('uploadedFile')
+            InputHide('name') 
+        }
+        else{
+            InputHide('uploadedFile')
+            InputShow('name')
+        }
+            
         selectConfig.value === 'Group' || selectConfig.value === 'Subject' ?  InputShow('teacherId') : InputHide('teacherId')
         
     }, [selectConfig.value])

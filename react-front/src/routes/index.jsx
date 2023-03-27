@@ -7,7 +7,6 @@ import GlobalUI from 'globalUI';
 
 
 
-
 const Router = () => {
     return (
 

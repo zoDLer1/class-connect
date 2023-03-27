@@ -17,12 +17,13 @@ export const useList = (onAutoClose = () => null) => {
         setList(() => {
             let newList = []
             for (const item of items) {
-                newList.push({ value: item, stored: {}, state: { loading: false, editMode: false } })
+                newList.push({ value: item, stored: {}, state: { loading: false, editMode: false, selected: false } })
             }
             return newList
         })
 
     }
+    const [selectedItem, setSelectedItem] = useState(null)
 
     const { add, remove } = useContext(CloseContext)
 
@@ -69,6 +70,46 @@ export const useList = (onAutoClose = () => null) => {
         })
 
     }
+
+    const selectedStateOn = (id) => {
+        setList((list) => {
+            let newList = [...list]
+            newList = unselectAll(newList)
+            const index = findItemIndex(list, id)
+            if (index !== -1) {
+                newList[index].state.selected = true
+                setSelectedItem(newList[index].value)
+                
+            }
+            return newList
+
+            
+        })
+        if (!selectedItem){
+            add({
+                id: 'selected-items', close: () => {
+                    setSelectedItem(null)
+                    selectedStateOff()
+                    
+                }
+            })
+        }
+        
+    }
+
+    const unselectAll = (newList) => {
+        for (let list_index = 0; list_index < newList.length; list_index++) {
+            newList[list_index].state.selected = false
+        }
+        return newList
+    }
+    const selectedStateOff = () => {
+        setList((list) => {
+            return unselectAll([...list])
+        })
+        remove('selected-items')
+    }
+
     const editModeState = (id, value) => {
         setList((list) => {
             const newList = [...list]
@@ -101,7 +142,7 @@ export const useList = (onAutoClose = () => null) => {
 
     }
     const addItem = (data) => {
-        setList((list) => [...list, { value: data, stored: {}, state: { loading: false, editMode: false } }])
+        setList((list) => [...list, { value: data, stored: {}, state: { loading: false, editMode: false, selected: false } }])
     }
     const updateItem = (id, data) => {
         setList((list) => {
@@ -117,12 +158,13 @@ export const useList = (onAutoClose = () => null) => {
             setProp: (key, value) => setItemProp(id, key, value),
             editModeOn: () => editModeOn(id),
             editModeOff: () => editModeOff(id),
-            loading: (value) => loadingState(id, value)
+            loading: (value) => loadingState(id, value),
+            select: () => selectedStateOn(id)
         }
 
     }
     const removeItem = (id) => {
         setList((list) => [...list].filter(item => item.value.guid !== id))
     }
-    return [list, { setItems, addItem, updateItem, removeItem, setItemProp, getItem }, { editModeOn, editModeOff, loadingState }, { storeProp, reject, commit }]
+    return [list, { setItems, addItem, updateItem, removeItem, setItemProp, getItem }, { editModeOn, editModeOff, loadingState }, { storeProp, reject, commit }, selectedItem]
 }

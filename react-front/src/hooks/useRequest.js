@@ -29,7 +29,6 @@ export const useRequest = (func = async () => null, statuses={}) => {
                 if(error.response.status === 401){
                     navigate('/login')
                 }
-                
                 handleResponse(error)
             }
         )

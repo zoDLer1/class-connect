@@ -6,7 +6,7 @@ class AuthService {
 
     // static 
 
-    static async login(data){
+    static async login(data) {
         const response = await AuthApiInstanse.post('/User/login/', data).then(
             (response) => {
                 user.set_access_token(response.data.accessToken.token)
@@ -17,23 +17,24 @@ class AuthService {
         )
         return response
 
-        
+
     }
 
-    static async refresh_token(){
-        const response = await AuthApiInstanse.post('/User/refreshToken/', {token:user.refresh})
-        response.then(
-            (s) => user.access_token(s.data.access),
+    static async refresh_token() {
+        return await AuthApiInstanse.post('/User/refreshToken/', { token: user.refresh }).then(
+            (s) => {
+                user.set_access_token(s.data.accessToken.token)
+                return s
+            },
         )
-        return response
     }
 
-    static async register(email, password){
-        return AuthApiInstanse.post('/users/register/', {email, password})
+    static async register(email, password) {
+        return AuthApiInstanse.post('/users/register/', { email, password })
     }
-    static async logout(){
+    static async logout() {
         return AuthApiInstanse.post('/users/logout')
     }
-    
+
 }
 export default AuthService

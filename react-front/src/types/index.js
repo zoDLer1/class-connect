@@ -19,6 +19,6 @@ export const types = {
     },
     'Task': {
         title: 'Задание',
-        icon: faFile
+        icon: faFolder
     }
 }
