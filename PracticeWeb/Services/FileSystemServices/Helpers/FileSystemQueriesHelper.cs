@@ -115,7 +115,7 @@ public abstract class FileSystemQueriesHelper
 
     protected async Task<List<object>> PrepareChildrenAsync(List<string> itemIds, User user)
     {
-        var children = new List<object>();
+        var children = new List<(Type Type, string Name, object Child)>();
         Console.WriteLine($"There is {itemIds.Count}");
         foreach (var id in itemIds)
         {
@@ -125,8 +125,8 @@ public abstract class FileSystemQueriesHelper
                 var item = await TryGetItemAsync(id);
                 try
                 {
-                    var child = await _serviceAccessor(item.Type.Id).GetAsync(item.Id, user, true);
-                    children.Add(child);
+                    var child = await _serviceAccessor(item.TypeId).GetAsync(item.Id, user, true);
+                    children.Add((item.TypeId, item.Name, child));
                 }
                 catch (AccessDeniedException)
                 {
@@ -139,7 +139,7 @@ public abstract class FileSystemQueriesHelper
                 continue;
             }
         }
-        return children;
+        return children.OrderByDescending(c => c.Type).ThenBy(c => c.Name).Select(c => c.Child).ToList();
     }
 
     public async virtual Task CheckIfCanCreateAsync(string parentId, Type type, User user)
