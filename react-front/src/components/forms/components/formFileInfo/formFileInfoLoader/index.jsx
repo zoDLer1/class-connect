@@ -10,15 +10,16 @@ const FormFileInfoItem = ({ icon, title, uploading }) => {
     const [getData, isLoading] = useRequest(
         async (id) => FilesService.get_folder(id, 'blob'),
         {
-            200: (response) => {
-                // setData(response.data)
+            200: async (response) => {
+                setType(response.data.type)
+                setText(await response.data.text())
                 setUrl(URL.createObjectURL(response.data))
             }
         }
     )
 
-    // const [uploadedData, setData] = useState()
-
+    const [type, setType] = useState()
+    const [text, setText] = useState()
     const [url, setUrl] = useState()
 
     useEffect(() => {
@@ -38,7 +39,22 @@ const FormFileInfoItem = ({ icon, title, uploading }) => {
             </div>
             <div className={css.image}>
                 <FormLoader loading={isLoading}>
-                    <img src={url} />
+                    {
+                        type?.startsWith('image')
+                        ?
+                            <img src={url} />
+                        : type?.startsWith('text') && text?.length < 3000
+                        ?
+                            <pre>{text}</pre>
+                        : type?.startsWith('application/mp4') 
+                        ?
+                            <video src={url} controls />
+                        : type?.startsWith('application/pdf') 
+                        ?
+                            <iframe title="Preview" src={url} />
+                        :
+                        <div>Невозможно отобразить предпросмотр</div>
+                    }
                 </FormLoader>
             </div>
         </div>

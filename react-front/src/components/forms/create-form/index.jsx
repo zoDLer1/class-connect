@@ -51,7 +51,7 @@ const CreateForm = ({ current, close, update }) => {
 
         name: {
             value: '',
-            validators: [REQUIRED(), MIN_LENGTH(4)]
+            validators: [REQUIRED()]
         },
         type: {
             value: current.access[0],

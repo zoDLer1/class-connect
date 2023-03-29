@@ -1,7 +1,7 @@
 import css from './formFileInfo.module.css'
 import { Types, Folder } from './types';
 
-const FormFileInfo = ({ data, name, type, guid }) => {
+const FormFileInfo = ({ data, name, type, guid, setFolder }) => {
     const Elem = Types[type?.name] || Types.Folder
 
     return (
@@ -10,7 +10,7 @@ const FormFileInfo = ({ data, name, type, guid }) => {
                 <>
                     <h3 className={css.title}>{name}</h3>
                     <div className={css.body}>
-                        <Elem {...data} id={guid} />
+                        <Elem {...data} id={guid} update={()=>setFolder(guid)} />
                     </div>
                 </>
 

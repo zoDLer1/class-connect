@@ -22,7 +22,7 @@ const GroupEnter = () => {
             },
             200: () => {
                 alert.show('Вы вступили в группу')
-               
+                user.set_user_data({...user.data, folder: id})
             }
         }
     )
@@ -37,11 +37,7 @@ const GroupEnter = () => {
         
     }, [])
 
-    return (
-        <div>
-            {id}
-        </div>
-    );
+    
 }
 
 export default GroupEnter;

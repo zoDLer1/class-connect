@@ -29,14 +29,17 @@ export const File = ({ creationTime, creatorName, id }) => {
     </>
 }
 
-export const Group = ({ teacher, creationTime, subjects, students, id }) => { // subjects, teacher, students
+export const Group = ({ teacher, creationTime, subjects, students, id, update }) => { // subjects, teacher, students
 
     const [removeStudent] = useRequest(
-        async ({id, current}) => await UsersService.group_remove(id, current)
+        async ({id, current}) => await UsersService.group_remove(id, current),
+        {
+            200: async () => await update() 
+        }
     )
 
     const items = [
-        { title: 'Преподпватель:', value: teacher.name, icon: faUser },
+        { title: 'Преподаватель:', value: teacher.name, icon: faUser },
         { title: 'Дата создания:', value: creationTime, icon: faCalendarDays },
         { title: 'Ссылка вступления:', value: `http://localhost:3000/group/enter/${id}`, icon: faLink }
     ]
@@ -56,7 +59,7 @@ export const Group = ({ teacher, creationTime, subjects, students, id }) => { //
 
 export const Subject = ({ teacher, creationTime }) => {
     const items = [
-        { title: 'Преподпватель:', value: teacher.name, icon: faUser },
+        { title: 'Преподаватель:', value: teacher.name, icon: faUser },
         { title: 'Дата создания:', value: creationTime, icon: faCalendarDays }
     ]
 

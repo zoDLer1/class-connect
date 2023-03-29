@@ -66,7 +66,7 @@ function FormFileBranch({ current, items, actions, state, loading, store, reques
             MainMenuOpen(evt)
         }}>
         <FormLoader loading={loading}>
-            {items.sort((a, b) => a.value.type.id - b.value.type.id).map(
+            {items.map(
                 (item) => {
                     const Elem = Types[item.value.type.name] || Types.Folder
                     return <Elem

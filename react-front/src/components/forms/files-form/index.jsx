@@ -58,6 +58,13 @@ function FilesForm() {
                 setParentFileInfo(fileInfo)
             },
             404: FOLDER_NOT_FOUND,
+            403: (response) => {
+                if (response.config.params.id === user.data.folder){
+                    user.set_user_data({ ...user.data, folder: null })
+                    navigate('/rootNotFound')
+                }
+                return FOLDER_NOT_FOUND()
+            },
             400: FOLDER_NOT_FOUND
         }
     )
@@ -134,7 +141,7 @@ function FilesForm() {
                     state={branchItemsStateActions}
                     requests={{ remove, update: updateInfo }}
                 />
-                <FormFileInfo {...selectedItem || parentFileInfo} />
+                <FormFileInfo setFolder={setFolder} {...selectedItem || parentFileInfo} />
             </div>
         </div>
     )

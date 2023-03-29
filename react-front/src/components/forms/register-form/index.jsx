@@ -26,7 +26,7 @@ function RegisterForm() {
             value: ''
         },
         patronymic: {
-            validators: [REQUIRED()],
+            validators: [],
             value: ''
         },
         email: {
