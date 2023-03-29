@@ -125,7 +125,7 @@ function useForm(InputsData, request = async () => null, statuses = {}) {
     }
 
 
-    return { InputsData, InputHide, InputShow, getSubmit, handleServerErrors, getInput, getValidatedData, addInput }
+    return { InputsData:inputs, InputHide, InputShow, getSubmit, handleServerErrors, getInput, getValidatedData, addInput }
 
 }
 

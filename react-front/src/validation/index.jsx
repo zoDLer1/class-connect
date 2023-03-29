@@ -17,6 +17,7 @@ export const MIN_LENGTH = (length, errorMessage = `Минимальная дли
     return (value) => value.length < length ? errorMessage : ''
 }
 
+
 export const IS_EXTANTIONS = (extantions, errorMessage = `Недопустимое расширение`) => {
     return (value) => {
         for (const extantion of extantions){

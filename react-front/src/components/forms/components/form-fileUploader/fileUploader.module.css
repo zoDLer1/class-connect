@@ -13,6 +13,7 @@
 
 .uploaded{
     position: relative;
+    flex: 1;
 }
 .error{
     position: absolute;
@@ -20,6 +21,17 @@
     color: var(--error-color);
     bottom: -19px;
 
+}
+.files--column{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.files--grid-3-col{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
+    row-gap: 20px;
 }
 
 .addfile{
@@ -29,16 +41,23 @@
     width: 200px;
     justify-content: center;
     border-radius: 10px;
-    border: 1px dashed  var(--dark-op20-color);
+
+    border: 1px solid var(--dark-op20-color);
     padding: 10px;
     cursor: pointer;
     height: 40px;
     
-    
+}
+.files--grid-3-col + .actions{
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    margin-top: 30px;
 }
 .addfile > *{
-    color: var(--dark-op25-color);
-    font-weight: 400;
+    /* color: var(--dark-op25-color); */
+    color: var(--primary-color);
+    font-weight: 500;
     font-size: 14px;
     
 }

@@ -1,9 +1,23 @@
 .block{
+    padding: 10px 10px;
+    border-bottom: 2px solid var(--dark-op10-color);
+    display: flex;
+    justify-content: space-between;
+}
+.actions{
+    display: none;
+}
+.block:hover .actions{
+    display: block;
+}
+.action{
+    cursor: pointer;
+}
+.body{
     display: flex;
     gap: 15px;
 
-    padding: 10px 10px;
-    border-bottom: 2px solid var(--dark-op10-color);
+   
 }
 .block:last-child{
     border: none;
@@ -12,11 +26,12 @@
 .icon{
     color: var(--primary-color);
     align-self: start;
+    width: 30px;
 }
 .title{
     font-weight: 500;
     font-size: 17px;
-    width: 140px;
+    width: 200px;
     align-self: start;
 }
 .value{

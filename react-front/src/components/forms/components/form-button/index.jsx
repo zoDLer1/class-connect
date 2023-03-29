@@ -2,9 +2,9 @@ import css from './form-button.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
-const FormButton = ({ text, icon, style=2 }) => {
+const FormButton = ({ text, icon, style=2, loading, ...props }) => {
     return (
-        <div className={[css.block, css[`block-style--${style}`]].join(' ')}>
+        <div {...props} className={[css.block, css[`block-style--${style}`]].join(' ')}>
             <div className={css.icon}>
                 <FontAwesomeIcon icon={icon}/>
             </div>

@@ -1,5 +1,5 @@
 .block{
-
+    
 }
 .header{
     display: flex;
@@ -18,6 +18,17 @@
 .items{
     display: flex;
     flex-direction: column;
-
     padding: 5px 0 0 40px;
+}
+.image{
+    overflow: hidden;
+    min-height: 300px;
+}
+.image img{
+    width: 100%;
+    padding: 20px 0;
+ 
+}
+.task{
+    padding: 20px 0;
 }

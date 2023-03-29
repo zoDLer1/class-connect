@@ -12,7 +12,10 @@ function FileBranchItem({ value, onMenu, state, actions, icon, ...props }) {
     return (
 
         <div className={[css.block, css[`selected--${state.selected}`]].join(' ')} {...props} onClick={(evt) => { evt.stopPropagation(); actions.select() }} onContextMenu={(evt) => {
-            onMenu(evt, value, state.editMode)
+            if(value.isEditable){
+                onMenu(evt, value, state.editMode)
+            }
+            
         }}>
 
 

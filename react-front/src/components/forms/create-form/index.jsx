@@ -57,10 +57,10 @@ const CreateForm = ({ current, close, update }) => {
             value: current.access[0],
             validators: [REQUIRED()]
         },
-        uploadedFile: {
-            value: null,
-            validators: [REQUIRED()],
-            hidden: true
+        uploadedFiles: {
+            validators: [MIN_LENGTH(1, 'Загрузите файл')],
+            hidden: true,
+            value: []
         }
 
     },
@@ -78,16 +78,16 @@ const CreateForm = ({ current, close, update }) => {
     const selectConfig = getInput('type')
 
     useEffect(()=>{
-        if (selectConfig.value === 'File'){
-            InputShow('uploadedFile')
+        if (selectConfig.value === 'File' || selectConfig.value === 'Work'){
+            InputShow('uploadedFiles')
             InputHide('name') 
         }
         else{
-            InputHide('uploadedFile')
+            InputHide('uploadedFiles')
             InputShow('name')
         }
             
-        selectConfig.value === 'Group' || selectConfig.value === 'Subject' ?  InputShow('teacherId') : InputHide('teacherId')
+        selectConfig.value === 'Group'  || selectConfig.value === 'Subject' ?  InputShow('teacherId') : InputHide('teacherId')
         
     }, [selectConfig.value])
 
@@ -102,7 +102,7 @@ const CreateForm = ({ current, close, update }) => {
                         <FormSelect {...getInput('teacherId')} options={teachersOptions} title="Преподаватели:" />
                         <FormSelect {...selectConfig} options={formOptions} title="Тип:" />
                         <FormInput {...getInput('name')} title="Имя:" />
-                        <FileUploader {...getInput('uploadedFile')} />
+                        <FileUploader {...getInput('uploadedFiles')} />
                     </div>
                     <FormSubmit text="Создать" {...getSubmit()} />
                 </FormLoader>

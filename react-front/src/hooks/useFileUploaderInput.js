@@ -6,16 +6,16 @@ function useFileUploaderInput({ validate, value, onChange }) {
 
     const { onChanged } = useValidateInput(validate, value, onChange)
 
-    const Clear = () =>{
-        onChanged(null)
+    const Remove = (indx) =>{
+        onChanged(value.filter((item, index) => index !== indx))
     }
 
     const getProps = () => ({
-        onChange: (evt) => onChanged(evt.target.files[0])
+        onChange: (evt) => onChanged([...value, ...Array.from(evt.target.files)])
     })
 
 
-    return { getProps, Clear }
+    return { getProps, Remove }
 }
 
 export default useFileUploaderInput

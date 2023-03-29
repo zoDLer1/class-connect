@@ -25,7 +25,10 @@ function FilesForm() {
 
     const [parentFileInfo, setParentFileInfo] = useState()
 
-    const [fileInfo, setFileInfo] = useState()
+    const FOLDER_NOT_FOUND = () => {
+        alert.show("Папка не найдена")
+        navigate('/files/' + user.data.folder)
+    }
 
     const [remove] = useRequest(
         async (id) => await FilesService.remove(id),
@@ -53,15 +56,9 @@ function FilesForm() {
                 setFilePath(path)
                 branchItemsAtions.setItems(children)
                 setParentFileInfo(fileInfo)
-                setFileInfo(fileInfo)
-
-
             },
-
-            400: () => {
-                alert.show("Папка не найдена")
-                navigate('/files/' + user.data.folder)
-            }
+            404: FOLDER_NOT_FOUND,
+            400: FOLDER_NOT_FOUND
         }
     )
     const updateInfo = async () => {
@@ -70,11 +67,16 @@ function FilesForm() {
 
 
     useEffect(() => {
-        
+
         const renderFolder = async () => {
             await setFolder(id)
         }
-        renderFolder()
+        if ('null' !== id) {
+            renderFolder()
+        }
+        else{
+            navigate('/rootNotFound')
+        }
 
 
     }, [id]);
@@ -123,7 +125,7 @@ function FilesForm() {
             </div>
             <div className={css.body}>
                 <FormFileBranch
-                    
+
                     current={parentFileInfo}
                     loading={isLoading}
                     store={branchStoreActions}

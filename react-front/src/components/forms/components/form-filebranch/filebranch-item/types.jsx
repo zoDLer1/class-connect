@@ -62,4 +62,19 @@ export const Task = ({ value, ...props }) => {
     />
 
 }
-export const Types = { Folder, Group, Subject, File, Task }
+
+export const Work = ({ value, ...props }) => {
+    const navigate = useNavigate()
+
+
+
+    return <FileBranchItem
+        value={value}
+        onDoubleClick={ () => navigate('/files/' + value.guid)}
+        icon={faFolder}
+        {...props}
+    />
+
+}
+
+export const Types = { Folder, Group, Subject, File, Task, Work }

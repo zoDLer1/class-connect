@@ -1,11 +1,12 @@
 .block{
     height: 100%;
-    background-image: url('http://localhost:3000/imgs/image.png');
+    background-image: url('http://localhost:3000/imgs/image32.png');
     background-repeat: no-repeat;
     background-size: cover;
-    background-position: 80% 20%;
+    background-position: 50% 50%;
     background-attachment: fixed;
     display: block;
+    
 }
 .info{
     display: flex;
@@ -16,22 +17,16 @@
 }
 .body{
     display: flex;
-    gap: 40px;
+    gap: 60px;
     align-items: center;
     background-color: rgba(0, 0, 0, 0.4);
     padding: 40px;
-    margin-bottom: 10px;
 }
 .logo{
-
+    width: 140px;
 }
 .title{
     color: #fff;
-}
-.links{
-    
-}
-.link{
-    font-size: 20px;  
-    font-weight: 500;
+    width: 600px;
+    font-weight: 700;
 }

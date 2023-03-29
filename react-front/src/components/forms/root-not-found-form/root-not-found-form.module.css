@@ -1,0 +1,23 @@
+.block{
+    box-shadow: 0 10px 15px -3px var(--dark-op10-color), 0 4px 6px -4px var(--dark-op10-color);
+    background-color: var(--light-color);
+    width: 600px;
+    height: 250px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 10px;
+    align-items: center;
+    /* gap: 20px; */
+}
+.title{
+    margin-top: 20px;
+    font-weight: 500;
+}
+.icon{
+    display: flex;
+    align-items: center;
+    flex: 1;
+    cursor: pointer;
+    color: var(--primary-color);
+}

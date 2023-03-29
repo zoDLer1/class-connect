@@ -20,6 +20,10 @@ class AuthService {
 
     }
 
+    static async register(data){
+        return await AuthApiInstanse.post('/User/signup/', data)
+    }
+
     static async refresh_token() {
         return await AuthApiInstanse.post('/User/refreshToken/', { token: user.refresh }).then(
             (s) => {
@@ -29,9 +33,6 @@ class AuthService {
         )
     }
 
-    static async register(email, password) {
-        return AuthApiInstanse.post('/users/register/', { email, password })
-    }
     static async logout() {
         return AuthApiInstanse.post('/users/logout')
     }
