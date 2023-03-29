@@ -43,10 +43,10 @@ const FormFileInfoItem = ({ icon, title, uploading }) => {
                         type?.startsWith('image')
                         ?
                             <img src={url} />
-                        : type?.startsWith('text') && text?.length < 3000
+                        : type?.startsWith('text') && text?.length < 5000
                         ?
                             <pre>{text}</pre>
-                        : type?.startsWith('application/mp4') 
+                        : type?.startsWith('application/mp4') || type?.startsWith('video/mp4') 
                         ?
                             <video src={url} controls />
                         : type?.startsWith('application/pdf') 
