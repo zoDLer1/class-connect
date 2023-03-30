@@ -1,8 +1,9 @@
+import typesCss from '../../types.module.css'
 import css from './filebranch-item.module.css'
 import { useId } from 'react';
 import Input from 'components/UI/Input';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import typesCss from '../../types.module.css'
+
 
 function FileBranchItem({ value, onMenu, state, actions, icon, ...props }) {
 
@@ -20,7 +21,7 @@ function FileBranchItem({ value, onMenu, state, actions, icon, ...props }) {
 
 
             <div htmlFor={id} className={css.body}>
-                <div className={[css.icon, typesCss[`icon--${value.type.name.toLowerCase()}`]].join(' ')}>
+                <div className={[typesCss[`icon--${value.type.name.toLowerCase()}`], css.icon].join(' ')}>
                     <FontAwesomeIcon icon={icon} />
                 </div>
 

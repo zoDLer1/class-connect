@@ -22,7 +22,7 @@
     bottom: -19px;
 
 }
-.files--column{
+.files{
     display: flex;
     flex-direction: column;
     gap: 10px;

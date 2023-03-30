@@ -64,7 +64,7 @@ const CreateForm = ({ current, close, update }) => {
         }
 
     },
-        async (validated_data) => FilesService.create(current.guid, validated_data),
+        async (validated_data) => FilesService.create(current.guid, {...validated_data, uploadedFile: validated_data.uploadedFiles ? validated_data.uploadedFiles[0] : undefined}),
         {
             200: () => {
                 

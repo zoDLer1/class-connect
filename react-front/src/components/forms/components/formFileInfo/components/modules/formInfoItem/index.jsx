@@ -1,8 +1,8 @@
-import css from '../formFileInfoItem.module.css'
+import css from '../formInfoItem.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import FormFileInfoElem from './formFileInfoElem';
+import FormInfoElem from './formFileElem';
 
-const FormFileInfoItem = ({ icon, title, items }) => {
+const FormInfoItem = ({ icon, title, items }) => {
     return (
         <div className={css.block}>
             <div className={css.header}>
@@ -12,10 +12,10 @@ const FormFileInfoItem = ({ icon, title, items }) => {
                 <h3 className={css.title}>{title}</h3>
             </div>
             <div className={css.items}>
-                {items.map((item, index) => <FormFileInfoElem key={index} {...item}/>)}
+                {items.map((item, index) => <FormInfoElem key={index} {...item}/>)}
             </div>
         </div>
     );
 }
 
-export default FormFileInfoItem;
+export default FormInfoItem;

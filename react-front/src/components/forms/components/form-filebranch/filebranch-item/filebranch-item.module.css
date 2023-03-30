@@ -58,6 +58,7 @@
 
 .icon{
     font-size: 30px;
+    color: var(--dark-op20-color);
 }
 .title{
     font-size: 18px;

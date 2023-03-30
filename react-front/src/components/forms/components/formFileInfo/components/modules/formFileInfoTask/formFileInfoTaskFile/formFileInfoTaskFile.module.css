@@ -1,0 +1,14 @@
+.block{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    border: 1px solid var(--dark-op20-color); 
+    border-radius: 10px;
+}
+.icon{
+    cursor: pointer;
+}
+.title{
+    font-size: 17px;
+}

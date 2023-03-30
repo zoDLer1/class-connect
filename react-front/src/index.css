@@ -13,6 +13,7 @@
   --dark-op10-color: rgba(0, 0, 0, 10%);
   --dark-op20-color: rgba(0, 0, 0, 20%);
   --dark-op25-color: rgba(0, 0, 0, 25%);
+  --file-loading-color: rgba(136 231 121 / 63%);
   --error-color: #DB4343;
   --success-color: #56AE48;
   --warning-color: #F4B43F;
@@ -22,7 +23,6 @@
   --light-gray-text-color: #B6B2B1;
   --title-font: 'Ubuntu', sans-serif;
   --primary-font: 'Roboto', sans-serif;
-  
 }
 
 *{

@@ -14,30 +14,29 @@ const GroupEnter = () => {
         {
             403: () => {
                 alert.show('Вы не можете вступить в группу')
-               
             },
-            400: (response) =>{
+            400: (response) => {
                 alert.show(response.response.data.errorText)
-                
+
             },
             200: () => {
                 alert.show('Вы вступили в группу')
-                user.set_user_data({...user.data, folder: id})
+                user.set_user_data({ ...user.data, folder: id })
             }
         }
     )
 
-    useEffect(()=>{
-        const GroupEnter = async () =>{
+    useEffect(() => {
+        const GroupEnter = async () => {
             await send(id)
             navigate(`/files/${user.data.folder}`)
         }
         GroupEnter()
 
-        
+
     }, [])
 
-    
+
 }
 
 export default GroupEnter;

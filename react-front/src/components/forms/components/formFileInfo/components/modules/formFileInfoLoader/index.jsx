@@ -1,11 +1,11 @@
-import css from '../formFileInfoItem.module.css'
+import css from '../formInfoItem.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useRequest } from 'hooks/useRequest';
 import FormLoader from 'components/forms/components/form-loader';
 import FilesService from 'services/filesService';
 import { useState, useEffect } from 'react';
 
-const FormFileInfoItem = ({ icon, title, uploading }) => {
+const FormFileInfoLoader = ({ icon, title, uploading }) => {
 
     const [getData, isLoading] = useRequest(
         async (id) => FilesService.get_folder(id, 'blob'),
@@ -17,7 +17,7 @@ const FormFileInfoItem = ({ icon, title, uploading }) => {
             }
         }
     )
-
+    const [isRendering, setRendering] = useState(true)
     const [type, setType] = useState()
     const [text, setText] = useState()
     const [url, setUrl] = useState()
@@ -42,7 +42,7 @@ const FormFileInfoItem = ({ icon, title, uploading }) => {
                     {
                         type?.startsWith('image')
                         ?
-                            <img src={url} />
+                            <img src={url} onLoad={() => setRendering(false)} />
                         : type?.startsWith('text') && text?.length < 5000
                         ?
                             <pre>{text}</pre>
@@ -61,4 +61,4 @@ const FormFileInfoItem = ({ icon, title, uploading }) => {
     );
 }
 
-export default FormFileInfoItem;
+export default FormFileInfoLoader;

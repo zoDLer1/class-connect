@@ -1,7 +1,7 @@
-import css from './formFileInfoElem.module.css'
+import css from './formFileElem.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-const FormFileInfoElem = ({ id, title, value, icon, action, actionFunc }) => {
+const FormInfoElem = ({ id, title, value, icon, action, actionFunc }) => {
     return (
         <div className={css.block}> 
             <div className={css.body}>
@@ -22,4 +22,4 @@ const FormFileInfoElem = ({ id, title, value, icon, action, actionFunc }) => {
     );
 }
 
-export default FormFileInfoElem;
+export default FormInfoElem;

@@ -20,6 +20,10 @@
 .image{
     overflow: hidden;
     min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 400px;
 }
 .image > *{
     width: 100%;
@@ -27,7 +31,4 @@
 }
 .image > iframe{
     height: 550px; 
-}
-.task{
-    padding: 20px 0;
 }
