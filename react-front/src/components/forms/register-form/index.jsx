@@ -45,7 +45,7 @@ function RegisterForm() {
         async (validated_data) => AuthService.register(validated_data),
         {
             200: () => {
-                alert.show("Вы зарегестрированы")
+                alert.show("Вы зарегистрированы")
                 navigate('/login')
             }
         }
