@@ -223,7 +223,10 @@ public class FileSystemService : IFileSystemService
 
         var child = await TryGetItemAsync(id);
         var result = await CreateFileAsync(id, file, user);
-        var workItemId = (string) (result.GetType().GetProperty("Guid")?.GetValue(result) ?? "");
+        var workItemId = (string) (result.GetType().GetProperty("Guid")?.GetValue(result) ?? string.Empty);
+        if (workItemId == string.Empty)
+            throw new AccessDeniedException();
+        
         var workItem = new WorkItem
         {
             Id = workItemId,
@@ -242,7 +245,12 @@ public class FileSystemService : IFileSystemService
         Console.WriteLine($"UPLOADING FILE {path}: {parentId}");
         using (var fileStream = new FileStream(path, FileMode.Create))
             await file.CopyToAsync(fileStream);
-        return item;
+        
+        if (user.RoleId == UserRole.Student)
+            return item;
+        
+        var parent = await TryGetItemAsync(parentId);
+        return await _serviceAccessor(parent.TypeId).GetAsync(parentId, user, true);
     }
 
     public async Task<object> CreateFolderAsync(string parentId, string name, Type type, User user, Dictionary<string, object>? parameters)
