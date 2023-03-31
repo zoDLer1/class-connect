@@ -1,5 +1,5 @@
 import css from './formFileInfo.module.css'
-import Types from './components/types';
+import Types from './components/formFileTypes';
 import { parse_time } from './components/utils';
 
 

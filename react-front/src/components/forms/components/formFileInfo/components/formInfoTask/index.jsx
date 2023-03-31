@@ -5,6 +5,8 @@ import FormInfoFolder from '../formInfoFolder';
 import { useRequest } from 'hooks/useRequest';
 import FilesService from 'services/filesService';
 import { useState } from 'react';
+import { useEffect } from 'react';
+
 
 const FormInfoTask = ({ ...props }) => {
 
@@ -28,6 +30,9 @@ const FormInfoTask = ({ ...props }) => {
         }
     )
 
+    useEffect(()=>{
+        setWork(props.work)
+    }, [props.work])
 
     const [work, setWork] = useState(props.work);
 

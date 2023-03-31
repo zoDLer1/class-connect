@@ -9,6 +9,8 @@ import { useContext } from 'react';
 import { GlobalUIContext } from 'contexts/GlobalUIContext';
 
 
+
+
 const FormFileInfoTask = ({ isSubmitted, icon, title, guid, task_id, files, requests }) => {
 
     const [isLoading, setloading] = useState(false);
@@ -21,14 +23,14 @@ const FormFileInfoTask = ({ isSubmitted, icon, title, guid, task_id, files, requ
     const saveFiles = (files) => {
         setloading(true)
         for (const file of files) {
-            requests.loadFile({ id: task_id, file })
+            requests.saveFile({ id: task_id, file })
         }
         setloading(false)
     }
 
-    const removeFile = (id) =>{
+    const removeFile = (id) => {
         isSubmitted ? alert.show('Работа уже отправлена') : requests.removeFile(id)
-    } 
+    }
 
     return (
         <div className={itemCss.block}>
@@ -41,7 +43,7 @@ const FormFileInfoTask = ({ isSubmitted, icon, title, guid, task_id, files, requ
             </div>
             <div className={itemCss.task}>
                 <div className={css.files}>
-                    {files.map(file => <FormFileInfoTaskFile key={file.id} isSubmitted={isSubmitted} remove={() => removeFile(file.id)} {...file} />)}
+                    {files?.map(file => <FormFileInfoTaskFile key={file.id} isSubmitted={isSubmitted} remove={() => removeFile(file.id)} {...file} />)}
                 </div>
                 <div className={css.actions}>
                     <input multiple onChange={(evt) => { saveFiles(evt.target.files) }} type="file" id='fileUploader' hidden disabled={isLoading} />

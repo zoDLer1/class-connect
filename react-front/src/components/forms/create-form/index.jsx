@@ -12,7 +12,7 @@ import UsersService from 'services/usersService';
 import FormLoader from '../components/form-loader';
 import css from './create-form.module.css'
 import { useState } from 'react';
-import { types } from 'types';
+import Types from 'types';
 import FileUploader from '../components/form-fileUploader';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -92,7 +92,7 @@ const CreateForm = ({ current, close, update }) => {
     }, [selectConfig.value])
 
 
-    const formOptions = [...current.access.map(key => ({ id: key, text: types[key].title }))] // {id: 'Group', text: 'testGroup'}
+    const formOptions = [...current.access.map(key => ({ id: key, text: Types[key].title }))] // {id: 'Group', text: 'testGroup'}
     return (
         <div className={formsCss.block}>
             <FormHeader text='Создать' />

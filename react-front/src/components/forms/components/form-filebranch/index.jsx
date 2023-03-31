@@ -4,10 +4,13 @@ import { faPen, faTrash, faCirclePlus, faCheck } from '@fortawesome/free-solid-s
 import { useContext } from 'react'
 import { GlobalUIContext } from 'contexts/GlobalUIContext'
 import CreateForm from 'components/forms/create-form'
-import { Types } from './filebranch-item/types'
+import Types from './components/fileBranchTypes'
+import { useNavigate } from 'react-router-dom'
+import FilebranchNotFound from './components/filebranchNotFound'
 
 function FormFileBranch({ current, items, actions, state, loading, store, requests }) {
 
+    const navigate = useNavigate()
     const { remove, update } = requests
 
     const { popup, menu } = useContext(GlobalUIContext)
@@ -68,10 +71,12 @@ function FormFileBranch({ current, items, actions, state, loading, store, reques
         <FormLoader loading={loading}>
             {items.map(
                 (item) => {
-                    const Elem = Types[item.value.type.name] || Types.Folder
+                    
+                    const Elem = Types[item.value.type.name] || FilebranchNotFound
                     return <Elem
                         key={'FBI' + item.value.guid}
                         {...item}
+                        navigateTo={(id)=> navigate('/files/'+id)}
                         actions={actions.getItem(item.value.guid)}
                         onMenu={(evt, data, editMode) => {
                             evt.preventDefault()

@@ -1,11 +1,11 @@
-import typesCss from '../../types.module.css'
 import css from './filebranch-item.module.css'
 import { useId } from 'react';
 import Input from 'components/UI/Input';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFolder } from '@fortawesome/free-solid-svg-icons';
 
 
-function FileBranchItem({ value, onMenu, state, actions, icon, ...props }) {
+function FileBranchItem({ value, onMenu, state, actions, type, ...props }) {
 
     const id = useId()
 
@@ -13,16 +13,16 @@ function FileBranchItem({ value, onMenu, state, actions, icon, ...props }) {
     return (
 
         <div className={[css.block, css[`selected--${state.selected}`]].join(' ')} {...props} onClick={(evt) => { evt.stopPropagation(); actions.select() }} onContextMenu={(evt) => {
-            if(value.isEditable){
+            if (value.isEditable) {
                 onMenu(evt, value, state.editMode)
             }
-            
+
         }}>
 
 
             <div htmlFor={id} className={css.body}>
-                <div className={[typesCss[`icon--${value.type.name.toLowerCase()}`], css.icon].join(' ')}>
-                    <FontAwesomeIcon icon={icon} />
+                <div className={css.icon}>
+                    <FontAwesomeIcon icon={type?.icon || faFolder} color={type?.iconColor || 'var(--dark-op20-color)'} />
                 </div>
 
                 {state.editMode
