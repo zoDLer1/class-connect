@@ -16,11 +16,11 @@ const FileUploader = ({ value, validate, onChange, error, hidden = false, hideFi
             <div className={css.block}>
                 <h4 className={css.title}>Загрузить:</h4>
                 <div className={css.uploaded}>
-                    <input id={id} type="file" {...getProps()} {...props} hidden />
+                    <input id={id}  type="file" {...getProps()} {...props} hidden />
 
                     <div className={css.files}>
                         {value.map((file, index) => <UploadedFile key={index} text={file.name} onClose={() => Remove(index)} />)}
-
+                        
 
                     </div>
                     {(!value.length || !hideFileAdd) ?

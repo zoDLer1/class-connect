@@ -20,16 +20,16 @@ const FormFileInfoTask = ({ isSubmitted, icon, title, guid, task_id, files, requ
 
 
 
-    const saveFiles = (files) => {
+    const saveFiles =  async (files) => {
         setloading(true)
         for (const file of files) {
-            requests.saveFile({ id: task_id, file })
+            await requests.saveFile({ id: task_id, file })
         }
         setloading(false)
     }
 
     const removeFile = (id) => {
-        isSubmitted ? alert.show('Работа уже отправлена') : requests.removeFile(id)
+        requests.removeFile(id)
     }
 
     return (
@@ -46,11 +46,16 @@ const FormFileInfoTask = ({ isSubmitted, icon, title, guid, task_id, files, requ
                     {files?.map(file => <FormFileInfoTaskFile key={file.id} isSubmitted={isSubmitted} remove={() => removeFile(file.id)} {...file} />)}
                 </div>
                 <div className={css.actions}>
-                    <input multiple onChange={(evt) => { saveFiles(evt.target.files) }} type="file" id='fileUploader' hidden disabled={isLoading} />
-                    <label className={css.addFile} htmlFor="fileUploader">
-                        <FormButton text={'добавить файл'} icon={faPlus} />
-                    </label>
-                    <div className={css.sendWork}>
+                    {!isSubmitted &&
+                        <>
+                            <label className={css.addFile} htmlFor="fileUploader">
+                                <FormButton text={'добавить файл'} icon={faPlus} />
+                            </label>
+                            <input multiple onChange={(evt) => { saveFiles(evt.target.files) }} type="file" id='fileUploader' hidden disabled={isLoading} />
+                          
+                        </>  
+                    }
+                    <div className={[css.sendWork, css[`isSubmitted--${isSubmitted}`]].join(' ')}>
                         <FormButton style={1} text={isSubmitted ? 'Отменить отправку' : 'сдать работу'} onClick={() => requests.sendWork(guid)} disabled={isLoading} icon={faPaperPlane} />
                     </div>
 

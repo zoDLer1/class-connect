@@ -15,11 +15,11 @@ import { useState } from 'react';
 import Types from 'types';
 import FileUploader from '../components/form-fileUploader';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 const CreateForm = ({ current, close, update }) => {
 
-    const navigate = useNavigate()
+
     const [teachersOptions, setTeachers] = useState([{id: null}])
     const [send, isLoading] = useRequest(
         async () => await UsersService.teachers(),
@@ -64,7 +64,19 @@ const CreateForm = ({ current, close, update }) => {
         }
 
     },
-        async (validated_data) => FilesService.create(current.guid, {...validated_data, uploadedFile: validated_data.uploadedFiles ? validated_data.uploadedFiles[0] : undefined}),
+        async (validated_data) => {
+            console.log(validated_data.uploadedFiles);
+            if (validated_data.uploadedFiles?.length){
+                let response = null
+                for (const file of validated_data.uploadedFiles){
+                    response = await FilesService.create(current.guid, {...validated_data, uploadedFile: file})
+                }
+                return response
+                
+            }
+            return await FilesService.create(current.guid, {...validated_data})
+            
+        },
         {
             200: () => {
                 
@@ -102,7 +114,7 @@ const CreateForm = ({ current, close, update }) => {
                         <FormSelect {...getInput('teacherId')} options={teachersOptions} title="Преподаватели:" />
                         <FormSelect {...selectConfig} options={formOptions} title="Тип:" />
                         <FormInput {...getInput('name')} title="Имя:" />
-                        <FileUploader {...getInput('uploadedFiles')} />
+                        <FileUploader {...getInput('uploadedFiles')} multiple hideFileAdd={false} />
                     </div>
                     <FormSubmit text="Создать" {...getSubmit()} />
                 </FormLoader>

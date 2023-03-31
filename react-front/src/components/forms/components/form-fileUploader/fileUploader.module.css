@@ -1,9 +1,10 @@
 .block{
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 20px;
 }
 .title{
+    padding: 10px 0;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -26,13 +27,10 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    max-height: 300px;
+    overflow-y: scroll;
 }
-.files--grid-3-col{
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    justify-items: center;
-    row-gap: 20px;
-}
+
 
 .addfile{
     display: flex;
@@ -48,11 +46,8 @@
     height: 40px;
     
 }
-.files--grid-3-col + .actions{
-    display: flex;
-    justify-content: center;
-    gap: 50px;
-    margin-top: 30px;
+.actions{
+    margin-top: 10px;
 }
 .addfile > *{
     /* color: var(--dark-op25-color); */

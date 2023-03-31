@@ -5,6 +5,7 @@
     padding: 15px 20px;
     border: 1px solid var(--dark-op20-color); 
     border-radius: 10px;
+    height: 56px;
 }
 .icon{
     cursor: pointer;

@@ -45,6 +45,23 @@ a{
 h1, h2, h3, h4, h5, h6, label{
   font-family: var(--title-font);
 }
+
 #root{
   height: 100%;
+}
+
+::-webkit-scrollbar {
+  width: 14px;
+  background: none; 
+}
+
+::-webkit-scrollbar-thumb {
+  min-height: 28px;
+  border-radius: 10px;
+  border: solid 5px var(--light-color);
+  background: var(--dark-op20-color);
+}
+
+::-webkit-scrollbar-corner {
+  background: none;
 }
