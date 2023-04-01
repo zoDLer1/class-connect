@@ -20,7 +20,7 @@ const FormFileInfoTask = ({ isSubmitted, icon, title, guid, task_id, files, requ
 
 
 
-    const saveFiles =  async (files) => {
+    const saveFiles = async (files) => {
         setloading(true)
         for (const file of files) {
             await requests.saveFile({ id: task_id, file })
@@ -36,10 +36,10 @@ const FormFileInfoTask = ({ isSubmitted, icon, title, guid, task_id, files, requ
         <div className={itemCss.block}>
 
             <div className={itemCss.header}>
-                <div className={itemCss.icon}>
-                    <FontAwesomeIcon icon={icon} size='xl' />
+                <div className={itemCss.header_body}>
+                    <FontAwesomeIcon color='var(--primary-color)' icon={icon} size='xl' />
+                    <h3 className={itemCss.title}>{title}</h3>
                 </div>
-                <h3 className={itemCss.title}>{title}</h3>
             </div>
             <div className={itemCss.task}>
                 <div className={css.files}>
@@ -52,8 +52,8 @@ const FormFileInfoTask = ({ isSubmitted, icon, title, guid, task_id, files, requ
                                 <FormButton text={'добавить файл'} icon={faPlus} />
                             </label>
                             <input multiple onChange={(evt) => { saveFiles(evt.target.files) }} type="file" id='fileUploader' hidden disabled={isLoading} />
-                          
-                        </>  
+
+                        </>
                     }
                     <div className={[css.sendWork, css[`isSubmitted--${isSubmitted}`]].join(' ')}>
                         <FormButton style={1} text={isSubmitted ? 'Отменить отправку' : 'сдать работу'} onClick={() => requests.sendWork(guid)} disabled={isLoading} icon={faPaperPlane} />

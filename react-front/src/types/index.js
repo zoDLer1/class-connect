@@ -23,7 +23,7 @@ export const Subject = {
 export const Group = {
     title: 'Группа',
     icon: faUsers,
-    iconColor: 'var(--primary-color)'
+    iconColor: 'var(--primary-color)',
 }
 
 export const Task = {
@@ -35,7 +35,7 @@ export const Task = {
 export const Work =  {
     title: 'Работа',
     icon: faFolder,
-    iconColor: 'var(--orange-color)'
+    iconColor: 'var(--success-color)'
 }
 
 export const DefaultType = {

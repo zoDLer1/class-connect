@@ -1,7 +1,7 @@
 import css from './formFileElem.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-const FormInfoElem = ({ id, title, value, icon, action, actionFunc }) => {
+const FormInfoElem = ({ id, title, value, icon, children }) => {
     return (
         <div className={css.block}> 
             <div className={css.body}>
@@ -12,12 +12,8 @@ const FormInfoElem = ({ id, title, value, icon, action, actionFunc }) => {
                 <p className={css.value}>{value}</p>
             </div>
             <div className={css.actions}>
-                <div onClick={()=>actionFunc(id)} className={css.action}>
-                    {action}
-                </div>
-                
+                {children}
             </div>
-
         </div>
     );
 }

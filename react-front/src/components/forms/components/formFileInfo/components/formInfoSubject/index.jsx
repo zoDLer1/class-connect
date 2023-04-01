@@ -3,7 +3,7 @@ import { faCircleInfo, faUser, faCalendarDays } from '@fortawesome/free-solid-sv
 
 const FormInfoSubject = ({ teacher, creationTime }) => {
     const items = [
-        { title: 'Преподаватель:', value: teacher.name, icon: faUser },
+        { title: 'Преподаватель:', value: [teacher.name, teacher.surname, teacher.patronymic].join(' '), icon: faUser },
         { title: 'Дата создания:', value: creationTime, icon: faCalendarDays }
     ]
 

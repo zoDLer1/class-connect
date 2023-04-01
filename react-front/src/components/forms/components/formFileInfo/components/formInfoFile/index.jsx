@@ -13,7 +13,7 @@ const FormInfoFile = ({ creationTime, creatorName, id }) => {
 
     return <>
         <FormInfoItem icon={faCircleInfo} title='Информация' items={items} />
-        <FormFileInfoLoader icon={faCircleInfo} title='Информация' uploading={id} />
+        <FormFileInfoLoader icon={faCircleInfo} title='Содержание' uploading={id} />
     </>
 }
 
