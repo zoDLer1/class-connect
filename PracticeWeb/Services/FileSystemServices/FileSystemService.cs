@@ -174,8 +174,11 @@ public class FileSystemService : IFileSystemService
         if (parent == null)
             throw new ItemNotFoundException();
 
-        // Поставить оценку может либо создатель задания, либо администратор
-        if (!(parent.CreatorId == user.Id || user.RoleId == UserRole.Administrator))
+        if (parent.TypeId != Type.Task)
+            throw new ItemTypeException();
+
+        var access = await _serviceAccessor(parent.TypeId).HasAccessAsync(parent.Id, user, new List<string>());
+        if (access.Permission < Permission.Write)
             throw new AccessDeniedException();
 
         var work = await _commonWorkQueries.GetAsync(id, _context.Works);
@@ -226,7 +229,7 @@ public class FileSystemService : IFileSystemService
         var workItemId = (string) (result.GetType().GetProperty("Guid")?.GetValue(result) ?? string.Empty);
         if (workItemId == string.Empty)
             throw new AccessDeniedException();
-        
+
         var workItem = new WorkItem
         {
             Id = workItemId,
@@ -245,10 +248,10 @@ public class FileSystemService : IFileSystemService
         Console.WriteLine($"UPLOADING FILE {path}: {parentId}");
         using (var fileStream = new FileStream(path, FileMode.Create))
             await file.CopyToAsync(fileStream);
-        
+
         if (user.RoleId == UserRole.Student)
             return item;
-        
+
         var parent = await TryGetItemAsync(parentId);
         return await _serviceAccessor(parent.TypeId).GetAsync(parentId, user, true);
     }
