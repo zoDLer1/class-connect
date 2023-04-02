@@ -8,10 +8,10 @@ import Types from './components/fileBranchTypes'
 import { useNavigate } from 'react-router-dom'
 import FilebranchNotFound from './components/filebranchNotFound'
 
-function FormFileBranch({ current, items, actions, state, loading, store, requests }) {
+function FormFileBranch({ current, items, actions, state, loading, store, requests, setFilesInfo }) {
 
     const navigate = useNavigate()
-    const { remove, update } = requests
+    const { remove } = requests
 
     const { popup, menu } = useContext(GlobalUIContext)
 
@@ -42,7 +42,7 @@ function FormFileBranch({ current, items, actions, state, loading, store, reques
     const PopupCreateFormOpen = (current) => {
         popup.open()
         popup.setCurrent(current)
-        popup.setContent(<CreateForm update={update} />)
+        popup.setContent(<CreateForm setFilesInfo={setFilesInfo} />)
     }
 
     const ItemsMenuOpen = (evt, data, editMode) => {

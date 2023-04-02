@@ -2,20 +2,17 @@ import itemCss from '../formInfoItem.module.css'
 import css from './formFileInfoTask.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import FormButton from '../../../../form-button';
-import { faPlus, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faPaperPlane, faCalendarDays, faStamp } from '@fortawesome/free-solid-svg-icons';
 import FormFileInfoTaskFile from './formFileInfoTaskFile';
 import { useState } from 'react';
-import { useContext } from 'react';
-import { GlobalUIContext } from 'contexts/GlobalUIContext';
+import FormInfoElem from '../formInfoItem/formFileElem';
 
 
 
 
-const FormFileInfoTask = ({ isSubmitted, icon, title, guid, task_id, files, requests }) => {
+const FormFileInfoTask = ({ isSubmitted, icon, until, title, guid, task_id, mark, files, requests }) => {
 
     const [isLoading, setloading] = useState(false);
-
-    const { alert } = useContext(GlobalUIContext)
 
 
 
@@ -34,7 +31,7 @@ const FormFileInfoTask = ({ isSubmitted, icon, title, guid, task_id, files, requ
 
     return (
         <div className={itemCss.block}>
-
+            
             <div className={itemCss.header}>
                 <div className={itemCss.header_body}>
                     <FontAwesomeIcon color='var(--primary-color)' icon={icon} size='xl' />
@@ -42,10 +39,15 @@ const FormFileInfoTask = ({ isSubmitted, icon, title, guid, task_id, files, requ
                 </div>
             </div>
             <div className={itemCss.task}>
+                <div className={itemCss.items}>
+                    <FormInfoElem title={'Срок сдачи: '} value={until ? until : '--'} icon={faCalendarDays}/>
+                    <FormInfoElem title={'Оценка: '} value={mark ? mark : '--'} icon={faStamp} />
+                    
+                </div>
                 <div className={css.files}>
                     {files?.map(file => <FormFileInfoTaskFile key={file.id} isSubmitted={isSubmitted} remove={() => removeFile(file.id)} {...file} />)}
                 </div>
-                <div className={css.actions}>
+                <div className={itemCss.actions}>
                     {!isSubmitted &&
                         <>
                             <label className={css.addFile} htmlFor="fileUploader">

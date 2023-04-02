@@ -46,7 +46,8 @@ function useForm(InputsData, request = async () => null, statuses = {}) {
             validate: () => validateInput(inputName),
             error: errors[inputName],
             disabled: waitingForResponse,
-            hidden: inputs[inputName].hidden
+            hidden: inputs[inputName].hidden,
+            rools: inputs[inputName].rools
 
         }
     }
@@ -125,7 +126,7 @@ function useForm(InputsData, request = async () => null, statuses = {}) {
     }
 
 
-    return { InputsData:inputs, InputHide, InputShow, getSubmit, handleServerErrors, getInput, getValidatedData, addInput }
+    return { InputsData:inputs, setInputValue, InputHide, InputShow, getSubmit, handleServerErrors, getInput, getValidatedData, addInput }
 
 }
 

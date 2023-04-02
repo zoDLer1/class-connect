@@ -1,7 +1,7 @@
 import css from './input.module.css'
 
 
-function Input({ title, error, ...props }) {
+function Input({ title, type='text', error, ...props }) {
 
 
 
@@ -9,7 +9,7 @@ function Input({ title, error, ...props }) {
         <div className={css.block}>
             {title && <h4 className={css.title}>{title}</h4>}
             <div className={css.body}>
-                <input className={css.input} {...props} />
+                <input type={type} className={css.input} {...props} />
                 <span className={css.error}>{error}</span>
             </div>
         </div>

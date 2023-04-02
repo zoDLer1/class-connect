@@ -1,0 +1,13 @@
+.return{
+    justify-self: end;
+}
+.actions{
+    width: 430px;
+}
+.mark{
+    display: flex;
+    margin-top: 20px;
+}
+.isLate--true{
+    color: var(--error-color);
+}

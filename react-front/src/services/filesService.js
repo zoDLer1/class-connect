@@ -20,8 +20,8 @@ class FilesService {
     static async rename(id, name){
         return await DefaultApiInstanse.patch('/FileSystem', null, { params: { id: id, name }})
     }
-    static async mark(id){
-        return await DefaultApiInstanse.post('/FileSystem/mark', {id})
+    static async mark(id, mark){
+        return await DefaultApiInstanse.post('/FileSystem/mark', {id, mark})
     }
 
 }

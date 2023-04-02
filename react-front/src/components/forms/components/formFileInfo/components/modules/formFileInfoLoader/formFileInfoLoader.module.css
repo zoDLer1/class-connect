@@ -1,0 +1,19 @@
+.image{
+    overflow: hidden;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 400px;
+}
+.image > *{
+    width: 100%;
+    margin: 20px 0; 
+}
+.image > iframe{
+    height: 550px; 
+}
+.noPreview{
+    text-align: center;
+    font-weight: 500;
+}

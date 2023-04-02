@@ -3,7 +3,7 @@ import FormInfoGroup from "./formInfoGroup"
 import FormInfoFolder from "./formInfoFolder"
 import FormInfoSubject from "./formInfoSubject"
 import FormInfoFile from "./formInfoFile"
-
+import FormInfoWork from "./formInfoWork"
 
 
 
@@ -12,7 +12,8 @@ const Types = {
     Folder: FormInfoFolder,
     Subject: FormInfoSubject,
     File: FormInfoFile,
-    Task: FormInfoTask
+    Task: FormInfoTask,
+    Work: FormInfoWork
 }
 
 export default Types

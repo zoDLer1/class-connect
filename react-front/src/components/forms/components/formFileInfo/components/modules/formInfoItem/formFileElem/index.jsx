@@ -9,7 +9,7 @@ const FormInfoElem = ({ id, title, value, icon, children }) => {
                     <FontAwesomeIcon icon={icon} size='lg' />
                 </div>
                 <h3 className={css.title}>{title}</h3>
-                <p className={css.value}>{value}</p>
+                <div className={css.value}>{value}</div>
             </div>
             <div className={css.actions}>
                 {children}

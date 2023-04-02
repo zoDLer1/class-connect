@@ -21,7 +21,8 @@ function LoginForm() {
     const { getSubmit, handleServerErrors, getInput } = useForm({
         email: {
             value: 'admin@admin.admin',
-            validators: [REQUIRED(), IS_EMAIL(), MAX_LENGTH(50)]
+            validators: [REQUIRED(), IS_EMAIL(), MAX_LENGTH(50)],
+            
         },
         password: {
             value: 'admin',

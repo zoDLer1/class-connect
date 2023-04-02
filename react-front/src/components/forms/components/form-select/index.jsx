@@ -1,9 +1,9 @@
 import css from './form-select.module.css'
 import useInput from 'hooks/useInput';
 
-const FormSelect = ({ title, error, options, validate, onChange = () => null, value, hidden = false }) => {
+const FormSelect = ({ title, error, options, rools=[], validate, onChange = () => null, value, hidden = false }) => {
 
-    const { getProps } = useInput({ validate, value, onChange })
+    const { getProps } = useInput({ validate, value, onChange, rools })
 
     if (!hidden) {
         return (

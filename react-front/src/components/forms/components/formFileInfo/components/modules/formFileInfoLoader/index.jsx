@@ -1,4 +1,5 @@
-import css from '../formInfoItem.module.css'
+import itemCss from '../formInfoItem.module.css'
+import css from './formFileInfoLoader.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useRequest } from 'hooks/useRequest';
 import FormLoader from 'components/forms/components/form-loader';
@@ -31,11 +32,11 @@ const FormFileInfoLoader = ({ icon, title, uploading }) => {
     }, [uploading]);
 
     return (
-        <div className={css.block}>
-            <div className={css.header}>
-                <div className={css.header_body}>
+        <div className={itemCss.block}>
+            <div className={itemCss.header}>
+                <div className={itemCss.header_body}>
                     <FontAwesomeIcon icon={icon} size='xl' color='var(--primary-color)' />
-                    <h3 className={css.title}>{title}</h3>
+                    <h3 className={itemCss.title}>{title}</h3>
                 </div>
                 <a href={url} download>
                     <FontAwesomeIcon color='var(--primary-color)' icon={faDownload} size='lg' cursor={'pointer'} />

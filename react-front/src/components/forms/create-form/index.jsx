@@ -17,7 +17,7 @@ import FileUploader from '../components/form-fileUploader';
 import { useEffect } from 'react';
 
 
-const CreateForm = ({ current, close, update }) => {
+const CreateForm = ({ current, close, setFilesInfo }) => {
 
 
     const [teachersOptions, setTeachers] = useState([{id: null}])
@@ -78,9 +78,8 @@ const CreateForm = ({ current, close, update }) => {
             
         },
         {
-            200: () => {
-                
-                update()
+            200: (response) => {
+                setFilesInfo(response.data)
                 close()
                 
             }

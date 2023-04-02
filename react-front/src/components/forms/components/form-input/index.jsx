@@ -2,9 +2,9 @@ import useInput from 'hooks/useInput'
 import Input from 'components/UI/Input'
 
 
-function FormInput({ validate, value, onChange, hidden=false, ...props}) {
+function FormInput({ validate=[], rools=[], value, onChange, hidden=false, ...props}) {
 
-    const { getProps } = useInput({validate, value, onChange})
+    const { getProps } = useInput({validate, value, onChange, rools})
     
     return !hidden ? <Input {...props} {...getProps()} /> : null
     

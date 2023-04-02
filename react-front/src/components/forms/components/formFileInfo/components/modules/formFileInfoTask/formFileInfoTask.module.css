@@ -9,12 +9,7 @@
     padding: 0 20px;
     margin-top: 20px;
 }
-.actions{
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    column-gap: 35px;
-    margin-top: 35px;
-}
+
 
 .addFile{
     justify-self: end;

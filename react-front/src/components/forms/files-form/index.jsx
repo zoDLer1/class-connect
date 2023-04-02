@@ -51,11 +51,7 @@ function FilesForm() {
         async (id) => await FilesService.get_folder(id),
         {
             200: (response) => {
-                const { children, path, ...fileInfo } = response.data
-
-                setFilePath(path)
-                branchItemsAtions.setItems(children)
-                setParentFileInfo(fileInfo)
+                setFilesInfo(response.data)
             },
             404: FOLDER_NOT_FOUND,
             403: (response) => {
@@ -70,6 +66,12 @@ function FilesForm() {
     )
     const updateInfo = async () => {
         await setFolder(id)
+    }
+    const setFilesInfo = (data) => {
+        const { children, path, ...fileInfo } = data
+        setFilePath(path)
+        branchItemsAtions.setItems(children)
+        setParentFileInfo(fileInfo)
     }
 
 
@@ -132,16 +134,16 @@ function FilesForm() {
             </div>
             <div className={css.body}>
                 <FormFileBranch
-
+                    setFilesInfo={setFilesInfo}
                     current={parentFileInfo}
                     loading={isLoading}
                     store={branchStoreActions}
                     items={branchItems}
                     actions={branchItemsAtions}
                     state={branchItemsStateActions}
-                    requests={{ remove, update: updateInfo }}
+                    requests={{ remove }}
                 />
-                <FormFileInfo setFolder={setFolder} {...selectedItem || parentFileInfo} />
+                <FormFileInfo setFilesInfo={setFilesInfo} update={updateInfo} {...selectedItem || parentFileInfo} />
             </div>
         </div>
     )

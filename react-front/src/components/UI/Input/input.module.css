@@ -16,9 +16,25 @@
     outline: none;
     box-shadow: inset 0px 0px 8px var(--primary-op25-color);
     border: none;
-    width: 200px;
+   
     padding: 5px 10px;
 }
+
+.input[type='text'],
+.input[type='password']{
+    width: 200px;
+}
+.input[type='num']{
+    width: 27px;
+}
+
+
+.input[type='num'] + .error{
+    width: 27px;
+    left: 0;
+}
+
+
 .body{
     display: flex;
     flex-direction: column;
