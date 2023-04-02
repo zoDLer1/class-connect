@@ -46,7 +46,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         return access;
     }
 
-    private object GetGroupData(Group group, User user)
+    private object GetGroupData(Group group, User user, Boolean asChild)
     {
         var subjects = _context.Subjects.Include(s => s.Item).Where(s => s.GroupId == group.Id);
         if (user.RoleId != UserRole.Administrator && group.TeacherId != user.Id)
@@ -62,12 +62,12 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
                 Surname = group.Teacher.Surname,
                 Patronymic = group.Teacher.Patronymic
             },
-            Subjects = subjects
+            Subjects = asChild ? subjects
                 .Select(s => new
                 {
                     Id = s.Id,
                     Name = s.Item.Name,
-                }),
+                }).ToList<object>() : new List<object>(),
             Students = new
             {
                 IsEditable = user.Id == group.TeacherId || user.RoleId == UserRole.Administrator,
@@ -98,7 +98,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Guid = folder.Guid,
             Path = folder.Path,
             Children = asChild ? null : folder.Children,
-            Data = user.Role.Id == UserRole.Student || group == null ? null : GetGroupData(group, user),
+            Data = user.Role.Id == UserRole.Student || group == null ? null : GetGroupData(group, user, asChild),
             Access = folder.Access,
             IsEditable = folder.IsEditable
         };

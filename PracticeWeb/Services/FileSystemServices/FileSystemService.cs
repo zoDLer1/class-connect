@@ -253,7 +253,7 @@ public class FileSystemService : IFileSystemService
             return item;
 
         var parent = await TryGetItemAsync(parentId);
-        return await _serviceAccessor(parent.TypeId).GetAsync(parentId, user, true);
+        return await _serviceAccessor(parent.TypeId).GetAsync(parentId, user, false);
     }
 
     public async Task<object> CreateFolderAsync(string parentId, string name, Type type, User user, Dictionary<string, object>? parameters)

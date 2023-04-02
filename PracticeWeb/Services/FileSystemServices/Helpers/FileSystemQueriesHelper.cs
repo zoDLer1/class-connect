@@ -223,16 +223,18 @@ public abstract class FileSystemQueriesHelper
             {
                 var item = await _common.GetAsync(w.Id, _context.Items.Include(e => e.Type));
                 var file = await _context.Files.FirstOrDefaultAsync(f => f.Id == w.Id);
-                return new
+                return (item?.Name, new
                 {
                     Id = w.Id,
                     Name = item?.Name,
                     Type = item?.Type,
                     MimeType = file?.MimeType,
                     IsEditable = user.Id == item?.CreatorId
-                };
+                });
             })
             .Select(r => r.Result)
+            .OrderBy(i => i.Name)
+            .Select(i => i.Item2)
             .ToList();
         return new
         {
