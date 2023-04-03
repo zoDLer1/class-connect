@@ -5,6 +5,6 @@ namespace PracticeWeb.Controllers.Models;
 public class NewNameItemModel : ItemModel
 {
     [Required(ErrorMessage = "Укажите имя объекта")]
-    [StringLength(70, ErrorMessage = "Используйте менее 70 символов")]
+    [StringLength(100, ErrorMessage = "Используйте менее 100 символов")]
     public string Name { get; set; } = null!;
 }

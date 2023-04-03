@@ -78,13 +78,6 @@ public class Context : DbContext
             new Role { Id = UserRole.Administrator, Name = "Administrator", Title = "Администратор" }
         );
 
-        builder.Entity<User>().HasData(
-            new User { Id = 1, Name = "Админ", Surname = "Админов", Email = "admin@admin.admin", RoleId = UserRole.Administrator, Password = "$2a$11$vZJfXw2NUiLp43m/lkoc6.uW5W6ibxwKHFHlKlcoJmHrFvRwk.yWG", RegTime = DateTime.Now },
-            new User { Id = 2, Name = "Валенок", Surname = "Купцов", Patronymic = "Анатольевич", Email = "test@test.test", RoleId = UserRole.Teacher, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTime.Now },
-            new User { Id = 3, Name = "Валентин", Surname = "Купцов", Patronymic = "Анатольевич", Email = "teacher@test.test", RoleId = UserRole.Teacher, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTime.Now },
-            new User { Id = 4, Name = "Другой", Surname = "Препод", Email = "anotherTeacher@test.test", RoleId = UserRole.Teacher, Password = "$2a$11$/DpkLbtTr9oZEJPZpLpyieT67Cd/T5liNN/fm3kf81vJ6L0EhWgHe", RegTime = DateTime.Now }
-        );
-
         builder.Entity<ItemType>().HasData(
             new ItemType { Id = Type.Folder, Name = "Folder" },
             new ItemType { Id = Type.File, Name = "File" },
@@ -92,16 +85,6 @@ public class Context : DbContext
             new ItemType { Id = Type.Subject, Name = "Subject" },
             new ItemType { Id = Type.Task, Name = "Task" },
             new ItemType { Id = Type.Work, Name = "Work" }
-        );
-
-        builder.Entity<Item>().HasData(
-            new Item { Id = "25aba956-b6c8-473f-b114-8ed881adf6c5", TypeId = Type.Group, Name = "ИСП-564", CreationTime = DateTime.Now, CreatorId = 1 },
-            new Item { Id = "7989dbf3-35a0-4efa-9a2f-5fe40e4b7c27", TypeId = Type.Group, Name = "Группа 1", CreationTime = DateTime.Now, CreatorId = 1 }
-        );
-
-        builder.Entity<Group>().HasData(
-            new Group { Id = "25aba956-b6c8-473f-b114-8ed881adf6c5", TeacherId = 3 },
-            new Group { Id = "7989dbf3-35a0-4efa-9a2f-5fe40e4b7c27", TeacherId = 2 }
         );
     }
 }

@@ -233,7 +233,7 @@ public abstract class FileSystemQueriesHelper
                 });
             })
             .Select(r => r.Result)
-            .OrderBy(i => i.Name)
+            .OrderByDescending(i => i.Name)
             .Select(i => i.Item2)
             .ToList();
         return new

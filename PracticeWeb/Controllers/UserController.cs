@@ -180,7 +180,7 @@ public class UserController : ControllerBase
         }
         catch (InvalidPasswordException)
         {
-            return BadRequest(new { Errors = new { Email = new List<string> { "Неправильный пароль" } } });
+            return BadRequest(new { Errors = new { Password = new List<string> { "Неправильный пароль" } } });
         }
     }
 
