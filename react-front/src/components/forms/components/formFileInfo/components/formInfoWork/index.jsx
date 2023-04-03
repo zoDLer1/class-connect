@@ -13,15 +13,10 @@ const FormInfoWork = ({ id, setFilesInfo, ...workInfo }) => {
 
    
 
-
-    // useEffect(() => {
-    //     setWork(workInfo)
-    // }, [id]);
-
     const { creationTime, creatorName, ...workProps } = workInfo
 
     return <>
-        <FormInfoFolder creationTime={creationTime} creatorName={creationTime} />
+        <FormInfoFolder creationTime={creationTime} creatorName={creatorName} />
         <FormFileInfoWork title={'Работа'} setFilesInfo={setFilesInfo} {...workProps} id={id} icon={faBriefcase}/>
         
     </>

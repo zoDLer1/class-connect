@@ -1,11 +1,27 @@
 import pagesCss from '../pages.module.css'
 import FilesForm from 'components/forms/files-form'
+import user from 'store/user'
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-function Files( props ) {
+function Files(props) {
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (user.data === null) {
+            navigate('/login')
+        }
+
+
+    }, [])
+
     return (
         <div {...props} className={[pagesCss.default_background, pagesCss.content_position_center].join(' ')}>
-            <FilesForm />
-            
+            {user.data ?
+                <FilesForm />
+                : null
+            }
+
         </div>
     )
 }

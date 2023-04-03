@@ -29,7 +29,9 @@ function FormFileBranch({ current, items, actions, state, loading, store, reques
     }
 
     const MainMenuOpen = (evt) => {
-        if (!loading && current.access.length){
+        const access = current.access.filter(item => item !== 'Work')
+
+        if (!loading && access.length){
             menu.open()
             menu.setCurrent(current)
             menu.setItems([{ text: 'Создать', icon: faCirclePlus, action: PopupCreateFormOpen }])
