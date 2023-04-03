@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router-dom'
 import FilebranchNotFound from './components/filebranchNotFound'
 
 function FormFileBranch({ current, items, actions, state, loading, store, requests, setFilesInfo }) {
-
     const navigate = useNavigate()
     const { remove } = requests
 
@@ -37,8 +36,6 @@ function FormFileBranch({ current, items, actions, state, loading, store, reques
             menu.setItems([{ text: 'Создать', icon: faCirclePlus, action: PopupCreateFormOpen }])
             menu.setCoords(evt.clientX, evt.clientY)
         }
-        
-   
     }
 
     const PopupCreateFormOpen = (current) => {
@@ -73,7 +70,6 @@ function FormFileBranch({ current, items, actions, state, loading, store, reques
         <FormLoader loading={loading}>
             {items.map(
                 (item) => {
-                    
                     const Elem = Types[item.value.type.name] || FilebranchNotFound
                     return <Elem
                         key={'FBI' + item.value.guid}
@@ -88,10 +84,7 @@ function FormFileBranch({ current, items, actions, state, loading, store, reques
                 }
             )}
         </FormLoader>
-
     </div>
-
-
 }
 
 export default FormFileBranch

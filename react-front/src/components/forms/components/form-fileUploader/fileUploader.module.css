@@ -4,7 +4,7 @@
     gap: 20px;
 }
 .title{
-    padding: 10px 0;
+    margin-top: 22px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -48,6 +48,7 @@
 }
 .actions{
     margin-top: 10px;
+    margin-right: 14px;
 }
 .addfile > *{
     /* color: var(--dark-op25-color); */

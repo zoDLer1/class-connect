@@ -2,17 +2,9 @@
 import FormInfoFolder from '../formInfoFolder';
 import FormFileInfoWork from '../modules/formFileInfoWork';
 import { faBriefcase } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
-import { useEffect } from 'react';
 
 
 const FormInfoWork = ({ id, setFilesInfo, ...workInfo }) => {
-
-
-    
-
-   
-
     const { creationTime, creatorName, ...workProps } = workInfo
 
     return <>

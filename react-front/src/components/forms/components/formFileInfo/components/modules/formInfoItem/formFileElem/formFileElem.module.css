@@ -16,13 +16,10 @@
 .body{
     display: flex;
     gap: 15px;
-
-   
 }
 .block:last-child{
     border: none;
 }
-
 .icon{
     color: var(--primary-color);
     align-self: start;
@@ -33,6 +30,9 @@
     font-size: 17px;
     width: 200px;
     align-self: start;
+}
+.title-extended{
+    width: auto;
 }
 .value{
     align-self: center;

@@ -7,7 +7,7 @@ import { parse_time } from './components/utils';
 const FormFileInfo = ({ data, name, type, guid, update, setFilesInfo }) => {
     const Elem = Types[type?.name] || Types.Folder
     return (
-        <div className={css.block} onClick={evt => evt.stopPropagation()}>
+        <div className={css.block} onClick={evt => evt.stopPropagation()} onContextMenu={e => e.stopPropagation()}>
             {data &&
                 <>
                     <div className={css.header}>

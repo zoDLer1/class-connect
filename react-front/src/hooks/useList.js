@@ -3,16 +3,8 @@ import { CloseContext } from 'contexts/сloseContext';
 import { useContext } from "react";
 
 
-
-
 export const useList = (onAutoClose = () => null) => {
-
-
-
     const [list, setList] = useState([])
-
-
-
     const setItems = (items) => {
         setList(() => {
             let newList = []
@@ -21,7 +13,6 @@ export const useList = (onAutoClose = () => null) => {
             }
             return newList
         })
-
     }
     const [selectedItem, setSelectedItem] = useState(null)
 
@@ -39,7 +30,6 @@ export const useList = (onAutoClose = () => null) => {
                 return newList
             }
         )
-
     }
     const reject = (id, key) => {
         setList((list) => {
@@ -49,10 +39,6 @@ export const useList = (onAutoClose = () => null) => {
             delete newList[index].stored[key]
             return newList
         })
-
-
-
-
     }
     const commit = (id, key) => {
         setList((list) => {
@@ -68,7 +54,6 @@ export const useList = (onAutoClose = () => null) => {
             newList[findItemIndex(list, id)].state.loading = value
             return newList
         })
-
     }
 
     const selectedStateOn = (id) => {
@@ -79,22 +64,17 @@ export const useList = (onAutoClose = () => null) => {
             if (index !== -1) {
                 newList[index].state.selected = true
                 setSelectedItem(newList[index].value)
-                
             }
             return newList
-
-            
         })
         if (!selectedItem){
             add({
                 id: 'selected-items', close: () => {
                     setSelectedItem(null)
                     selectedStateOff()
-                    
                 }
             })
         }
-        
     }
 
     const unselectAll = (newList) => {
@@ -161,7 +141,6 @@ export const useList = (onAutoClose = () => null) => {
             loading: (value) => loadingState(id, value),
             select: () => selectedStateOn(id)
         }
-
     }
     const removeItem = (id) => {
         setList((list) => [...list].filter(item => item.value.guid !== id))

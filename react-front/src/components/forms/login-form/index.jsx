@@ -20,12 +20,12 @@ function LoginForm() {
 
     const { getSubmit, handleServerErrors, getInput } = useForm({
         email: {
-            value: 'admin@admin.admin',
+            value: '',
             validators: [REQUIRED(), IS_EMAIL(), MAX_LENGTH(50)],
             
         },
         password: {
-            value: 'admin',
+            value: '',
             validators: [REQUIRED(), MIN_LENGTH(0)]
         }
     },
