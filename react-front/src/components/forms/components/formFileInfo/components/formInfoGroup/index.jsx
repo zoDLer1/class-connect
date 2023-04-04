@@ -3,9 +3,10 @@ import FormInfoItem from '../modules/formInfoItem';
 import UsersService from 'services/usersService';
 import { useRequest } from 'hooks/useRequest';
 import FormInfoUser from '../modules/formInfoItem/formInfoUser';
-
+import FormInfoSubject from '../modules/formInfoItem/formInfoSubject';
 
 const FormInfoGroup = ({ teacher, creationTime, subjects, students, id, update }) => {
+
 
     const [removeStudent] = useRequest(
         async ({ id, current }) => await UsersService.group_remove(id, current),
@@ -14,7 +15,11 @@ const FormInfoGroup = ({ teacher, creationTime, subjects, students, id, update }
         }
     )
     const getSubject = (subject) => {
-        return { icon: faCube, title: subject.name }
+        return {
+            id: subject.id,
+            icon: faCube,
+            title: subject.name
+        }
     }
 
 
@@ -40,6 +45,7 @@ const FormInfoGroup = ({ teacher, creationTime, subjects, students, id, update }
         {
             subjects.length
                 ? <FormInfoItem
+                    Elem={FormInfoSubject}
                     icon={faCubes}
                     title='Предметы'
                     items={subjects.map(getSubject)}

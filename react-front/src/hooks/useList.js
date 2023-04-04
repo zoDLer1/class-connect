@@ -166,5 +166,5 @@ export const useList = (onAutoClose = () => null) => {
     const removeItem = (id) => {
         setList((list) => [...list].filter(item => item.value.guid !== id))
     }
-    return [list, { setItems, addItem, updateItem, removeItem, setItemProp, getItem }, { editModeOn, editModeOff, loadingState }, { storeProp, reject, commit }, selectedItem]
+    return [list, { setItems, addItem, updateItem, removeItem, setItemProp, getItem }, { selectedStateOn, editModeOn, editModeOff, loadingState }, { storeProp, reject, commit }, selectedItem]
 }

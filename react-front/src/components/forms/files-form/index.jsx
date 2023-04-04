@@ -55,7 +55,7 @@ function FilesForm() {
             },
             404: FOLDER_NOT_FOUND,
             403: (response) => {
-                if (response.config.params.id === user.data.folder){
+                if (response.config.params.id === user.data.folder) {
                     user.set_user_data({ ...user.data, folder: null })
                     navigate('/rootNotFound')
                 }
@@ -70,7 +70,12 @@ function FilesForm() {
     const setFilesInfo = (data) => {
         const { children, path, ...fileInfo } = data
         setFilePath(path)
+        const guid = selectedItem?.guid
         branchItemsAtions.setItems(children)
+        
+        if (guid){
+            branchItemsStateActions.selectedStateOn(guid)
+        }
         setParentFileInfo(fileInfo)
     }
 
@@ -83,7 +88,7 @@ function FilesForm() {
         if ('null' !== id) {
             renderFolder()
         }
-        else{
+        else {
             navigate('/rootNotFound')
         }
 
@@ -124,6 +129,7 @@ function FilesForm() {
 
     return (
         <div className={css.block}>
+        
             <div className={css.header}>
                 <FormFilePath loading={isLoading} path={filePath} />
                 <div className={css.user_info}>
@@ -143,7 +149,7 @@ function FilesForm() {
                     state={branchItemsStateActions}
                     requests={{ remove }}
                 />
-                <FormFileInfo setFilesInfo={setFilesInfo} update={updateInfo} {...selectedItem || parentFileInfo} />
+                <FormFileInfo update={updateInfo} {...selectedItem || parentFileInfo} />
             </div>
         </div>
     )

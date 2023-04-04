@@ -31,7 +31,11 @@
 .title{
     font-weight: 500;
     font-size: 17px;
-    width: 200px;
+    min-width: 200px;
+    max-width: 500px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     align-self: start;
 }
 .value{
