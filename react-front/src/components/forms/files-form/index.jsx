@@ -37,8 +37,8 @@ function FilesForm() {
         async ({ id, name }) => await FilesService.rename(id, name),
         {
             200: (response) => branchStoreActions.commit(response.config.params.id),
-            400: (response) => branchStoreActions.reject(JSON.parse(response.config.data).params.id, 'name'),
-            0: (response) => branchStoreActions.reject(JSON.parse(response.config.data).params.id, 'name')
+            400: (response) => branchStoreActions.reject(response.config.params.id, 'name'),
+            0: (response) =>  branchStoreActions.reject(response.config.params.id, 'name')
         }
     )
 
