@@ -27,18 +27,16 @@ DefaultApiInstanse.interceptors.response.use(
     },
     async (error) => {
         
-        if (error.response.status === 401) {
-            try{
-                await AuthService.refresh_token()
-                return DefaultApiInstanse.request(error.config)
-            }
-            catch{
-                return error
-            }
+        if (error.response?.status === 401) {
+            // try {
+            await AuthService.refresh_token()
+            return DefaultApiInstanse.request(error.config)
+            // }
+            // catch {
+            //     window.location = "/login";
+            //     return error
+            // }
         }
-        
-        
-        
         return error
     }
 )

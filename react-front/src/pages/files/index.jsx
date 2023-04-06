@@ -4,15 +4,14 @@ import user from 'store/user'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+
 function Files(props) {
     const navigate = useNavigate()
-
     useEffect(() => {
+        /* eslint-disable react-hooks/exhaustive-deps */
         if (user.data === null) {
             navigate('/login')
         }
-
-
     }, [])
 
     return (
@@ -21,9 +20,9 @@ function Files(props) {
                 <FilesForm />
                 : null
             }
-
         </div>
     )
 }
 
 export default Files
+

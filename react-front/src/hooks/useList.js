@@ -5,118 +5,114 @@ import { useContext } from "react";
 
 
 
+
 export const useList = (onAutoClose = () => null) => {
 
+    const [collection, setList] = useState({})
 
-
-    const [list, setList] = useState([])
-
-
-
-    const setItems = (items) => {
-        setList(() => {
-            let newList = []
-            for (const item of items) {
-                newList.push({ value: item, stored: {}, state: { loading: false, editMode: false, selected: false } })
-            }
-            return newList
-        })
-
-    }
     const [selectedItem, setSelectedItem] = useState(null)
 
     const { add, remove } = useContext(CloseContext)
 
-    const findItemIndex = (lst, id) => {
-        return [...lst].findIndex(item => item.value.guid === id)
+
+    // * Items Collection Methods
+    const setItems = (items) => {
+        setList(() => {
+            let newCollection = {}
+            for (const item of items) {
+                newCollection[item.guid] = { value: item, stored: {}, state: { loading: false, editMode: false, selected: false } }
+            }
+            return newCollection
+        })
     }
+
+    // * Item Store Methods
+
+
+
+
     const storeProp = (id, key) => {
         setList(
-            (list) => {
-                const newList = [...list]
-                const index = findItemIndex(list, id)
-                newList[index].stored[key] = newList[index].value[key]
-                return newList
+            (collection) => {
+                const newCollection = {...collection}
+                newCollection[id].stored[key] = newCollection[id].value[key]
+                return newCollection
             }
         )
-
     }
     const reject = (id, key) => {
-        setList((list) => {
-            const newList = [...list]
-            const index = findItemIndex(list, id)
-            newList[index].value[key] = newList[index].stored[key]
-            delete newList[index].stored[key]
-            return newList
+        setList((collection) => {
+            const newCollection = {...collection}
+            newCollection[id].value[key] = newCollection[id].stored[key]
+            delete newCollection[id].stored[key]
+            return newCollection
         })
-
-
-
-
     }
     const commit = (id, key) => {
-        setList((list) => {
-            const newList = [...list]
-            const index = findItemIndex(list, id)
-            delete newList[index].stored[key]
-            return newList
+        setList((collection) => {
+            const newCollection = {...collection}
+            delete newCollection[id].stored[key]
+            return newCollection
         })
     }
-    const loadingState = (id, value) => {
-        setList((list) => {
-            const newList = [...list]
-            newList[findItemIndex(list, id)].state.loading = value
-            return newList
-        })
 
+    // * Item State Methods
+
+
+    const switchState = (id, key, value) =>{
+        setList((collection) => {
+            const newCollection = {...collection}
+            newCollection[id].state[key] = value
+            return newCollection
+        })
     }
+
+
+
+
+
+
 
     const selectedStateOn = (id) => {
-        setList((list) => {
-            let newList = [...list]
-            newList = unselectAll(newList)
-            const index = findItemIndex(list, id)
-            if (index !== -1) {
-                newList[index].state.selected = true
-                setSelectedItem(newList[index].value)
-                
-            }
-            return newList
-
-            
+        setList((collection) => {
+            let newCollection = {...collection}
+            newCollection = unselectAll(newCollection)
+            newCollection[id].state.selected = true
+            setSelectedItem(newCollection[id].value)
+            return newCollection
         })
-        if (!selectedItem){
+        if (!selectedItem) {
             add({
                 id: 'selected-items', close: () => {
                     setSelectedItem(null)
                     selectedStateOff()
-                    
                 }
             })
         }
-        
     }
-
-    const unselectAll = (newList) => {
-        for (let list_index = 0; list_index < newList.length; list_index++) {
-            newList[list_index].state.selected = false
+    const unselectAll = (newCollection) => {
+        for (const id in newCollection) {
+            newCollection[id].state.selected = false
         }
-        return newList
+        return newCollection
     }
     const selectedStateOff = () => {
-        setList((list) => {
-            return unselectAll([...list])
+        setList((collection) => {
+            return unselectAll({...collection})
         })
         remove('selected-items')
     }
 
+    
     const editModeState = (id, value) => {
-        setList((list) => {
-            const newList = [...list]
-            newList[findItemIndex(list, id)].state.editMode = value
-            return newList
+        setList((collection) => {
+            const newCollection = {...collection}
+            newCollection[id].state.editMode = value
+            return newCollection
         })
     }
+
+    // ? refactor it
     const editModeOn = (id) => {
 
         editModeState(id, true)
@@ -124,7 +120,7 @@ export const useList = (onAutoClose = () => null) => {
         add({
             id, close: () => {
                 editModeOff(id)
-                onAutoClose(list[findItemIndex(list, id)])
+                onAutoClose(collection[id])
             }
         })
     }
@@ -133,22 +129,30 @@ export const useList = (onAutoClose = () => null) => {
         remove(id)
 
     }
+
+
     const setItemProp = (id, key, value) => {
-        setList((list) => {
-            const newList = [...list]
-            newList[findItemIndex(list, id)].value[key] = value
-            return newList
+        setList((collection) => {
+            const newCollection = {...collection}
+            newCollection[id].value[key] = value
+            return newCollection
         })
 
     }
-    const addItem = (data) => {
-        setList((list) => [...list, { value: data, stored: {}, state: { loading: false, editMode: false, selected: false } }])
+
+    const appendItem = (data) => {
+        setList((collection) => {
+            const newCollection = {...collection}
+            newCollection[data.inewCollectiond] = { value: data, stored: {}, state: { loading: false, editMode: false, selected: false } }
+            return 
+        })
     }
+
     const updateItem = (id, data) => {
-        setList((list) => {
-            const newList = [...list]
-            newList[findItemIndex(list, id)].value = data
-            return newList
+        setList((collection) => {
+            const newCollection = {...collection}
+            newCollection[id].value = data
+            return newCollection
         })
     }
     const getItem = (id) => {
@@ -158,13 +162,15 @@ export const useList = (onAutoClose = () => null) => {
             setProp: (key, value) => setItemProp(id, key, value),
             editModeOn: () => editModeOn(id),
             editModeOff: () => editModeOff(id),
-            loading: (value) => loadingState(id, value),
             select: () => selectedStateOn(id)
         }
-
     }
     const removeItem = (id) => {
-        setList((list) => [...list].filter(item => item.value.guid !== id))
+        setList((collection) => {
+            const newCollection = {...collection}
+            delete newCollection[id]
+            return newCollection
+        })
     }
-    return [list, { setItems, addItem, updateItem, removeItem, setItemProp, getItem }, { selectedStateOn, editModeOn, editModeOff, loadingState }, { storeProp, reject, commit }, selectedItem]
+    return [collection, { setItems, addItem: appendItem, updateItem, removeItem, setItemProp, getItem }, { editModeOn, editModeOff }, { storeProp, reject, commit }, selectedItem]
 }

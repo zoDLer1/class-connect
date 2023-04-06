@@ -15,11 +15,9 @@
 .title{
     font-size: 26px;
     font-weight: 700;
-    
 }
 .body{
     display: flex;
     flex-direction: column;
-    gap: 50px;
-    
+    gap: 20px;
 }

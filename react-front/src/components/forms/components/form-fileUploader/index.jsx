@@ -6,7 +6,6 @@ import { useId } from 'react';
 import useFileUploaderInput from 'hooks/useFileUploaderInput';
 
 
-
 const FileUploader = ({ value, validate, onChange, error, hidden = false, hideFileAdd = true, ...props }) => {
     const id = useId()
     const { getProps, Remove } = useFileUploaderInput({ value, validate, onChange })
@@ -17,11 +16,8 @@ const FileUploader = ({ value, validate, onChange, error, hidden = false, hideFi
                 <h4 className={css.title}>Загрузить:</h4>
                 <div className={css.uploaded}>
                     <input id={id}  type="file" {...getProps()} {...props} hidden />
-
                     <div className={css.files}>
                         {value.map((file, index) => <UploadedFile key={index} text={file.name} onClose={() => Remove(index)} />)}
-                        
-
                     </div>
                     {(!value.length || !hideFileAdd) ?
                         <div className={css.actions}>
@@ -32,12 +28,8 @@ const FileUploader = ({ value, validate, onChange, error, hidden = false, hideFi
                         </div>
                         : null
                     }
-
-
                     <span className={css.error}>{error}</span>
                 </div>
-
-
             </div>
         )
     }

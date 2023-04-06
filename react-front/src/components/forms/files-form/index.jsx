@@ -13,16 +13,12 @@ import { useEffect, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 
-
 function FilesForm() {
-
     const { alert } = useContext(GlobalUIContext)
+    const navigate = useNavigate(
 
-
-    const navigate = useNavigate()
-
+    )
     const { id } = useParams()
-
     const [parentFileInfo, setParentFileInfo] = useState()
 
     const FOLDER_NOT_FOUND = () => {
@@ -43,7 +39,6 @@ function FilesForm() {
             200: (response) => branchStoreActions.commit(response.config.params.id),
             400: (response) => branchStoreActions.reject(JSON.parse(response.config.data).params.id, 'name'),
             0: (response) => branchStoreActions.reject(JSON.parse(response.config.data).params.id, 'name')
-
         }
     )
 
@@ -64,24 +59,20 @@ function FilesForm() {
             400: FOLDER_NOT_FOUND
         }
     )
+
     const updateInfo = async () => {
         await setFolder(id)
     }
+
     const setFilesInfo = (data) => {
         const { children, path, ...fileInfo } = data
         setFilePath(path)
-        const guid = selectedItem?.guid
         branchItemsAtions.setItems(children)
-        
-        if (guid){
-            branchItemsStateActions.selectedStateOn(guid)
-        }
         setParentFileInfo(fileInfo)
     }
 
-
     useEffect(() => {
-
+        /* eslint-disable react-hooks/exhaustive-deps */
         const renderFolder = async () => {
             await setFolder(id)
         }
@@ -91,11 +82,7 @@ function FilesForm() {
         else {
             navigate('/rootNotFound')
         }
-
-
     }, [id]);
-
-
 
     const [filePath, setFilePath] = useState([
         {
@@ -124,19 +111,18 @@ function FilesForm() {
         }
     ],
     )
-    const [branchItems, branchItemsAtions, branchItemsStateActions, branchStoreActions, selectedItem] = useList((current) => current.stored.name !== current.value.name ? rename({ id: current.value.guid, name: current.value.name }) : branchStoreActions.reject(current.value.guid, 'name'))
 
+    const [branchItems, branchItemsAtions, branchItemsStateActions, branchStoreActions, selectedItem] = useList((current) => current.stored.name !== current.value.name ? rename({ id: current.value.guid, name: current.value.name }) : branchStoreActions.reject(current.value.guid, 'name'))
 
     return (
         <div className={css.block}>
-        
+
             <div className={css.header}>
                 <FormFilePath loading={isLoading} path={filePath} />
                 <div className={css.user_info}>
                     <p className={[css.role, css[`role--${user.data.role.toLowerCase()}`]].join(' ')}>{user.data.role}</p>
                     <p className={css.username}>{user.data.name} {user.data.surname}</p>
                 </div>
-
             </div>
             <div className={css.body}>
                 <FormFileBranch

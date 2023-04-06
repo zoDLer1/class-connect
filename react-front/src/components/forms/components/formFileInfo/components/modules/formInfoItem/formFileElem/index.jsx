@@ -8,8 +8,10 @@ const FormInfoElem = ({ id, title, value, icon, children }) => {
                 <div className={css.icon}>
                     <FontAwesomeIcon icon={icon} size='lg' />
                 </div>
-                <h3 className={css.title}>{title}</h3>
-                <div className={css.value}>{value}</div>
+                <h3 className={[css.title, !value && css['title-extended']].join(' ')}>{title}</h3>
+                {
+                    value && <div className={css.value}>{value}</div>
+                }
             </div>
             <div className={css.actions}>
                 {children}

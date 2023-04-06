@@ -2,9 +2,6 @@ import css from './input.module.css'
 
 
 function Input({ title, type='text', error, ...props }) {
-
-
-
     return (
         <div className={css.block}>
             {title && <h4 className={css.title}>{title}</h4>}
@@ -16,4 +13,4 @@ function Input({ title, type='text', error, ...props }) {
     )
 }
 
-export default Input
+export default Input;

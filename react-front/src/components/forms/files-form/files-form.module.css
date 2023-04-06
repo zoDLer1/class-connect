@@ -20,7 +20,6 @@
     gap: 10px;
     align-items: center;
 }
-
 .role{
     font-family: var(--title-font);
     font-weight: 500;
@@ -39,7 +38,6 @@
 .username:hover{
     color: var(--primary-color);
 }
-
 .body{
     height: 600px;
     display: flex;

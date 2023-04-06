@@ -62,8 +62,8 @@
 
 .title{
     font-size: 18px;
-    max-width: 220px;
-    width: 100%;
+    width: 210px;
+    padding-right: 10px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;

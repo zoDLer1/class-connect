@@ -11,7 +11,7 @@ export const useRequest = (func = async () => null, statuses={}) => {
 
 
     const handleResponse = (response, data) =>{
-        console.log(response)
+        
         const func = statuses[response.request.status]
         if (func) func(response, data)
     }
@@ -23,13 +23,17 @@ export const useRequest = (func = async () => null, statuses={}) => {
                 handleResponse(success)
             },
             (error) => {
+                console.log(error)
                 if (error.code === 'ERR_NETWORK'){
                     alert.show('Сервер недоступен')     
                 }
                 if(error.response?.status === 401){
                     navigate('/login')
                 }
+               
                 handleResponse(error)
+                
+                
             }
         )
         setWaiting(false)

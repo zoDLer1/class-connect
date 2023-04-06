@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 const FormInfoSubject = (props) => {
-    
+
     const navigate = useNavigate()
     return (
         <div style={{cursor: 'pointer'}} onClick={() => navigate('/files/' + props.id)}>
@@ -19,4 +19,6 @@ const FormInfoSubject = (props) => {
     );
 }
 
+
 export default FormInfoSubject;
+

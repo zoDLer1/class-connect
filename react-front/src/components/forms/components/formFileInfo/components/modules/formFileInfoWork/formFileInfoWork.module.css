@@ -2,7 +2,7 @@
     justify-self: end;
 }
 .actions{
-    width: 430px;
+    width: auto;
 }
 .mark{
     display: flex;

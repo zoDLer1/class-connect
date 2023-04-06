@@ -68,17 +68,11 @@ const FormFileInfoWork = ({ icon, title, setFilesInfo, id, mark, submitTime, isL
 
                 <div className={[itemCss.actions, css.actions].join(' ')}>
                     <div className={css.return}>
-                        <FormButton text={'Вернуть работу'} onClick={() => returnWork(id)} icon={faTurnDown} />
+                        <FormButton text={'Вернуть работу'} onClick={async () => { await returnWork(id); window.location.reload(); }} icon={faTurnDown} />
                     </div>
-
                     <FormButton style={1} {...getSubmit()} text={'Поставить оценку'} icon={faStamp} />
-
-
                 </div>
-
             </div>
-
-
         </div>
     );
 }

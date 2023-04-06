@@ -5,12 +5,6 @@ import { faBriefcase } from '@fortawesome/free-solid-svg-icons';
 
 
 const FormInfoWork = ({ id, setFilesInfo, ...workInfo }) => {
-
-
-    
-
-   
-
     const { creationTime, creatorName, ...workProps } = workInfo
 
     return <>

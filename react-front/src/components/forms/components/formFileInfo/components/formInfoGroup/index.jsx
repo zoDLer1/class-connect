@@ -3,7 +3,7 @@ import FormInfoItem from '../modules/formInfoItem';
 import UsersService from 'services/usersService';
 import { useRequest } from 'hooks/useRequest';
 import FormInfoUser from '../modules/formInfoItem/formInfoUser';
-import FormInfoSubject from '../modules/formInfoItem/formInfoSubject';
+import FormInfoSubject from '../modules/formInfoItem/formInfoSubject'
 
 const FormInfoGroup = ({ teacher, creationTime, subjects, students, id, update }) => {
 

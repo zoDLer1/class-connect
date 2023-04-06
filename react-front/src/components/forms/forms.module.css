@@ -7,11 +7,13 @@
     border-radius: 0 0 10px 10px;
 
 }
+
 .inputs{
     display: flex;
     flex-direction: column;
     gap: 30px;
     padding: 20px 40px;
+    padding-right: calc(40px - 14px);
 }
 .text{
     color: var(--gray-text-color);
