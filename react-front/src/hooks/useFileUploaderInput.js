@@ -2,9 +2,8 @@
 import useValidateInput from './useValidateInput'
 
 
-function useFileUploaderInput({ validate, value, onChange }) {
-
-    const { onChanged } = useValidateInput(validate, value, onChange)
+function useFileUploaderInput({ value, validation_methods  }) {
+    const { onChanged } = useValidateInput({value, ...validation_methods })
 
     const Remove = (indx) =>{
         onChanged(value.filter((item, index) => index !== indx))

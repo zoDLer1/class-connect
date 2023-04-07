@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-function useValidateInput(validate, value, onInputChange) {
+function useValidateInput({value, validate, rools, setValue}) {
 
     const [isSelected, setSelected] = useState(false)
 
@@ -12,9 +12,12 @@ function useValidateInput(validate, value, onInputChange) {
         /* eslint-disable react-hooks/exhaustive-deps */
     }, [value])
 
-    const onChanged = (evt) => {
+    const onChanged = (value) => {
         setSelected(true)
-        onInputChange(evt)
+        const isValid = rools(value)
+        if (isValid){
+            setValue(value)
+        }
     }
 
 

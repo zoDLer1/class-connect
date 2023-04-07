@@ -1,22 +1,16 @@
-import { useEffect, useState } from 'react'
 
-function useInput({ validate, value, onChange }) {
-    // const [errorMessage, setError] = useState('')
-    const [isSelected, setSelected] = useState(false)
+import useValidateInput from './useValidateInput'
 
-    useEffect(() => {
-        if (isSelected) {
-            validate()
-        }
 
-        /* eslint-disable react-hooks/exhaustive-deps */
-    }, [value])
+function useSelect({ value,  }) {
+
+    const { onChanged } = useValidateInput({validate, rools, value, onChange})
 
     const getProps = () => ({
         value,
         onChange: (evt) => {
             setSelected(true)
-            onChange(evt.target.value)
+            onChanged(evt.target.value)
         }
     })
 
@@ -24,4 +18,4 @@ function useInput({ validate, value, onChange }) {
     return { getProps }
 }
 
-export default useInput
+export default useSelect

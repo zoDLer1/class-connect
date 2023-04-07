@@ -20,18 +20,18 @@ function LoginForm() {
 
     const { getSubmit, handleServerErrors, getInput } = useForm({
         email: {
-            value: '',
+            value: 'admin@admin.admin',
             validators: [REQUIRED(), IS_EMAIL(), MAX_LENGTH(50)],
-            
+
         },
         password: {
-            value: '',
+            value: 'admin',
             validators: [REQUIRED(), MIN_LENGTH(0)]
         }
     },
         async (data) => await AuthService.login(data),
         {
-            200: (response) => { console.log(response); navigate('/files/' + response.data.user.folder) },
+            200: (response) => navigate('/files/' + response.data.user.folder),
             404: (response) => handleServerErrors(response.response.data.errors)
         }
     )

@@ -103,7 +103,7 @@ export const useList = (onAutoClose = () => null) => {
         remove('selected-items')
     }
 
-    
+
     const editModeState = (id, value) => {
         setList((collection) => {
             const newCollection = {...collection}
@@ -144,7 +144,7 @@ export const useList = (onAutoClose = () => null) => {
         setList((collection) => {
             const newCollection = {...collection}
             newCollection[data.inewCollectiond] = { value: data, stored: {}, state: { loading: false, editMode: false, selected: false } }
-            return 
+            return
         })
     }
 

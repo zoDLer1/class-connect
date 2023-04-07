@@ -16,7 +16,7 @@
     outline: none;
     box-shadow: inset 0px 0px 8px var(--primary-op25-color);
     border: none;
-   
+
     padding: 5px 10px;
 }
 
@@ -28,6 +28,25 @@
     width: 27px;
 }
 
+
+.input[type="date"]::-webkit-inner-spin-button,
+.input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+}
+.input[type="date"]{
+    width: 100px;
+}
+
+
+.input[type="time"]::-webkit-inner-spin-button,
+.input[type="time"]::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+}
+.input[type="time"]{
+    width: 85px;
+}
 
 .input[type='num'] + .error{
     width: 27px;

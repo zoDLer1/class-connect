@@ -5,6 +5,7 @@ import FormSubmit from '../components/form-submit';
 import FormSelect from '../components/form-select';
 import useForm from 'hooks/useForm';
 import { REQUIRED, MIN_LENGTH, IS_EXTANTIONS } from 'validation';
+import { MAX_LENGTH_ROOL } from 'validation/rools';
 import FilesService from 'services/filesService';
 import { useLoading } from 'hooks/useLoading';
 import { useRequest } from 'hooks/useRequest';
@@ -15,6 +16,7 @@ import { useState } from 'react';
 import Types from 'types';
 import FileUploader from '../components/form-fileUploader';
 import { useEffect } from 'react';
+import DateInput from 'components/forms/components/form-dateTimeInput';
 
 
 const CreateForm = ({ current, close, setFilesInfo }) => {
@@ -46,12 +48,13 @@ const CreateForm = ({ current, close, setFilesInfo }) => {
         teacherId: {
             value: teachersOptions[0].id,
             validators: [REQUIRED()],
-            hidden: true
+            hidden: true,
+
         },
 
         name: {
             value: '',
-            validators: [REQUIRED()]
+            validators: [REQUIRED()],
         },
         type: {
             value: current.access[0],
@@ -61,27 +64,30 @@ const CreateForm = ({ current, close, setFilesInfo }) => {
             validators: [MIN_LENGTH(1, 'Загрузите файл')],
             hidden: true,
             value: []
+        },
+        until: {
+            value: ''
         }
+
 
     },
         async (validated_data) => {
-            console.log(validated_data.uploadedFiles);
             if (validated_data.uploadedFiles?.length){
                 let response = null
                 for (const file of validated_data.uploadedFiles){
                     response = await FilesService.create(current.guid, {...validated_data, uploadedFile: file})
                 }
                 return response
-                
+
             }
             return await FilesService.create(current.guid, {...validated_data})
-            
+
         },
         {
             200: (response) => {
                 setFilesInfo(response.data)
                 close()
-                
+
             }
         }
     )
@@ -91,19 +97,19 @@ const CreateForm = ({ current, close, setFilesInfo }) => {
     useEffect(()=>{
         if (selectConfig.value === 'File' || selectConfig.value === 'Work'){
             InputShow('uploadedFiles')
-            InputHide('name') 
+            InputHide('name')
         }
         else{
             InputHide('uploadedFiles')
             InputShow('name')
         }
-            
+
         selectConfig.value === 'Group'  || selectConfig.value === 'Subject' ?  InputShow('teacherId') : InputHide('teacherId')
-        
+
     }, [selectConfig.value])
 
 
-    const formOptions = [...current.access.map(key => ({ id: key, text: Types[key].title }))] // {id: 'Group', text: 'testGroup'}
+    const formOptions = [...current.access.map(key => ({ id: key, text: Types[key].title }))]
     return (
         <div className={formsCss.block}>
             <FormHeader text='Создать' />
@@ -114,6 +120,7 @@ const CreateForm = ({ current, close, setFilesInfo }) => {
                         <FormSelect {...selectConfig} options={formOptions} title="Тип:" />
                         <FormInput {...getInput('name')} title="Имя:" />
                         <FileUploader {...getInput('uploadedFiles')} multiple hideFileAdd={false} />
+                        <DateInput {...getInput('until')}/>
                     </div>
                     <FormSubmit text="Создать" {...getSubmit()} />
                 </FormLoader>

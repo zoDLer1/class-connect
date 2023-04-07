@@ -37,23 +37,37 @@ function useForm(InputsData, request = async () => null, statuses = {}) {
     }
     const setInputValue = (inputName, value) => setInput(inputName, 'value', value)
 
+    const checkRools = (inputName, newValue) => {
 
+        const rools = inputs[inputName]?.rools || []
+
+        for (const rool of rools){
+            if (!rool(newValue)){
+                return false
+            }
+        }
+        return true
+    }
 
     const getInput = (inputName) => {
         return {
-            onChange: (value) => setInputValue(inputName, value),
             value: inputs[inputName].value,
-            validate: () => validateInput(inputName),
             error: errors[inputName],
             disabled: waitingForResponse,
             hidden: inputs[inputName].hidden,
-            rools: inputs[inputName].rools
+            validation_methods: {
+                rools: (newValue) => checkRools(inputName, newValue),
+                validate: () => validateInput(inputName),
+                setValue: (value) => setInputValue(inputName, value)
+            }
 
         }
     }
     const validateInput = (inputName) => {
 
-        for (const validator of inputs[inputName].validators) {
+        const validators = inputs[inputName]?.validators || []
+
+        for (const validator of validators) {
             if (!inputs[inputName].hidden) {
                 const errorMessage = validator(inputs[inputName].value)
                 changeError(inputName, errorMessage)

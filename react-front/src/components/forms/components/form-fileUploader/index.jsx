@@ -6,9 +6,10 @@ import { useId } from 'react';
 import useFileUploaderInput from 'hooks/useFileUploaderInput';
 
 
-const FileUploader = ({ value, validate, onChange, error, hidden = false, hideFileAdd = true, ...props }) => {
+const FileUploader = ({ value, validation_methods, error, hidden = false, hideFileAdd = true, ...props }) => {
+
     const id = useId()
-    const { getProps, Remove } = useFileUploaderInput({ value, validate, onChange })
+    const { getProps, Remove } = useFileUploaderInput({ value, validation_methods })
 
     if (!hidden) {
         return (
