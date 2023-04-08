@@ -56,7 +56,7 @@ public class GroupController : ControllerBase
             return BadRequest(new { errorText = "Студент не найден" });
 
         if (await _context.Accesses.FirstOrDefaultAsync(s => s.UserId == user.Id) != null)
-            return BadRequest(new { errorText = "Данный пользователь уже добавлен в группу" });
+            return BadRequest(new { errorText = "Вы уже добавлены в группу" });
 
         var studentAccess = new Access{
             Permission = Permission.Read,

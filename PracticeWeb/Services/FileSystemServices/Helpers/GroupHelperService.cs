@@ -67,7 +67,9 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
                 {
                     Id = s.Id,
                     Name = s.Item.Name,
-                }).ToList<object>() : new List<object>(),
+                })
+                .OrderBy(s => s.Name)
+                .ToList<object>() : new List<object>(),
             Students = new
             {
                 IsEditable = user.Id == group.TeacherId || user.RoleId == UserRole.Administrator,
@@ -81,6 +83,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
                         Name = string.Join(' ', new[] { user?.Name, user?.Surname, user?.Patronymic })
                     };
                 })
+                .OrderBy(s => s.Name)
             }
         };
     }
