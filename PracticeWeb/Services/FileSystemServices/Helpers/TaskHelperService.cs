@@ -82,8 +82,8 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
             // Учитываем текущий часовой пояс
             until = ((DateTime) until).AddHours(3);
-            if (until <= DateTime.Now.AddHours(2))
-                throw new InvalidDataException();
+            if (until <= DateTime.Now.AddMinutes(20))
+                throw new InvalidDateException();
         }
 
         var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Task, user);
