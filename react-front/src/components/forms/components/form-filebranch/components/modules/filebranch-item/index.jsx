@@ -23,7 +23,11 @@ function FileBranchItem({ value, onMenu, state, actions, type, ...props }) {
                     : <p className={css.title}>{value.name}</p>
                 }
             </div>
-            <i className={`${css.arrow} fa-solid fa-angle-right`}></i>
+            {
+                value.type.name !== 'File' &&
+                <i className={`${css.arrow} fa-solid fa-angle-right`}></i>
+
+            }
         </div>
     )
 }

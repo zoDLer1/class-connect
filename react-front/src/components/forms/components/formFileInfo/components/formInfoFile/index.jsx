@@ -5,7 +5,7 @@ import FormFileInfoLoader from "../modules/formFileInfoLoader";
 
 
 
-const FormInfoFile = ({ creationTime, creatorName, id }) => {
+const FormInfoFile = ({ creationTime, name, creatorName, id }) => {
     const items = [
         { title: 'Создатель:', value: creatorName, icon: faUser },
         { title: 'Дата создания:', value: creationTime, icon: faCalendarDays }
@@ -13,7 +13,7 @@ const FormInfoFile = ({ creationTime, creatorName, id }) => {
 
     return <>
         <FormInfoItem icon={faCircleInfo} title='Информация' items={items} />
-        <FormFileInfoLoader icon={faCircleInfo} title='Содержание' uploading={id} />
+        <FormFileInfoLoader icon={faCircleInfo}  name={name} title='Содержание' uploading={id} />
     </>
 }
 

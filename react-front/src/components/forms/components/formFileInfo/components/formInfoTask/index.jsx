@@ -1,12 +1,14 @@
 import { faBriefcase } from '@fortawesome/free-solid-svg-icons';
 import FormFileInfoTask from '../modules/formFileInfoTask';
 import user from 'store/user';
-import FormInfoFolder from '../formInfoFolder';
+import FormInfoItem from '../modules/formInfoItem';
 import { useRequest } from 'hooks/useRequest';
 import FilesService from 'services/filesService';
 import { useState } from 'react';
 import { useEffect } from 'react';
+import { faUser, faCalendarDays, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import { parse_time } from '../utils';
+
 
 const FormInfoTask = ({ ...props }) => {
 
@@ -30,6 +32,7 @@ const FormInfoTask = ({ ...props }) => {
         }
     )
 
+
     useEffect(()=>{
         setWork(props.work)
     }, [props.work])
@@ -37,9 +40,19 @@ const FormInfoTask = ({ ...props }) => {
     const [work, setWork] = useState(props.work);
 
     if (user.data.role === 'Student') {
-        return <FormFileInfoTask title='Ваша работа' {...work} until={parse_time(props.until)} requests={{ saveFile, removeFile, sendWork }} task_id={props.id} icon={faBriefcase} />
+        return <FormFileInfoTask title='Ваша работа' {...work} until={props.until ? parse_time(props.until) : '--' } requests={{ saveFile, removeFile, sendWork }} task_id={props.id} icon={faBriefcase} />
     }
-    return <FormInfoFolder {...props} />
+    else{
+        const items = [
+            { title: 'Создатель:', value: props.creatorName, icon: faUser },
+            { title: 'Дата создания:', value: props.creationTime, icon: faCalendarDays },
+            { title: 'Срок сдачи:', value: props.until ? parse_time(props.until) : '--',  icon: faCalendarDays  }
+        ]
+
+        return <FormInfoItem icon={faCircleInfo} title='Информация' items={items} />
+    }
+
+
 }
 
 

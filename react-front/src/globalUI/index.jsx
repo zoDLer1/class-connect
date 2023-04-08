@@ -25,7 +25,7 @@ const GlobalUI = ({ children }) => {
 
     return <GlobalUIContext.Provider value={{ alert, popup, menu: menuActions }}>
         <Alert {...alert} />
-        <Menu {...menu} />
+        <Menu {...menu}  />
         <Popup {...popup} />
         {children}
     </GlobalUIContext.Provider>

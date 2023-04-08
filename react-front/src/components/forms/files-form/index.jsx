@@ -126,7 +126,7 @@ function FilesForm() {
                     state={branchItemsStateActions}
                     requests={{ remove }}
                 />
-                <FormFileInfo update={updateInfo} {...selectedItem || parentFileInfo} />
+                <FormFileInfo setFilesInfo={setFilesInfo} update={updateInfo} {...selectedItem || parentFileInfo} />
             </div>
         </div>
     )

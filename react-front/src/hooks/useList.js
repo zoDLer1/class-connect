@@ -74,6 +74,7 @@ export const useList = (onAutoClose = () => null) => {
 
 
     const selectedStateOn = (id) => {
+        console.log(1)
         setList((collection) => {
             let newCollection = {...collection}
             newCollection = unselectAll(newCollection)
@@ -100,6 +101,7 @@ export const useList = (onAutoClose = () => null) => {
         setList((collection) => {
             return unselectAll({...collection})
         })
+        console.log('unselectAll')
         remove('selected-items')
     }
 
@@ -172,5 +174,5 @@ export const useList = (onAutoClose = () => null) => {
             return newCollection
         })
     }
-    return [collection, { setItems, addItem: appendItem, updateItem, removeItem, setItemProp, getItem }, { editModeOn, editModeOff }, { storeProp, reject, commit }, selectedItem]
+    return [collection, { setItems, addItem: appendItem, updateItem, removeItem, setItemProp, getItem }, { editModeOn, selectedStateOn, editModeOff }, { storeProp, reject, commit }, selectedItem]
 }

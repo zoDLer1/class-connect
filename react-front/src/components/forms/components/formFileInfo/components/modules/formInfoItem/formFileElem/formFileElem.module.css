@@ -4,12 +4,15 @@
     display: flex;
     justify-content: space-between;
 }
-.actions{
+/* .actions *{
+    color: var(--dark-op10-color) !important;
     display: none;
 }
 .block:hover .actions{
     display: block;
-}
+} */
+
+
 .action{
     cursor: pointer;
 }

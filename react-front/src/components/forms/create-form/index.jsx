@@ -4,7 +4,7 @@ import FormInput from '../components/form-input';
 import FormSubmit from '../components/form-submit';
 import FormSelect from '../components/form-select';
 import useForm from 'hooks/useForm';
-import { REQUIRED, MIN_LENGTH, IS_EXTANTIONS } from 'validation';
+import { REQUIRED, MIN_LENGTH, IS_EXTANTIONS, DATE_IS_FUTURE } from 'validation';
 import FilesService from 'services/filesService';
 import { useLoading } from 'hooks/useLoading';
 import { useRequest } from 'hooks/useRequest';
@@ -20,7 +20,7 @@ import DateInput from 'components/forms/components/form-dateTimeInput';
 
 const CreateForm = ({ current, close, setFilesInfo }) => {
 
-    
+
     const [teachersOptions, setTeachers] = useState([{id: null}])
     const [send, isLoading] = useRequest(
         async () => await UsersService.teachers(),
@@ -67,6 +67,7 @@ const CreateForm = ({ current, close, setFilesInfo }) => {
         until: {
             value: '',
             hidden: true,
+            // validators: [DATE_IS_FUTURE()]
         }
 
 

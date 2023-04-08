@@ -39,9 +39,9 @@ const FormFileInfoTask = ({ isSubmitted, icon, until, title, guid, isLate, task_
             </div>
             <div className={itemCss.task}>
                 <div className={itemCss.items}>
-                    <FormInfoElem title={'Срок сдачи: '} value={until ? until : '--'} icon={faCalendarDays}/>
+                    <FormInfoElem title={'Срок сдачи: '} value={until} icon={faCalendarDays} />
                     <FormInfoElem title={'Оценка: '} value={mark ? mark : '--'} icon={faStamp} />
-                    
+
                 </div>
                 <div className={css.files}>
                     {files?.map(file => <FormFileInfoTaskFile key={file.id} isSubmitted={isSubmitted} remove={() => removeFile(file.id)} {...file} />)}
@@ -57,7 +57,9 @@ const FormFileInfoTask = ({ isSubmitted, icon, until, title, guid, isLate, task_
                         </>
                     }
                     <div className={[css.sendWork, css[`isSubmitted--${isSubmitted}`]].join(' ')}>
-                        <FormButton style={1} text={isSubmitted ? 'Отменить отправку' : 'сдать работу'} onClick={() => requests.sendWork(guid)} disabled={isLoading} icon={faPaperPlane} />
+                        {!mark &&
+                            <FormButton style={1} text={isSubmitted ? 'Отменить отправку' : 'сдать работу'} onClick={() => requests.sendWork(guid)} disabled={isLoading} icon={faPaperPlane} />
+                        }
                     </div>
 
                 </div>

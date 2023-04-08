@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
 
 
-const FormFileInfoLoader = ({ icon, title, uploading }) => {
+const FormFileInfoLoader = ({ icon, title, name, uploading }) => {
 
     const [getData, isLoading] = useRequest(
         async (id) => FilesService.get_folder(id, 'blob'),
@@ -38,10 +38,10 @@ const FormFileInfoLoader = ({ icon, title, uploading }) => {
                     <FontAwesomeIcon icon={icon} size='xl' color='var(--primary-color)' />
                     <h3 className={itemCss.title}>{title}</h3>
                 </div>
-                <a href={url} download>
+                <a href={url} download={name}>
                     <FontAwesomeIcon color='var(--primary-color)' icon={faDownload} size='lg' cursor={'pointer'} />
                 </a>
-                
+
             </div>
             <div className={css.image}>
                 <FormLoader loading={isLoading}>

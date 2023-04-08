@@ -25,6 +25,9 @@ export const IS_EXTANTIONS = (extantions, errorMessage = `Недопустимо
                 return ''
             }
         }
-        return errorMessage
+        return
     }
 }
+
+export const DATE_IS_FUTURE = (errorMessage = `Некорректная дата`) =>
+    (value) =>  Date.now() > value || value  ? errorMessage : ''

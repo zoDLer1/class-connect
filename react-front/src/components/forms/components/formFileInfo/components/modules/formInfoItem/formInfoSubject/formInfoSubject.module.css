@@ -1,0 +1,9 @@
+.icon{
+    color: var(--dark-op25-color);
+}
+.block{
+    cursor: 'pointer' 
+}
+.block:hover .icon{
+    color: var(--primary-color);
+}

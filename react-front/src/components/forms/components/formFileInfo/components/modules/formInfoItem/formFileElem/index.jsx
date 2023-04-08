@@ -1,9 +1,9 @@
 import css from './formFileElem.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-const FormInfoElem = ({ id, title, value, icon, children }) => {
+const FormInfoElem = ({ id, title, value, icon, children, className, ...props }) => {
     return (
-        <div className={css.block}> 
+        <div {...props} className={[css.block, className].join(' ')}> 
             <div className={css.body}>
                 <div className={css.icon}>
                     <FontAwesomeIcon icon={icon} size='lg' />

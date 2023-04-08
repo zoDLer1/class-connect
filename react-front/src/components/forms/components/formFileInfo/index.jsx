@@ -4,7 +4,7 @@ import { parse_time } from './components/utils';
 
 
 
-const FormFileInfo = ({ data, name, type, guid, update }) => {
+const FormFileInfo = ({ data, name, type, setFilesInfo, guid, update }) => {
     const Elem = Types[type?.name] || Types.Folder
     return (
         <div className={css.block} onClick={evt => evt.stopPropagation()}>
@@ -15,7 +15,7 @@ const FormFileInfo = ({ data, name, type, guid, update }) => {
                     </div>
 
                     <div className={css.body}>
-                        <Elem {...{ ...data, creationTime: parse_time(data.creationTime) }} id={guid} update={update} />
+                        <Elem {...{ ...data, creationTime: parse_time(data.creationTime) }} name={name} setFilesInfo={setFilesInfo} id={guid} update={update} />
                     </div>
                 </>
 

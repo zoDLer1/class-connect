@@ -6,4 +6,7 @@ export const NUMER_BETWEEN_ROOL = (min, max) => (value) => {
     const number = Number(value)
     return (min <= number && number <= max) || !value
 }
-    
+
+export const DATE_IS_FUTURE_ROOL = () =>
+    (value) =>  Date.now() < value
+
