@@ -10,7 +10,7 @@ import FormInfoElem from '../formInfoItem/formFileElem';
 
 
 
-const FormFileInfoTask = ({ isSubmitted, icon, until, title, guid, task_id, mark, files, requests }) => {
+const FormFileInfoTask = ({ isSubmitted, icon, until, title, guid, isLate, task_id, mark, files, requests }) => {
 
     const [isLoading, setloading] = useState(false);
 
@@ -31,7 +31,6 @@ const FormFileInfoTask = ({ isSubmitted, icon, until, title, guid, task_id, mark
 
     return (
         <div className={itemCss.block}>
-            
             <div className={itemCss.header}>
                 <div className={itemCss.header_body}>
                     <FontAwesomeIcon color='var(--primary-color)' icon={icon} size='xl' />

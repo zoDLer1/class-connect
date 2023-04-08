@@ -15,10 +15,14 @@ import { useNavigate } from 'react-router-dom'
 
 function FilesForm() {
     const { alert } = useContext(GlobalUIContext)
-    const navigate = useNavigate(
+    const navigate = useNavigate()
 
-    )
+   
+
     const { id } = useParams()
+
+    const [loadingMode, setLoadingMode] = useState('all')
+
     const [parentFileInfo, setParentFileInfo] = useState()
 
     const FOLDER_NOT_FOUND = () => {
@@ -71,10 +75,23 @@ function FilesForm() {
         setParentFileInfo(fileInfo)
     }
 
+
     useEffect(() => {
         /* eslint-disable react-hooks/exhaustive-deps */
         const renderFolder = async () => {
+            if (filePath.find(item => item.guid === id)){
+                setLoadingMode('parent')
+            }
+            else if (branchItems[id]){
+                setLoadingMode('child')
+            }
+            else{
+                setLoadingMode('all')
+            }
+         
+
             await setFolder(id)
+            
         }
         if ('null' !== id) {
             renderFolder()
@@ -84,33 +101,7 @@ function FilesForm() {
         }
     }, [id]);
 
-    const [filePath, setFilePath] = useState([
-        {
-            "name": "",
-            "guid": "1",
-            "type": {
-                "name": "Folder",
-                "id": 1
-            }
-        },
-        {
-            "name": "",
-            "guid": "2",
-            "type": {
-                "name": "Folder",
-                "id": 1
-            }
-        },
-        {
-            "name": "",
-            "guid": "3",
-            "type": {
-                "name": "Folder",
-                "id": 1
-            }
-        }
-    ],
-    )
+    const [filePath, setFilePath] = useState([])
 
     const [branchItems, branchItemsAtions, branchItemsStateActions, branchStoreActions, selectedItem] = useList((current) => current.stored.name !== current.value.name ? rename({ id: current.value.guid, name: current.value.name }) : branchStoreActions.reject(current.value.guid, 'name'))
 
@@ -118,7 +109,7 @@ function FilesForm() {
         <div className={css.block}>
 
             <div className={css.header}>
-                <FormFilePath loading={isLoading} path={filePath} />
+                <FormFilePath loadingMode={loadingMode} loading={isLoading} path={filePath} />
                 <div className={css.user_info}>
                     <p className={[css.role, css[`role--${user.data.role.toLowerCase()}`]].join(' ')}>{user.data.role}</p>
                     <p className={css.username}>{user.data.name} {user.data.surname}</p>

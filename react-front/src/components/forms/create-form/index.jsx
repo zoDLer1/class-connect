@@ -5,7 +5,6 @@ import FormSubmit from '../components/form-submit';
 import FormSelect from '../components/form-select';
 import useForm from 'hooks/useForm';
 import { REQUIRED, MIN_LENGTH, IS_EXTANTIONS } from 'validation';
-import { MAX_LENGTH_ROOL } from 'validation/rools';
 import FilesService from 'services/filesService';
 import { useLoading } from 'hooks/useLoading';
 import { useRequest } from 'hooks/useRequest';
@@ -21,7 +20,7 @@ import DateInput from 'components/forms/components/form-dateTimeInput';
 
 const CreateForm = ({ current, close, setFilesInfo }) => {
 
-
+    
     const [teachersOptions, setTeachers] = useState([{id: null}])
     const [send, isLoading] = useRequest(
         async () => await UsersService.teachers(),
@@ -66,7 +65,8 @@ const CreateForm = ({ current, close, setFilesInfo }) => {
             value: []
         },
         until: {
-            value: ''
+            value: '',
+            hidden: true,
         }
 
 
@@ -80,7 +80,7 @@ const CreateForm = ({ current, close, setFilesInfo }) => {
                 return response
 
             }
-            return await FilesService.create(current.guid, {...validated_data})
+            return await FilesService.create(current.guid, {...validated_data, until: validated_data.until? validated_data.until.toISOString(): null})
 
         },
         {
@@ -105,6 +105,7 @@ const CreateForm = ({ current, close, setFilesInfo }) => {
         }
 
         selectConfig.value === 'Group'  || selectConfig.value === 'Subject' ?  InputShow('teacherId') : InputHide('teacherId')
+        selectConfig.value === 'Task' ? InputShow('until') : InputHide('until')
 
     }, [selectConfig.value])
 

@@ -6,7 +6,7 @@ import { useRequest } from 'hooks/useRequest';
 import FilesService from 'services/filesService';
 import { useState } from 'react';
 import { useEffect } from 'react';
-
+import { parse_time } from '../utils';
 
 const FormInfoTask = ({ ...props }) => {
 
@@ -37,7 +37,7 @@ const FormInfoTask = ({ ...props }) => {
     const [work, setWork] = useState(props.work);
 
     if (user.data.role === 'Student') {
-        return <FormFileInfoTask title='Ваша работа' {...work} until={props.until} requests={{ saveFile, removeFile, sendWork }} task_id={props.id} icon={faBriefcase} />
+        return <FormFileInfoTask title='Ваша работа' {...work} until={parse_time(props.until)} requests={{ saveFile, removeFile, sendWork }} task_id={props.id} icon={faBriefcase} />
     }
     return <FormInfoFolder {...props} />
 }
