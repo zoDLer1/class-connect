@@ -6,30 +6,42 @@ import FormLoader from 'components/forms/components/form-loader';
 import FilesService from 'services/filesService';
 import { useState, useEffect } from 'react';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
+import user from 'store/user';
 
 
 const FormFileInfoLoader = ({ icon, title, name, uploading }) => {
 
+
     const [getData, isLoading] = useRequest(
-        async (id) => FilesService.get_folder(id, 'blob'),
+        async (id) => await FilesService.get_folder(id, 'blob'),
         {
             200: async (response) => {
-                setType(response.data.type)
-                setText(await response.data.text())
-                setUrl(URL.createObjectURL(response.data))
+                if (user.currentItem === response.config.params.id){
+                    setRendering(false)
+                    setType(response.data.type)
+                    setText(await response.data.text())
+                    setUrl(URL.createObjectURL(response.data))
+                }
+
             }
         }
     )
+
+    const [isRendering, setRendering] = useState(true)
     const [type, setType] = useState()
     const [text, setText] = useState()
     const [url, setUrl] = useState()
 
     useEffect(() => {
         const fetchData = async () => {
-            getData(uploading)
+            await getData(uploading)
         }
         fetchData()
+        user.set_current_item(uploading)
     }, [uploading]);
+
+
+
 
     return (
         <div className={itemCss.block}>
@@ -44,7 +56,7 @@ const FormFileInfoLoader = ({ icon, title, name, uploading }) => {
 
             </div>
             <div className={css.image}>
-                <FormLoader loading={isLoading}>
+                <FormLoader loading={isLoading || isRendering}>
                     {
                         type?.startsWith('image')
                             ?

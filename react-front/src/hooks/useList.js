@@ -12,6 +12,8 @@ export const useList = (onAutoClose = () => null) => {
 
     const [selectedItem, setSelectedItem] = useState(null)
 
+    const [edited, setEdited] = useState(false)
+
     const { add, remove } = useContext(CloseContext)
 
 
@@ -59,13 +61,7 @@ export const useList = (onAutoClose = () => null) => {
     // * Item State Methods
 
 
-    const switchState = (id, key, value) =>{
-        setList((collection) => {
-            const newCollection = {...collection}
-            newCollection[id].state[key] = value
-            return newCollection
-        })
-    }
+
 
 
 
@@ -74,22 +70,27 @@ export const useList = (onAutoClose = () => null) => {
 
 
     const selectedStateOn = (id) => {
-        console.log(1)
-        setList((collection) => {
-            let newCollection = {...collection}
-            newCollection = unselectAll(newCollection)
-            newCollection[id].state.selected = true
-            setSelectedItem(newCollection[id].value)
-            return newCollection
-        })
-        if (!selectedItem) {
-            add({
-                id: 'selected-items', close: () => {
-                    setSelectedItem(null)
-                    selectedStateOff()
-                }
+        if (!edited){
+            setList((collection) => {
+                let newCollection = {...collection}
+                newCollection = unselectAll(newCollection)
+                newCollection[id].state.selected = true
+                setSelectedItem(newCollection[id].value)
+                return newCollection
             })
+
+            if (!selectedItem) {
+                add({
+                    id: 'selected-items',
+                    close: () => {
+                        setSelectedItem(null)
+                        selectedStateOff()
+                        console.log('close')
+                    }
+                })
+            }
         }
+
     }
     const unselectAll = (newCollection) => {
         for (const id in newCollection) {
@@ -101,7 +102,6 @@ export const useList = (onAutoClose = () => null) => {
         setList((collection) => {
             return unselectAll({...collection})
         })
-        console.log('unselectAll')
         remove('selected-items')
     }
 
@@ -118,7 +118,7 @@ export const useList = (onAutoClose = () => null) => {
     const editModeOn = (id) => {
 
         editModeState(id, true)
-
+        setEdited(true)
         add({
             id, close: () => {
                 editModeOff(id)
@@ -127,6 +127,7 @@ export const useList = (onAutoClose = () => null) => {
         })
     }
     const editModeOff = (id) => {
+        setEdited(false)
         editModeState(id, false)
         remove(id)
 

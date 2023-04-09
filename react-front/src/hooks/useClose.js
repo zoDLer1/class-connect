@@ -15,7 +15,7 @@ export function useClose() {
         set((items) => [...[...items].filter(item => item.id !== id)])
     }
 
-    const closeAll = (excepted) => {
+    const closeAll = () => {
         for (const item of items) {
             item.close()
         }

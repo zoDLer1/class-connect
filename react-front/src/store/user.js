@@ -5,6 +5,7 @@ class User{
     access = null || localStorage.getItem('access')
     refresh = null || localStorage.getItem('refresh')
     data = null || JSON.parse(localStorage.getItem('user'))
+    currentItem = null
 
     constructor(){
         makeAutoObservable(this)
@@ -24,6 +25,10 @@ class User{
         this.data = data
 
         localStorage.setItem('user', JSON.stringify(data))
-    } 
+    }
+
+    set_current_item(val){
+        this.currentItem = val
+    }
 }
 export default new User()

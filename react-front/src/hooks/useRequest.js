@@ -1,17 +1,17 @@
 import { useContext, useState } from 'react'
 import { GlobalUIContext } from 'contexts/GlobalUIContext'
 import { useNavigate } from 'react-router-dom'
-
+import axios from 'axios'
 
 
 export const useRequest = (func = async () => null, statuses={}) => {
     const { alert } = useContext(GlobalUIContext)
     const navigate = useNavigate()
-    const [waitingForResponse, setWaiting] = useState(false)     
+    const [waitingForResponse, setWaiting] = useState(false)
 
 
     const handleResponse = (response, data) =>{
-        
+
         const func = statuses[response.request.status]
         if (func) func(response, data)
     }
@@ -23,17 +23,16 @@ export const useRequest = (func = async () => null, statuses={}) => {
                 handleResponse(success)
             },
             (error) => {
-                console.log(error)
                 if (error.code === 'ERR_NETWORK'){
-                    alert.show('Сервер недоступен')     
+                    alert.show('Сервер недоступен')
                 }
                 if(error.response?.status === 401){
                     navigate('/login')
                 }
-               
+
                 handleResponse(error)
-                
-                
+
+
             }
         )
         setWaiting(false)
