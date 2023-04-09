@@ -80,8 +80,7 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
             if (until == null)
                 throw new InvalidDataException();
 
-            // Учитываем текущий часовой пояс
-            until = ((DateTime) until).AddHours(3);
+            until = until?.ToLocalTime();
             if (until <= DateTime.Now.AddMinutes(20))
                 throw new InvalidDateException();
         }
