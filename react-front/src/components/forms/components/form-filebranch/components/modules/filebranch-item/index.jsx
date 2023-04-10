@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFolder } from '@fortawesome/free-solid-svg-icons';
 
 
-function FileBranchItem({ value, onMenu, state, actions, type, ...props }) {
+function FileBranchItem({ value, onMenu, onKeyUp, state, actions, type, ...props }) {
     const id = useId()
 
     return (
@@ -19,7 +19,7 @@ function FileBranchItem({ value, onMenu, state, actions, type, ...props }) {
                     <FontAwesomeIcon icon={type?.icon || faFolder} color={type?.iconColor || 'var(--dark-op20-color)'} />
                 </div>
                 {state.editMode
-                    ? <Input style={{ cursor: 'text' }} onChange={(evt) => actions.setProp('name', evt.target.value)} value={value.name} />
+                    ? <Input style={{ cursor: 'text' }} onKeyUp={onKeyUp} onChange={(evt) => actions.setProp('name', evt.target.value)} value={value.name} />
                     : <p className={css.title}>{value.name}</p>
                 }
             </div>

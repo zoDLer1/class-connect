@@ -2,7 +2,7 @@ import itemCss from '../formInfoItem.module.css'
 import css from './formFileInfoTask.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import FormButton from '../../../../form-button';
-import { faPlus, faPaperPlane, faCalendarDays, faStamp } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faPaperPlane, faCalendarDays, faStamp, faBusinessTime } from '@fortawesome/free-solid-svg-icons';
 import FormFileInfoTaskFile from './formFileInfoTaskFile';
 import { useState } from 'react';
 import FormInfoElem from '../formInfoItem/formFileElem';
@@ -10,7 +10,7 @@ import FormInfoElem from '../formInfoItem/formFileElem';
 
 
 
-const FormFileInfoTask = ({ isSubmitted, icon, until, title, guid, isLate, task_id, mark, files, requests }) => {
+const FormFileInfoTask = ({ isSubmitted, submitTime, icon, until, title, guid, isLate, task_id, mark, files, requests,  }) => {
 
     const [isLoading, setloading] = useState(false);
 
@@ -41,6 +41,10 @@ const FormFileInfoTask = ({ isSubmitted, icon, until, title, guid, isLate, task_
                 <div className={itemCss.items}>
                     <FormInfoElem title={'Срок сдачи: '} value={until} icon={faCalendarDays} />
                     <FormInfoElem title={'Оценка: '} value={mark ? mark : '--'} icon={faStamp} />
+
+                    <FormInfoElem title={'Время сдачи: '} className={css[`isLate--${isLate}`]} value={submitTime} icon={faBusinessTime  } />
+
+
 
                 </div>
                 <div className={css.files}>

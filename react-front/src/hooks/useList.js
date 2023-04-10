@@ -89,7 +89,6 @@ export const useList = (onAutoClose = () => null) => {
                     close: () => {
                         setSelectedItem(null)
                         selectedStateOff()
-                        console.log('close')
                     }
                 })
             }

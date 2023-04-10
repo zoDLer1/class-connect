@@ -18,3 +18,6 @@
     grid-column: 1/-1;
     justify-self: center;
 }
+.isLate--true div div:last-child{
+    color: var(--error-color);
+}

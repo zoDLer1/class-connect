@@ -16,6 +16,8 @@ function FormFileBranch({ current, items, actions, state, loading, store, reques
 
     const RenameItem = async (current) => {
         state.editModeOff(current.guid)
+        await requests.rename({ id: current.guid, name: current.name })
+
     }
 
     const EditModeItemOn = (current) => {
@@ -48,7 +50,7 @@ function FormFileBranch({ current, items, actions, state, loading, store, reques
         menu.open()
 
         const items = editMode
-            ? [{ text: 'Сохранить', icon: faCheck, action: RenameItem }]
+            ? [{ text: 'Сохранить', icon: faCheck, action: (current) => state.editModeOff(current.guid) }]
             : [
                 { text: 'Переименовать', icon: faPen, action: EditModeItemOn },
                 { text: 'Удалить', icon: faTrash, action: DeleteItem },
@@ -74,6 +76,11 @@ function FormFileBranch({ current, items, actions, state, loading, store, reques
                     return <Elem
                         key={'FBI' + id}
                         {...item}
+                        onKeyUp={evt=>{
+                            if (evt.keyCode === 13){
+                                RenameItem(item.value)
+                            }
+                        }}
                         navigateTo={(id)=> navigate('/files/'+id)}
                         actions={actions.getItem(item.value.guid)}
                         onMenu={(evt, data, editMode) => {

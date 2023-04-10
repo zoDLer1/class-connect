@@ -30,6 +30,9 @@
 .role--teacher{
     color: var(--success-color);
 }
+.role--student{
+    display: none;
+}
 .username{
     cursor: pointer;
     font-size: 18px;

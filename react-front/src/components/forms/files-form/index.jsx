@@ -11,6 +11,7 @@ import FormFileInfo from '../components/formFileInfo'
 import { useParams } from 'react-router-dom'
 import { useEffect, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
+import roles from 'roles'
 
 
 function FilesForm() {
@@ -115,7 +116,7 @@ function FilesForm() {
             <div className={css.header}>
                 <FormFilePath loadingMode={loadingMode} loading={isLoading} path={filePath} />
                 <div className={css.user_info}>
-                    <p className={[css.role, css[`role--${user.data.role.toLowerCase()}`]].join(' ')}>{user.data.role}</p>
+                    <p className={[css.role, css[`role--${user.data.role.toLowerCase()}`]].join(' ')}>{roles[user.data.role.toLowerCase()]}</p>
                     <p className={css.username}>{user.data.name} {user.data.surname}</p>
                 </div>
             </div>
@@ -128,7 +129,7 @@ function FilesForm() {
                     items={branchItems}
                     actions={branchItemsAtions}
                     state={branchItemsStateActions}
-                    requests={{ remove }}
+                    requests={{ remove, rename }}
                 />
                 <FormFileInfo setFilesInfo={setFilesInfo} update={updateInfo} {...selectedItem || parentFileInfo} />
             </div>

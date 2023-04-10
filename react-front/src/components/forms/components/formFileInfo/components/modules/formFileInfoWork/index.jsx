@@ -13,10 +13,10 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import FormInfoElem from '../formInfoItem/formFileElem';
 import { parse_time } from '../../utils';
-import { faCalendarDays } from '@fortawesome/free-solid-svg-icons';
+import { faClock } from '@fortawesome/free-solid-svg-icons';
 
 
-const FormFileInfoWork = ({ icon, title, setFilesInfo, id, mark, submitTime, isLate }) => {
+const FormFileInfoWork = ({ icon, title, setFilesInfo, isLate, id, mark, submitTime }) => {
 
     const navigate = useNavigate()
 
@@ -56,8 +56,9 @@ const FormFileInfoWork = ({ icon, title, setFilesInfo, id, mark, submitTime, isL
                 </div>
             </div>
             <div>
+
                 <div className={itemCss.items}>
-                    <FormInfoElem title={'Время сдачи:'} icon={faCalendarDays} value={
+                    <FormInfoElem title={'Время сдачи:'} icon={faClock} value={
                         <p className={css[`isLate--${isLate}`]}>{parse_time(submitTime)}</p>
                     } />
                     <div className={css.mark}>

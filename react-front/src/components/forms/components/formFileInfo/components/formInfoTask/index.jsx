@@ -39,8 +39,11 @@ const FormInfoTask = ({ ...props }) => {
 
     const [work, setWork] = useState(props.work);
 
+
+
     if (user.data.role === 'Student') {
-        return <FormFileInfoTask title='Ваша работа' {...work} until={props.until ? parse_time(props.until) : '--' } requests={{ saveFile, removeFile, sendWork }} task_id={props.id} icon={faBriefcase} />
+        return <FormFileInfoTask title='Ваша работа' {...work} submitTime={work.submitTime ? parse_time(work.submitTime): '--'}
+        until={props.until ? parse_time(props.until) : '--' } requests={{ saveFile, removeFile, sendWork }} task_id={props.id} icon={faBriefcase} />
     }
     else{
         const items = [
