@@ -44,7 +44,6 @@ public abstract class FileSystemQueriesHelper
             throw new InvalidPathException();
         var parent = await TryGetItemAsync(connection.ParentId);
         // Проверяем, имеет ли пользователь доступ к родителю
-        Console.WriteLine($"{parent.Type.Name}: {parent.Id} – {parent.Name}");
         return await _serviceAccessor(parent.Type.Id).HasAccessAsync(parent.Id, user, path);
     }
 
@@ -60,11 +59,8 @@ public abstract class FileSystemQueriesHelper
     {
         var result = new List<string>();
 
-        Console.WriteLine($"getting access for {item.Type.Id} with {permission} {typeof(TypeDependence).GetProperties().Length}");
-
         foreach (var prop in typeof(TypeDependence).GetProperties())
         {
-            Console.WriteLine($"property: {prop.Name}");
             var dependence = prop.GetValue(null, null) as HashSet<Type>;
             if (dependence?.Contains(item.Type.Id) == false)
                 continue;
@@ -116,10 +112,8 @@ public abstract class FileSystemQueriesHelper
     protected async Task<List<object>> PrepareChildrenAsync(List<string> itemIds, User user)
     {
         var children = new List<(Type Type, string Name, object Child)>();
-        Console.WriteLine($"There is {itemIds.Count}");
         foreach (var id in itemIds)
         {
-            Console.WriteLine($"Child item is {id}");
             try
             {
                 var item = await TryGetItemAsync(id);
@@ -179,7 +173,6 @@ public abstract class FileSystemQueriesHelper
         if (item.Type.Id == Type.File)
             throw new ItemTypeException();
 
-        Console.WriteLine($"Item type name is {item.Type.Name}");
         var access = await _serviceAccessor(item.Type.Id).HasAccessAsync(id, user, new List<string>());
         var types = await GetCreatingTypesAsync(item, user, access.Permission);
         if (access.Permission == Permission.None)
@@ -241,6 +234,7 @@ public abstract class FileSystemQueriesHelper
             Guid = work.Id,
             IsLate = work.SubmitDate > task.Until,
             IsSubmitted = work.IsSubmitted,
+            SubmitTime = work.SubmitDate,
             Mark = work.Mark,
             Files = items
         };
@@ -285,7 +279,6 @@ public abstract class FileSystemQueriesHelper
         };
 
         var path = await MakeFullPathAsync(parent.Id);
-        Console.WriteLine($"path: {path}");
         if (!IsFolderPathValid(path))
             throw new FolderNotFoundException();
 
@@ -329,8 +322,6 @@ public abstract class FileSystemQueriesHelper
             .Include(c => c.Child)
             .Where(c => c.ParentId == id && c.Child.TypeId == Type.Work)
             .Count();
-
-        Console.WriteLine($"the item type is {item.TypeId} and children count is {workChildrenCount} {item.TypeId != Type.Folder} {(item.TypeId == Type.Task && workChildrenCount > 0)}");
 
         // Изменяемый объект должен быть папкой или заданием, в которое ещё не сдали работы
         if (item.TypeId != Type.Folder && !(item.TypeId == Type.Task && workChildrenCount == 0))
@@ -379,8 +370,6 @@ public abstract class FileSystemQueriesHelper
             throw new FolderNotFoundException();
 
         var parent = await TryGetItemAsync(parentConnection.ParentId);
-        Console.WriteLine($"the user {user.Id} with role {user.RoleId} has access {access.Permission}. can write {(user.RoleId == UserRole.Student && parent.TypeId == Type.Work && access.Permission == Permission.Read)} in {parent.TypeId}");
-
         if (access.Permission < Permission.Write)
             throw new AccessDeniedException();
 

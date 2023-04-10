@@ -189,9 +189,14 @@ public class FileSystemService : IFileSystemService
             throw new ItemTypeException();
 
         if (mark == null)
+        {
             work.IsSubmitted = false;
+            work.SubmitDate = null;
+        }
         else
+        {
             work.Mark = mark;
+        }
         await _commonWorkQueries.UpdateAsync(work);
         return await _serviceAccessor(Type.Task).GetAsync(parentConnection.ParentId, user, false);
     }
@@ -202,13 +207,10 @@ public class FileSystemService : IFileSystemService
         var id = string.Empty;
         var workConnection = await _context.Connections.Include(c => c.Child).FirstOrDefaultAsync(c => c.ParentId == parentId && c.Child.CreatorId == user.Id);
 
-        Console.WriteLine($"does work exist?: {workConnection != null} parent id — {parentId}");
-
         // Если работа ещё не была создана, то создаём
         if (workConnection == null)
         {
             var (path, item) = await _serviceAccessor(Type.Work).CreateAsync(parentId, name, user, null);
-            Console.WriteLine($"creating directory in {path}");
             CreateDirectory(path);
             id = Path.GetFileName(path);
         }
@@ -243,9 +245,7 @@ public class FileSystemService : IFileSystemService
     public async Task<object> CreateFileAsync(string parentId, IFormFile file, User user)
     {
         await CreateFileSystemIfNotExistsAsync();
-        Console.WriteLine($"UPLOADING FILE {parentId}");
         var (path, item) = await _serviceAccessor(Type.File).CreateAsync(parentId, file.FileName.Trim(), user);
-        Console.WriteLine($"UPLOADING FILE {path}: {parentId}");
         using (var fileStream = new FileStream(path, FileMode.Create))
             await file.CopyToAsync(fileStream);
 

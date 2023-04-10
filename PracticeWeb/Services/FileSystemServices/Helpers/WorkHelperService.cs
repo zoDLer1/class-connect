@@ -29,7 +29,6 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
             throw new ItemNotFoundException();
 
         var item = await TryGetItemAsync(id);
-        Console.WriteLine($"{item.CreatorId != user.Id} {work.IsSubmitted && user.RoleId != UserRole.Student} {user.RoleId == UserRole.Teacher} {access.Permission}");
         // Если пользователь не является создателем работы
         if (item.CreatorId != user.Id)
             // То преподаватели и администраторы могут видеть работу, если она сдана
@@ -45,7 +44,6 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
             access.Permission = Permission.Write;
 
         Console.WriteLine($"work access: {access.Permission} in {id}");
-
         access.Path.Add(work.Id);
         return access;
     }

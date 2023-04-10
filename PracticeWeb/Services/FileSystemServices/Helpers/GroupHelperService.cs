@@ -38,7 +38,6 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             access.Permission = Permission.Read;
 
         Console.WriteLine($"group access: {access.Permission} or {permission} in {id}");
-
         if (access.Permission == Permission.None)
             throw new AccessDeniedException();
 

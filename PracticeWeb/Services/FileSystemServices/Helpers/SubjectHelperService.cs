@@ -32,7 +32,6 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             access.Permission = Permission.None;
 
         Console.WriteLine($"subject access: {access.Permission} or {permission} in {id}");
-
         if (access.Permission == Permission.None)
             throw new AccessDeniedException();
 
