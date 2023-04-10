@@ -12,7 +12,6 @@ function App() {
 
   return (
     <CloseContext.Provider value={{ add, remove, closeAll }}>
-        {JSON.stringify(itms)}
       <main onClick={() => closeAll()} onContextMenu={(evt) => { evt.preventDefault(); closeAll() }}>
         <Router />
       </main>

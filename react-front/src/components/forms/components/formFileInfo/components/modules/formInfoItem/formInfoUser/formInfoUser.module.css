@@ -2,8 +2,9 @@
     color: var(--dark-op25-color);
 }
 .block{
-    cursor: 'pointer' 
+
 }
 .block:hover .icon{
     color: #DB4343;
+    cursor: pointer;
 }

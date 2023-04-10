@@ -26,8 +26,8 @@ const FormInfoGroup = ({ teacher, creationTime, subjects, students, id, update }
     const getStudent = (student) => {
         return {
             id: student.id,
-            icon: faUser, title:
-                student.name,
+            icon: faUser,
+            title: student.name,
             action: async (current) => await removeStudent({ id, current })
         }
 

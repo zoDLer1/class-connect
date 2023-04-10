@@ -57,7 +57,7 @@ const FormFileInfoTask = ({ isSubmitted, icon, until, title, guid, isLate, task_
                         </>
                     }
                     <div className={[css.sendWork, css[`isSubmitted--${isSubmitted}`]].join(' ')}>
-                        {!mark &&
+                        {(!mark || !isSubmitted) &&
                             <FormButton style={1} text={isSubmitted ? 'Отменить отправку' : 'сдать работу'} onClick={() => requests.sendWork(guid)} disabled={isLoading} icon={faPaperPlane} />
                         }
                     </div>

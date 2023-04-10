@@ -74,8 +74,12 @@ export const useList = (onAutoClose = () => null) => {
             setList((collection) => {
                 let newCollection = {...collection}
                 newCollection = unselectAll(newCollection)
-                newCollection[id].state.selected = true
-                setSelectedItem(newCollection[id].value)
+                if (newCollection[id]){
+                    newCollection[id].state.selected = true
+                    setSelectedItem(newCollection[id].value)
+                }
+
+
                 return newCollection
             })
 
@@ -175,5 +179,5 @@ export const useList = (onAutoClose = () => null) => {
             return newCollection
         })
     }
-    return [collection, { setItems, addItem: appendItem, updateItem, removeItem, setItemProp, getItem }, { editModeOn, selectedStateOn, editModeOff }, { storeProp, reject, commit }, selectedItem]
+    return [collection, { setItems, addItem: appendItem, updateItem, removeItem, setItemProp, getItem }, { selectedStateOff, editModeOn, selectedStateOn, editModeOff }, { storeProp, reject, commit }, selectedItem]
 }

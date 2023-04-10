@@ -17,7 +17,7 @@ function FilesForm() {
     const { alert } = useContext(GlobalUIContext)
     const navigate = useNavigate()
 
-   
+
 
     const { id } = useParams()
 
@@ -71,7 +71,11 @@ function FilesForm() {
     const setFilesInfo = (data) => {
         const { children, path, ...fileInfo } = data
         setFilePath(path)
+        const guid = selectedItem?.guid
         branchItemsAtions.setItems(children)
+        if (guid){
+            branchItemsStateActions.selectedStateOn(guid)
+        }
         setParentFileInfo(fileInfo)
     }
 
@@ -88,10 +92,10 @@ function FilesForm() {
             else{
                 setLoadingMode('all')
             }
-         
+
 
             await setFolder(id)
-            
+
         }
         if ('null' !== id) {
             renderFolder()
