@@ -42,7 +42,7 @@ const FormInfoTask = ({ ...props }) => {
 
 
     if (user.data.role === 'Student') {
-        return <FormFileInfoTask title='Ваша работа' {...work} submitTime={work.submitTime ? parse_time(work.submitTime): '--'}
+        return <FormFileInfoTask title='Ваша работа' {...work} submitTime={work?.submitTime ? parse_time(work.submitTime): '--'}
         until={props.until ? parse_time(props.until) : '--' } requests={{ saveFile, removeFile, sendWork }} task_id={props.id} icon={faBriefcase} />
     }
     else{
