@@ -100,8 +100,8 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
         var fileEntity = new FileEntity
         {
             Id = item.Guid,
-            Extension = Path.GetExtension(item.Name),
-            MimeType = MimeTypes.GetMimeType(item.Name)
+            Extension = Path.GetExtension(name),
+            MimeType = MimeTypes.GetMimeType(name)
         };
         await _commonFileQueries.CreateAsync(fileEntity);
         return (itemPath, await GetAsync(item.Guid, user, true));
