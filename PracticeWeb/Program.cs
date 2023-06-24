@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -25,16 +26,23 @@ string Ask(string question)
 
 async void CreateAdmin(Context context)
 {
-    var email = Ask("Enter the admin email:");
+    var email = "";
+    var attr = new EmailAddressAttribute();
+    while (!attr.IsValid(email))
+        email = Ask("Enter the admin email:");
+
     var password = Ask("Enter the admin password:");
-    context.Users.Add(new User {
-        Name = "Админ",
-        Surname = "Админов",
-        Email = email,
-        Password = BCrypt.Net.BCrypt.HashPassword(password),
-        RegTime = DateTime.Now,
-        RoleId = UserRole.Administrator
-    });
+    context.Users.Add(
+        new User
+        {
+            Name = "Админ",
+            Surname = "Админов",
+            Email = email,
+            Password = BCrypt.Net.BCrypt.HashPassword(password),
+            RegTime = DateTime.Now,
+            RoleId = UserRole.Administrator
+        }
+    );
 
     await context.SaveChangesAsync();
 }
