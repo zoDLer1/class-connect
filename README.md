@@ -1,5 +1,5 @@
 <p align="center">
-<h1 align="center">practice-web</h1>
+<h1 align="center">class-connect</h1>
 <div align="center">An app for creating assignments, grading, and sending works between students and teachers.</div>
 <div align="center">
     <br />
