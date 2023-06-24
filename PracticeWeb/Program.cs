@@ -12,6 +12,33 @@ using PracticeWeb.Services.FileSystemServices;
 using PracticeWeb.Services.FileSystemServices.Helpers;
 using PracticeWeb.Services.UserServices;
 
+string Ask(string question)
+{
+    while (true)
+    {
+        Console.WriteLine(question);
+        var answer = Console.ReadLine();
+        if (!string.IsNullOrWhiteSpace(answer))
+            return answer.Trim();
+    }
+}
+
+async void CreateAdmin(Context context)
+{
+    var email = Ask("Enter the admin email:");
+    var password = Ask("Enter the admin password:");
+    context.Users.Add(new User {
+        Name = "Админ",
+        Surname = "Админов",
+        Email = email,
+        Password = BCrypt.Net.BCrypt.HashPassword(password),
+        RegTime = DateTime.Now,
+        RoleId = UserRole.Administrator
+    });
+
+    await context.SaveChangesAsync();
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -111,6 +138,7 @@ using (var scope = app.Services.CreateScope())
     var isCreated = await context.Database.EnsureCreatedAsync();
     if (isCreated)
     {
+        CreateAdmin(context);
         await scope.ServiceProvider
             .GetRequiredService<IFileSystemService>()
             .RecreateFileSystemAsync();
