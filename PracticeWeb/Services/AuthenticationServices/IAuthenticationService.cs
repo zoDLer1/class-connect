@@ -14,5 +14,6 @@ public interface IAuthenticationService
         string? patronymic,
         string email,
         string password,
-        UserRole role);
+        UserRole role
+    );
 }

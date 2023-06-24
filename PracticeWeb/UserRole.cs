@@ -1,6 +1,7 @@
 namespace PracticeWeb;
 
-public enum UserRole {
+public enum UserRole
+{
     Student,
     Teacher,
     Administrator

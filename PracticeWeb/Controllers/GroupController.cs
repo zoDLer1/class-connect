@@ -30,12 +30,7 @@ public class GroupController : ControllerBase
     {
         var groups = _context.Items
             .Where(i => i.TypeId == Type.Group)
-            .Select(g => new
-                {
-                    Id = g.Id,
-                    Name = g.Name
-                }
-            );
+            .Select(g => new { Id = g.Id, Name = g.Name });
         return new JsonResult(groups);
     }
 
@@ -58,7 +53,8 @@ public class GroupController : ControllerBase
         if (await _context.Accesses.FirstOrDefaultAsync(s => s.UserId == user.Id) != null)
             return BadRequest(new { errorText = "Вы уже добавлены в группу" });
 
-        var studentAccess = new Access{
+        var studentAccess = new Access
+        {
             Permission = Permission.Read,
             ItemId = group.Id,
             UserId = user.Id
@@ -76,7 +72,7 @@ public class GroupController : ControllerBase
         if (group == null)
             return NotFound(new { errorText = "Группа не найдена" });
 
-        var student = await _userService.GetAsync((int) model.StudentId);
+        var student = await _userService.GetAsync((int)model.StudentId);
         if (student == null)
             return NotFound(new { errorText = "Студент не найден" });
 
@@ -89,9 +85,13 @@ public class GroupController : ControllerBase
             return BadRequest(new { errorText = "Преподаватель не найден" });
 
         if (group.TeacherId != teacher.Id && teacher.RoleId == UserRole.Teacher)
-            return BadRequest(new { errorText = "Пользователь не является преподавателем этой группы" });
+            return BadRequest(
+                new { errorText = "Пользователь не является преподавателем этой группы" }
+            );
 
-        var studentAccess = await _context.Accesses.FirstOrDefaultAsync(s => s.UserId == student.Id && s.ItemId == group.Id);
+        var studentAccess = await _context.Accesses.FirstOrDefaultAsync(
+            s => s.UserId == student.Id && s.ItemId == group.Id
+        );
         if (studentAccess == null)
             return BadRequest(new { errorText = "Студента нет в группе" });
 

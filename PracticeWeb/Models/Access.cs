@@ -1,6 +1,7 @@
 namespace PracticeWeb.Models;
 
-public class Access {
+public class Access
+{
     public Permission Permission { get; set; }
 
     public string ItemId { get; set; } = null!;

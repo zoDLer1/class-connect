@@ -1,6 +1,3 @@
 namespace PracticeWeb.Exceptions;
 
-public class TeacherNotFoundException : Exception
-{
-
-}
+public class TeacherNotFoundException : Exception { }

@@ -1,4 +1,3 @@
-using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -30,7 +29,8 @@ public class UserController : ControllerBase
         Context context,
         IAuthenticationService authenticationService,
         IUserService userService,
-        IFileSystemService fileSystemService)
+        IFileSystemService fileSystemService
+    )
     {
         _context = context;
         _commonGroupQueries = new CommonQueries<string, Group>(_context);
@@ -43,15 +43,18 @@ public class UserController : ControllerBase
     [HttpGet("teachers")]
     public IActionResult GetTeachers()
     {
-        var teachers = _context.Users.Include(u => u.Role)
+        var teachers = _context.Users
+            .Include(u => u.Role)
             .Where(u => u.RoleId == UserRole.Teacher)
-            .Select(u => new
-                {
-                    Id = u.Id,
-                    FirstName = u.Name,
-                    LastName = u.Surname,
-                    Patronymic = u.Patronymic
-                }
+            .Select(
+                u =>
+                    new
+                    {
+                        Id = u.Id,
+                        FirstName = u.Name,
+                        LastName = u.Surname,
+                        Patronymic = u.Patronymic
+                    }
             );
         return new JsonResult(teachers);
     }
@@ -74,7 +77,8 @@ public class UserController : ControllerBase
             claims,
             "Token",
             ClaimsIdentity.DefaultNameClaimType,
-            ClaimsIdentity.DefaultRoleClaimType);
+            ClaimsIdentity.DefaultRoleClaimType
+        );
         return identity;
     }
 
@@ -89,7 +93,10 @@ public class UserController : ControllerBase
             notBefore: now,
             claims: identity.Claims,
             expires: expires,
-            signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)
+            signingCredentials: new SigningCredentials(
+                AuthOptions.GetSymmetricSecurityKey(),
+                SecurityAlgorithms.HmacSha256
+            )
         );
         var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
         return new
@@ -130,12 +137,7 @@ public class UserController : ControllerBase
         var jwt = CreateToken(user);
         await _userService.UpdateAsync(user);
 
-        return new JsonResult(
-            new {
-                accessToken = jwt,
-                refreshToken = user.RefreshToken
-            }
-        );
+        return new JsonResult(new { accessToken = jwt, refreshToken = user.RefreshToken });
     }
 
     [HttpPost("login")]
@@ -158,14 +160,17 @@ public class UserController : ControllerBase
             }
 
             return new JsonResult(
-                new {
+                new
+                {
                     accessToken = jwt,
-                    refreshToken = new {
+                    refreshToken = new
+                    {
                         token = refreshToken.Token,
                         created = refreshToken.Created,
                         expires = refreshToken.Expires
                     },
-                    user = new {
+                    user = new
+                    {
                         name = user.Name,
                         surname = user.Surname,
                         role = user.Role.Name,
@@ -176,11 +181,15 @@ public class UserController : ControllerBase
         }
         catch (UserNotFoundException)
         {
-            return NotFound(new { Errors = new { Email = new List<string> { "Пользователь не найден" } } });
+            return NotFound(
+                new { Errors = new { Email = new List<string> { "Пользователь не найден" } } }
+            );
         }
         catch (InvalidPasswordException)
         {
-            return BadRequest(new { Errors = new { Password = new List<string> { "Неправильный пароль" } } });
+            return BadRequest(
+                new { Errors = new { Password = new List<string> { "Неправильный пароль" } } }
+            );
         }
     }
 
@@ -188,12 +197,32 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Signup([FromBody] SignupModel model)
     {
         if (model.Patronymic != string.Empty && model.Patronymic.Length < 5)
-            return BadRequest(new { Errors = new { Patronymic = new List<string> { "Используйте не менее 5 символов" } } });
+            return BadRequest(
+                new
+                {
+                    Errors = new
+                    {
+                        Patronymic = new List<string> { "Используйте не менее 5 символов" }
+                    }
+                }
+            );
 
         if (await IsEmailUsedAsync(model.Email))
-            return BadRequest(new { Errors = new { Email = new List<string> { "Данная почта уже используется" } } });
+            return BadRequest(
+                new
+                {
+                    Errors = new { Email = new List<string> { "Данная почта уже используется" } }
+                }
+            );
 
-        await _authenticationService.RegisterAsync(model.Name, model.Surname, model.Patronymic, model.Email, model.Password, UserRole.Student);
+        await _authenticationService.RegisterAsync(
+            model.Name,
+            model.Surname,
+            model.Patronymic,
+            model.Email,
+            model.Password,
+            UserRole.Student
+        );
         return Ok();
     }
 }

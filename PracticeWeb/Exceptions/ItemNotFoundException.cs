@@ -1,6 +1,3 @@
 namespace PracticeWeb.Exceptions;
 
-public class ItemNotFoundException : Exception
-{
-
-}
+public class ItemNotFoundException : Exception { }

@@ -1,6 +1,3 @@
 namespace PracticeWeb.Exceptions;
 
-public class InvalidUserRoleException : Exception
-{
-
-}
+public class InvalidUserRoleException : Exception { }

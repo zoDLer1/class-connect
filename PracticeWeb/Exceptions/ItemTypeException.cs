@@ -1,6 +1,3 @@
 namespace PracticeWeb.Exceptions;
 
-public class ItemTypeException : Exception
-{
-
-}
+public class ItemTypeException : Exception { }

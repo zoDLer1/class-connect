@@ -17,7 +17,11 @@ public class FileSystemController : ControllerBase
     private IUserService _userService;
     private Context _context;
 
-    public FileSystemController(IFileSystemService fileSystemService, IUserService userService, Context context)
+    public FileSystemController(
+        IFileSystemService fileSystemService,
+        IUserService userService,
+        Context context
+    )
     {
         _fileSystemService = fileSystemService;
         _userService = userService;
@@ -103,11 +107,15 @@ public class FileSystemController : ControllerBase
         }
         catch (TeacherNotFoundException)
         {
-            return BadRequest(new { Errors = new { TeacherId = new List<string> { "Преподаватель не найден" } } });
+            return BadRequest(
+                new { Errors = new { TeacherId = new List<string> { "Преподаватель не найден" } } }
+            );
         }
         catch (InvalidDateException)
         {
-            return BadRequest(new { Errors = new { Until = new List<string> { "Некорректная дата" } } });
+            return BadRequest(
+                new { Errors = new { Until = new List<string> { "Некорректная дата" } } }
+            );
         }
         catch (ItemNotFoundException)
         {
@@ -123,11 +131,18 @@ public class FileSystemController : ControllerBase
         }
         catch (InvalidGroupNameException)
         {
-            return BadRequest(new { Errors = new { Name = new List<string> { "Неправильное название группы" } } });
+            return BadRequest(
+                new { Errors = new { Name = new List<string> { "Неправильное название группы" } } }
+            );
         }
         catch (InvalidSubjectNameException)
         {
-            return BadRequest(new { Errors = new { Name = new List<string> { "Неправильное название предмета" } } });
+            return BadRequest(
+                new
+                {
+                    Errors = new { Name = new List<string> { "Неправильное название предмета" } }
+                }
+            );
         }
         catch (InvalidUserRoleException)
         {
@@ -135,7 +150,15 @@ public class FileSystemController : ControllerBase
         }
         catch (KeyNotFoundException)
         {
-            return BadRequest(new { Errors = new { Type = new List<string> { "Некорректное значение параметра Type" } } });
+            return BadRequest(
+                new
+                {
+                    Errors = new
+                    {
+                        Type = new List<string> { "Некорректное значение параметра Type" }
+                    }
+                }
+            );
         }
         catch (NullReferenceException)
         {
@@ -157,12 +180,24 @@ public class FileSystemController : ControllerBase
             object result;
             if (user.RoleId == UserRole.Student)
             {
-                var fullUserName = string.Join(' ', new[] { user.Name, user.Surname, user.Patronymic });
-                result = await _fileSystemService.CreateWorkAsync(model.Id, fullUserName, model.UploadedFile, user);
+                var fullUserName = string.Join(
+                    ' ',
+                    new[] { user.Name, user.Surname, user.Patronymic }
+                );
+                result = await _fileSystemService.CreateWorkAsync(
+                    model.Id,
+                    fullUserName,
+                    model.UploadedFile,
+                    user
+                );
             }
             else
             {
-                result = await _fileSystemService.CreateFileAsync(model.Id, model.UploadedFile, user);
+                result = await _fileSystemService.CreateFileAsync(
+                    model.Id,
+                    model.UploadedFile,
+                    user
+                );
             }
             return new JsonResult(result);
         }
@@ -207,7 +242,15 @@ public class FileSystemController : ControllerBase
             else
             {
                 if (model.Mark != null && model.Mark < 2 || model.Mark > 5)
-                    return BadRequest(new { Errors = new { Mark = new List<string> { "Некорректное значение оценки" } } });
+                    return BadRequest(
+                        new
+                        {
+                            Errors = new
+                            {
+                                Mark = new List<string> { "Некорректное значение оценки" }
+                            }
+                        }
+                    );
 
                 result = await _fileSystemService.MarkWork(model.Id, model.Mark, user);
             }
@@ -250,11 +293,18 @@ public class FileSystemController : ControllerBase
         }
         catch (InvalidGroupNameException)
         {
-            return BadRequest(new { Errors = new { Name = new List<string> { "Неправильное название группы" } } });
+            return BadRequest(
+                new { Errors = new { Name = new List<string> { "Неправильное название группы" } } }
+            );
         }
         catch (InvalidSubjectNameException)
         {
-            return BadRequest(new { Errors = new { Name = new List<string> { "Неправильное название предмета" } } });
+            return BadRequest(
+                new
+                {
+                    Errors = new { Name = new List<string> { "Неправильное название предмета" } }
+                }
+            );
         }
         catch (InvalidPathException)
         {
@@ -275,7 +325,11 @@ public class FileSystemController : ControllerBase
         try
         {
             var user = await GetUserAsync();
-            await _fileSystemService.UpdateTypeAsync(model.Id, (Type)Enum.Parse(typeof(Type), model.Type), user);
+            await _fileSystemService.UpdateTypeAsync(
+                model.Id,
+                (Type)Enum.Parse(typeof(Type), model.Type),
+                user
+            );
         }
         catch (UserNotFoundException)
         {
@@ -287,7 +341,15 @@ public class FileSystemController : ControllerBase
         }
         catch (ItemTypeException)
         {
-            return BadRequest(new { Errors = new { Type = new List<string> { "Некорректное значение параметра Type" } } });
+            return BadRequest(
+                new
+                {
+                    Errors = new
+                    {
+                        Type = new List<string> { "Некорректное значение параметра Type" }
+                    }
+                }
+            );
         }
         catch (InvalidPathException)
         {

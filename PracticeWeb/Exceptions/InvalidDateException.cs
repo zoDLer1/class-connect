@@ -1,6 +1,3 @@
 namespace PracticeWeb.Exceptions;
 
-public class InvalidDateException : Exception
-{
-
-}
+public class InvalidDateException : Exception { }

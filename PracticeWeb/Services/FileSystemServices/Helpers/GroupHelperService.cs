@@ -11,7 +11,9 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public GroupHelperService(
         IHostEnvironment env,
         ServiceResolver serviceAccessor,
-        Context context) : base(env, serviceAccessor, context)
+        Context context
+    )
+        : base(env, serviceAccessor, context)
     {
         _commonGroupQueries = new CommonQueries<string, Group>(_context);
     }
@@ -34,7 +36,12 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             access.Permission = permission;
 
         // Ведёт ли преподаватель предмет?
-        if (Permission.Write > access.Permission && await _context.Subjects.FirstOrDefaultAsync(s => s.TeacherId == user.Id && s.GroupId == group.Id) != null)
+        if (
+            Permission.Write > access.Permission
+            && await _context.Subjects.FirstOrDefaultAsync(
+                s => s.TeacherId == user.Id && s.GroupId == group.Id
+            ) != null
+        )
             access.Permission = Permission.Read;
 
         Console.WriteLine($"group access: {access.Permission} or {permission} in {id}");
@@ -61,28 +68,31 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
                 Surname = group.Teacher.Surname,
                 Patronymic = group.Teacher.Patronymic
             },
-            Subjects = asChild ? subjects
-                .Select(s => new
-                {
-                    Id = s.Id,
-                    Name = s.Item.Name,
-                })
-                .OrderBy(s => s.Name)
-                .ToList<object>() : new List<object>(),
+            Subjects = asChild
+                ? subjects
+                    .Select(s => new { Id = s.Id, Name = s.Item.Name, })
+                    .OrderBy(s => s.Name)
+                    .ToList<object>()
+                : new List<object>(),
             Students = new
             {
                 IsEditable = user.Id == group.TeacherId || user.RoleId == UserRole.Administrator,
                 Items = _context.Accesses
-                .Where(s => s.ItemId == group.Id && s.Permission == Permission.Read)
-                .ToList()
-                .Select(s => {
-                    var user = _context.Users.FirstOrDefault(u => u.Id == s.UserId);
-                    return new {
-                        Id = user?.Id,
-                        Name = string.Join(' ', new[] { user?.Name, user?.Surname, user?.Patronymic })
-                    };
-                })
-                .OrderBy(s => s.Name)
+                    .Where(s => s.ItemId == group.Id && s.Permission == Permission.Read)
+                    .ToList()
+                    .Select(s =>
+                    {
+                        var user = _context.Users.FirstOrDefault(u => u.Id == s.UserId);
+                        return new
+                        {
+                            Id = user?.Id,
+                            Name = string.Join(
+                                ' ',
+                                new[] { user?.Name, user?.Surname, user?.Patronymic }
+                            )
+                        };
+                    })
+                    .OrderBy(s => s.Name)
             }
         };
     }
@@ -100,7 +110,9 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Guid = folder.Guid,
             Path = folder.Path,
             Children = asChild ? null : folder.Children,
-            Data = user.Role.Id == UserRole.Student || group == null ? null : GetGroupData(group, user, asChild),
+            Data = user.Role.Id == UserRole.Student || group == null
+                ? null
+                : GetGroupData(group, user, asChild),
             Access = folder.Access,
             IsEditable = folder.IsEditable
         };
@@ -114,16 +126,27 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         await base.CheckIfCanCreateAsync(parentId, Type.Group, user);
 
         // Является ли родитель корнем
-        if (await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == parentId) != null && parentId != _rootGuid)
+        if (
+            await _context.Connections.FirstOrDefaultAsync(c => c.ChildId == parentId) != null
+            && parentId != _rootGuid
+        )
             throw new InvalidPathException();
     }
 
-    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    public async Task<(string, object)> CreateAsync(
+        string parentId,
+        string name,
+        User user,
+        Dictionary<string, object>? parameters = null
+    )
     {
         await CheckIfCanCreateAsync(parentId, user);
 
         // Еесть ли группа с таким же названием
-        if (await _context.Groups.Include(g => g.Item).FirstOrDefaultAsync(g => g.Item.Name == name) != null)
+        if (
+            await _context.Groups.Include(g => g.Item).FirstOrDefaultAsync(g => g.Item.Name == name)
+            != null
+        )
             throw new InvalidGroupNameException();
 
         if (parameters?.ContainsKey("TeacherId") == false)
@@ -138,13 +161,10 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             throw new InvalidUserRoleException();
 
         var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Group, user);
-        var group = new Group
-        {
-            Id = item.Guid,
-            TeacherId = teacher.Id,
-        };
+        var group = new Group { Id = item.Guid, TeacherId = teacher.Id, };
         await _commonGroupQueries.CreateAsync(group);
-        var teacherAccess = new Access {
+        var teacherAccess = new Access
+        {
             Permission = Permission.Write,
             ItemId = group.Id,
             UserId = teacher.Id,
@@ -166,7 +186,11 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             throw new ItemNotFoundException();
 
         // Есть ли группа с таким же названием
-        if (await _context.Groups.Include(g => g.Item).FirstOrDefaultAsync(g => g.Item.Name == newName) != null)
+        if (
+            await _context.Groups
+                .Include(g => g.Item)
+                .FirstOrDefaultAsync(g => g.Item.Name == newName) != null
+        )
             throw new InvalidGroupNameException();
 
         var item = await base.UpdateAsync(id, newName, user);

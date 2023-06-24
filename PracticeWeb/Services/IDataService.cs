@@ -1,11 +1,8 @@
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using PracticeWeb.Models;
 
 namespace PracticeWeb.Services;
 
-public interface IDataService<TId,T>
+public interface IDataService<TId, T>
     where TId : IEquatable<TId>
     where T : CommonModel<TId>
 {

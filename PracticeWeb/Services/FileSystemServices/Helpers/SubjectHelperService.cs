@@ -12,7 +12,9 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public SubjectHelperService(
         IHostEnvironment env,
         ServiceResolver serviceAccessor,
-        Context context) : base(env, serviceAccessor, context)
+        Context context
+    )
+        : base(env, serviceAccessor, context)
     {
         _commonGroupQueries = new CommonQueries<string, Group>(_context);
         _commonSubjectQueries = new CommonQueries<string, Subject>(_context);
@@ -20,7 +22,10 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
     public async Task<ItemAccess> HasAccessAsync(string id, User user, List<string> path)
     {
-        var subject = await _commonSubjectQueries.GetAsync(id, _context.Subjects.Include(s => s.Group));
+        var subject = await _commonSubjectQueries.GetAsync(
+            id,
+            _context.Subjects.Include(s => s.Group)
+        );
         if (subject == null)
             throw new ItemNotFoundException();
 
@@ -28,7 +33,11 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         var permission = await GetPermission(user.Id, subject.Id);
 
         // Если это преподаватель и он не имеет доступ к группе на запись и не имеет доступ на запись к предмету
-        if (user.RoleId == UserRole.Teacher && Permission.Write > access.Permission && permission == Permission.None)
+        if (
+            user.RoleId == UserRole.Teacher
+            && Permission.Write > access.Permission
+            && permission == Permission.None
+        )
             access.Permission = Permission.None;
 
         Console.WriteLine($"subject access: {access.Permission} or {permission} in {id}");
@@ -47,11 +56,10 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
     {
         var access = await HasAccessAsync(id, user, new List<string>());
         var item = await TryGetItemAsync(id);
-        var subject = await _commonSubjectQueries.GetAsync(id, _context
-            .Subjects
-            .Include(s => s.Group)
-            .ThenInclude(g => g.Item)
-            .Include(s => s.Teacher));
+        var subject = await _commonSubjectQueries.GetAsync(
+            id,
+            _context.Subjects.Include(s => s.Group).ThenInclude(g => g.Item).Include(s => s.Teacher)
+        );
         if (subject == null)
             throw new ItemNotFoundException();
 
@@ -63,10 +71,12 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Guid = folder.Guid,
             Path = folder.Path,
             Children = asChild ? null : folder.Children,
-            Data = new {
+            Data = new
+            {
                 CreationTime = folder.Data.CreationTime,
                 Group = subject.Group.Item.Name,
-                Teacher = new {
+                Teacher = new
+                {
                     Id = subject.Teacher.Id,
                     Name = subject.Teacher.Name,
                     Surname = subject.Teacher.Surname,
@@ -92,13 +102,17 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             throw new InvalidPathException();
     }
 
-    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    public async Task<(string, object)> CreateAsync(
+        string parentId,
+        string name,
+        User user,
+        Dictionary<string, object>? parameters = null
+    )
     {
         await CheckIfCanCreateAsync(parentId, user);
 
         // Усть ли у данной группы предмет с таким же названием
-        var anotherSubject = _context
-            .Subjects
+        var anotherSubject = _context.Subjects
             .Where(s => s.GroupId == parentId)
             .Include(s => s.Item)
             .FirstOrDefault(s => s.Item.Name == name);
@@ -106,7 +120,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             throw new InvalidSubjectNameException();
 
         if (parameters?.ContainsKey("TeacherId") == false)
-        throw new NullReferenceException();
+            throw new NullReferenceException();
 
         int? teacherId = parameters?["TeacherId"] as int?;
         var teacher = _context.Users.Include(s => s.Role).FirstOrDefault(s => s.Id == teacherId);
@@ -122,10 +136,14 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Id = item.Guid,
             GroupId = parentId,
             TeacherId = teacher.Id,
-            Description = parameters?.ContainsKey("Description") == true ? parameters["Description"] as string : null
+            Description =
+                parameters?.ContainsKey("Description") == true
+                    ? parameters["Description"] as string
+                    : null
         };
         await _commonSubjectQueries.CreateAsync(subject);
-        var teacherAccess = new Access {
+        var teacherAccess = new Access
+        {
             Permission = Permission.Write,
             ItemId = subject.Id,
             UserId = subject.TeacherId,
@@ -146,8 +164,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             throw new ItemNotFoundException();
 
         // Усть ли у данной группы предмет с таким же названием
-        var anotherSubject = _context
-            .Subjects
+        var anotherSubject = _context.Subjects
             .Where(s => s.GroupId == subject.GroupId)
             .Include(s => s.Item)
             .FirstOrDefault(s => s.Item.Name == newName);

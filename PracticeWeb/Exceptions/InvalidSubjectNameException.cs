@@ -1,6 +1,3 @@
 namespace PracticeWeb.Exceptions;
 
-public class InvalidSubjectNameException : Exception
-{
-
-}
+public class InvalidSubjectNameException : Exception { }

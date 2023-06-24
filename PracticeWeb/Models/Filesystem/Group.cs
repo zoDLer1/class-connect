@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace PracticeWeb.Models;
 
 public class Group : CommonModel<string>

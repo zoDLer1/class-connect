@@ -1,6 +1,3 @@
 namespace PracticeWeb.Exceptions;
 
-public class FolderNotFoundException : Exception
-{
-
-}
+public class FolderNotFoundException : Exception { }

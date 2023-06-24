@@ -15,10 +15,7 @@ public class FileSystemService : IFileSystemService
     private ServiceResolver _serviceAccessor;
     private Regex ReturnPattern = new Regex(@"\/\.\.(?![^\/])");
 
-    public FileSystemService(
-        IHostEnvironment env,
-        Context context,
-        ServiceResolver serviceAccessor)
+    public FileSystemService(IHostEnvironment env, Context context, ServiceResolver serviceAccessor)
     {
         _context = context;
         _fileSystemPath = Path.Combine(env.ContentRootPath, "Filesystem");
@@ -52,7 +49,8 @@ public class FileSystemService : IFileSystemService
                 CreatorId = 1,
             };
             await _commonItemQueries.CreateAsync(item);
-            var adminAccess = new Access {
+            var adminAccess = new Access
+            {
                 Permission = Permission.Write,
                 ItemId = rootGuid,
                 UserId = 1,
@@ -74,13 +72,10 @@ public class FileSystemService : IFileSystemService
         var groups = _context.Groups.ToList();
         foreach (var group in groups)
         {
-            var connection = new Connection
-            {
-                ParentId = RootGuid,
-                ChildId = group.Id,
-            };
+            var connection = new Connection { ParentId = RootGuid, ChildId = group.Id, };
             await _context.Connections.AddAsync(connection);
-            var teacherAccess = new Access {
+            var teacherAccess = new Access
+            {
                 Permission = Permission.Write,
                 ItemId = group.Id,
                 UserId = group.TeacherId,
@@ -177,7 +172,8 @@ public class FileSystemService : IFileSystemService
         if (parent.TypeId != Type.Task)
             throw new ItemTypeException();
 
-        var access = await _serviceAccessor(parent.TypeId).HasAccessAsync(parent.Id, user, new List<string>());
+        var access = await _serviceAccessor(parent.TypeId)
+            .HasAccessAsync(parent.Id, user, new List<string>());
         if (access.Permission < Permission.Write)
             throw new AccessDeniedException();
 
@@ -201,22 +197,33 @@ public class FileSystemService : IFileSystemService
         return await _serviceAccessor(Type.Task).GetAsync(parentConnection.ParentId, user, false);
     }
 
-    public async Task<object> CreateWorkAsync(string parentId, string name, IFormFile file, User user)
+    public async Task<object> CreateWorkAsync(
+        string parentId,
+        string name,
+        IFormFile file,
+        User user
+    )
     {
         await CreateFileSystemIfNotExistsAsync();
         var id = string.Empty;
-        var workConnection = await _context.Connections.Include(c => c.Child).FirstOrDefaultAsync(c => c.ParentId == parentId && c.Child.CreatorId == user.Id);
+        var workConnection = await _context.Connections
+            .Include(c => c.Child)
+            .FirstOrDefaultAsync(c => c.ParentId == parentId && c.Child.CreatorId == user.Id);
 
         // Если работа ещё не была создана, то создаём
         if (workConnection == null)
         {
-            var (path, item) = await _serviceAccessor(Type.Work).CreateAsync(parentId, name, user, null);
+            var (path, item) = await _serviceAccessor(Type.Work)
+                .CreateAsync(parentId, name, user, null);
             CreateDirectory(path);
             id = Path.GetFileName(path);
         }
         else
         {
-            var workEntity = await _commonWorkQueries.GetAsync(workConnection.ChildId, _context.Works);
+            var workEntity = await _commonWorkQueries.GetAsync(
+                workConnection.ChildId,
+                _context.Works
+            );
             if (workEntity == null)
                 throw new ItemNotFoundException();
 
@@ -228,15 +235,13 @@ public class FileSystemService : IFileSystemService
 
         var child = await TryGetItemAsync(id);
         var result = await CreateFileAsync(id, file, user);
-        var workItemId = (string) (result.GetType().GetProperty("Guid")?.GetValue(result) ?? string.Empty);
+        var workItemId = (string)(
+            result.GetType().GetProperty("Guid")?.GetValue(result) ?? string.Empty
+        );
         if (workItemId == string.Empty)
             throw new AccessDeniedException();
 
-        var workItem = new WorkItem
-        {
-            Id = workItemId,
-            WorkId = id
-        };
+        var workItem = new WorkItem { Id = workItemId, WorkId = id };
         await _context.WorkItems.AddAsync(workItem);
         await _context.SaveChangesAsync();
         return await _serviceAccessor(Type.Task).GetAsync(parentId, user, false);
@@ -245,7 +250,8 @@ public class FileSystemService : IFileSystemService
     public async Task<object> CreateFileAsync(string parentId, IFormFile file, User user)
     {
         await CreateFileSystemIfNotExistsAsync();
-        var (path, item) = await _serviceAccessor(Type.File).CreateAsync(parentId, file.FileName.Trim(), user);
+        var (path, item) = await _serviceAccessor(Type.File)
+            .CreateAsync(parentId, file.FileName.Trim(), user);
         using (var fileStream = new FileStream(path, FileMode.Create))
             await file.CopyToAsync(fileStream);
 
@@ -256,13 +262,20 @@ public class FileSystemService : IFileSystemService
         return await _serviceAccessor(parent.TypeId).GetAsync(parentId, user, false);
     }
 
-    public async Task<object> CreateFolderAsync(string parentId, string name, Type type, User user, Dictionary<string, object>? parameters)
+    public async Task<object> CreateFolderAsync(
+        string parentId,
+        string name,
+        Type type,
+        User user,
+        Dictionary<string, object>? parameters
+    )
     {
         if (type == Type.File)
             throw new KeyNotFoundException();
         await CreateFileSystemIfNotExistsAsync();
         var parent = await TryGetItemAsync(parentId);
-        var (path, item) = await _serviceAccessor(type).CreateAsync(parentId, name.Trim(), user, parameters);
+        var (path, item) = await _serviceAccessor(type)
+            .CreateAsync(parentId, name.Trim(), user, parameters);
         CreateDirectory(path);
         return item;
     }
