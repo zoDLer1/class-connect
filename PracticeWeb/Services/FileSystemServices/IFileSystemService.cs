@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 using PracticeWeb.Models;
 
 namespace PracticeWeb.Services.FileSystemServices;
@@ -12,7 +11,13 @@ public interface IFileSystemService
     Task<object> GetObjectAsync(string id, User user);
     Task<object> CreateWorkAsync(string parentId, string name, IFormFile file, User user);
     Task<object> CreateFileAsync(string parentId, IFormFile file, User user);
-    Task<object> CreateFolderAsync(string parentId, string name, Type type, User user, Dictionary<string, object>? parameters);
+    Task<object> CreateFolderAsync(
+        string parentId,
+        string name,
+        Type type,
+        User user,
+        Dictionary<string, object>? parameters
+    );
     Task RenameAsync(string id, string newName, User user);
     Task UpdateTypeAsync(string id, Type newType, User user);
     Task RemoveAsync(string id, User user);

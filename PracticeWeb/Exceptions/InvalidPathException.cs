@@ -1,6 +1,3 @@
 namespace PracticeWeb.Exceptions;
 
-public class InvalidPathException : Exception
-{
-
-}
+public class InvalidPathException : Exception { }

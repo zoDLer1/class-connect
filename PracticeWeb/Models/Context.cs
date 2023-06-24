@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using PracticeWeb.Services.FileSystemServices;
 
 namespace PracticeWeb.Models;
 
@@ -22,69 +21,63 @@ public class Context : DbContext
 
     public DbSet<Access> Accesses { get; set; } = null!;
 
-    public Context(DbContextOptions<Context> options) : base(options)
-    {
-
-    }
+    public Context(DbContextOptions<Context> options)
+        : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<User>()
-            .HasIndex(g => g.RefreshTokenId)
-            .IsUnique();
+        builder.Entity<User>().HasIndex(g => g.RefreshTokenId).IsUnique();
 
-        builder.Entity<FileEntity>()
-            .HasOne(f => f.Item)
-            .WithMany()
-            .HasForeignKey(f => f.Id);
+        builder.Entity<FileEntity>().HasOne(f => f.Item).WithMany().HasForeignKey(f => f.Id);
 
-        builder.Entity<Group>()
-            .HasOne(g => g.Item)
-            .WithMany()
-            .HasForeignKey(g => g.Id);
+        builder.Entity<Group>().HasOne(g => g.Item).WithMany().HasForeignKey(g => g.Id);
 
-        builder.Entity<Subject>()
-            .HasOne(s => s.Item)
-            .WithMany()
-            .HasForeignKey(s => s.Id);
+        builder.Entity<Subject>().HasOne(s => s.Item).WithMany().HasForeignKey(s => s.Id);
 
-        builder.Entity<TaskEntity>()
-            .HasOne(t => t.Item)
-            .WithMany()
-            .HasForeignKey(t => t.Id);
+        builder.Entity<TaskEntity>().HasOne(t => t.Item).WithMany().HasForeignKey(t => t.Id);
 
-        builder.Entity<Work>()
-            .HasOne(w => w.Item)
-            .WithMany()
-            .HasForeignKey(w => w.Id);
+        builder.Entity<Work>().HasOne(w => w.Item).WithMany().HasForeignKey(w => w.Id);
 
-        builder.Entity<Connection>().HasKey(t => new {
-            t.ParentId, t.ChildId
-        });
+        builder.Entity<Connection>().HasKey(t => new { t.ParentId, t.ChildId });
 
-        builder.Entity<RefreshToken>().HasKey(t => new {
-            t.Token
-        });
+        builder.Entity<RefreshToken>().HasKey(t => new { t.Token });
 
-        builder.Entity<Access>().HasKey(t => new {
-            t.ItemId, t.UserId
-        });
+        builder.Entity<Access>().HasKey(t => new { t.ItemId, t.UserId });
 
-        builder.Entity<Role>().HasData(
-            new Role { Id = UserRole.Student, Name = "Student", Title = "Студент" },
-            new Role { Id = UserRole.Teacher, Name = "Teacher", Title = "Преподаватель" },
-            new Role { Id = UserRole.Administrator, Name = "Administrator", Title = "Администратор" }
-        );
+        builder
+            .Entity<Role>()
+            .HasData(
+                new Role
+                {
+                    Id = UserRole.Student,
+                    Name = "Student",
+                    Title = "Студент"
+                },
+                new Role
+                {
+                    Id = UserRole.Teacher,
+                    Name = "Teacher",
+                    Title = "Преподаватель"
+                },
+                new Role
+                {
+                    Id = UserRole.Administrator,
+                    Name = "Administrator",
+                    Title = "Администратор"
+                }
+            );
 
-        builder.Entity<ItemType>().HasData(
-            new ItemType { Id = Type.Folder, Name = "Folder" },
-            new ItemType { Id = Type.File, Name = "File" },
-            new ItemType { Id = Type.Group, Name = "Group" },
-            new ItemType { Id = Type.Subject, Name = "Subject" },
-            new ItemType { Id = Type.Task, Name = "Task" },
-            new ItemType { Id = Type.Work, Name = "Work" }
-        );
+        builder
+            .Entity<ItemType>()
+            .HasData(
+                new ItemType { Id = Type.Folder, Name = "Folder" },
+                new ItemType { Id = Type.File, Name = "File" },
+                new ItemType { Id = Type.Group, Name = "Group" },
+                new ItemType { Id = Type.Subject, Name = "Subject" },
+                new ItemType { Id = Type.Task, Name = "Task" },
+                new ItemType { Id = Type.Work, Name = "Work" }
+            );
     }
 }

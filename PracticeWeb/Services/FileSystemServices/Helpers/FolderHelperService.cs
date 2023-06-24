@@ -10,7 +10,9 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
     public FolderHelperService(
         IHostEnvironment env,
         ServiceResolver serviceAccessor,
-        Context context) : base(env, serviceAccessor, context)
+        Context context
+    )
+        : base(env, serviceAccessor, context)
     {
         _commonFileQueries = new CommonQueries<string, FileEntity>(_context);
     }
@@ -44,7 +46,10 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
     {
         var access = await HasAccessAsync(id, user, new List<string>());
         // Проверяем, если запрос от студента и он обращается ли к корню
-        if (user.Role.Id != UserRole.Teacher && access.Permission == Permission.None || access.Path.Count() == 0)
+        if (
+            user.Role.Id != UserRole.Teacher && access.Permission == Permission.None
+            || access.Path.Count() == 0
+        )
             throw new AccessDeniedException();
 
         var folder = await base.GetFolderAsync(id, user, asChild);
@@ -65,7 +70,12 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
         await base.CheckIfCanCreateAsync(parentId, Type.Folder, user);
     }
 
-    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    public async Task<(string, object)> CreateAsync(
+        string parentId,
+        string name,
+        User user,
+        Dictionary<string, object>? parameters = null
+    )
     {
         await CheckIfCanCreateAsync(parentId, user);
         var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Folder, user);

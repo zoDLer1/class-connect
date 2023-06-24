@@ -1,6 +1,3 @@
 namespace PracticeWeb.Exceptions;
 
-public class ServiceNotFoundException : Exception
-{
-
-}
+public class ServiceNotFoundException : Exception { }

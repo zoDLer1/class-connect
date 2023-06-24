@@ -10,10 +10,8 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
     private CommonQueries<string, Subject> _commonSubjectQueries;
     private CommonQueries<string, Work> _commonWorkQueries;
 
-    public WorkHelperService(
-        IHostEnvironment env,
-        ServiceResolver serviceAccessor,
-        Context context) : base(env, serviceAccessor, context)
+    public WorkHelperService(IHostEnvironment env, ServiceResolver serviceAccessor, Context context)
+        : base(env, serviceAccessor, context)
     {
         _commonFileQueries = new CommonQueries<string, FileEntity>(_context);
         _commonWorkQueries = new CommonQueries<string, Work>(_context);
@@ -73,7 +71,8 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Guid = folder.Guid,
             Path = folder.Path,
             Children = folder.Children,
-            Data = new {
+            Data = new
+            {
                 CreationTime = folder.Data.CreationTime,
                 CreatorName = folder.Data.CreatorName,
                 Mark = work?.Mark,
@@ -94,13 +93,16 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
             throw new InvalidPathException();
 
         var parent = await TryGetItemAsync(parentId);
-        var access = await _serviceAccessor(parent.Type.Id).HasAccessAsync(parent.Id, user, new List<string>());
+        var access = await _serviceAccessor(parent.Type.Id)
+            .HasAccessAsync(parent.Id, user, new List<string>());
 
         // Проверка допустимости типов
         if (!TypeDependence.Work.Contains(parent.TypeId))
             throw new InvalidPathException();
 
-        var oldWork = await _context.Connections.Include(c => c.Child).FirstOrDefaultAsync(c => c.ParentId == parentId && c.Child.CreatorId == user.Id);
+        var oldWork = await _context.Connections
+            .Include(c => c.Child)
+            .FirstOrDefaultAsync(c => c.ParentId == parentId && c.Child.CreatorId == user.Id);
         if (oldWork != null)
         {
             var work = await _commonWorkQueries.GetAsync(oldWork.ChildId, _context.Works);
@@ -109,19 +111,23 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
         }
     }
 
-    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    public async Task<(string, object)> CreateAsync(
+        string parentId,
+        string name,
+        User user,
+        Dictionary<string, object>? parameters = null
+    )
     {
         await CheckIfCanCreateAsync(parentId, user);
 
-        var oldWork = await _context.Connections.Include(c => c.Child).FirstOrDefaultAsync(c => c.ParentId == parentId && c.Child.CreatorId == user.Id);
+        var oldWork = await _context.Connections
+            .Include(c => c.Child)
+            .FirstOrDefaultAsync(c => c.ParentId == parentId && c.Child.CreatorId == user.Id);
         if (oldWork != null)
             throw new FolderNotFoundException();
 
         var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Work, user);
-        var work = new Work
-        {
-            Id = item.Guid
-        };
+        var work = new Work { Id = item.Guid };
         await _commonWorkQueries.CreateAsync(work);
         var data = await GetWorkData(item.Guid, user);
         if (data == null)

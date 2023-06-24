@@ -1,6 +1,3 @@
 namespace PracticeWeb.Exceptions;
 
-public class AccessDeniedException : Exception
-{
-
-}
+public class AccessDeniedException : Exception { }

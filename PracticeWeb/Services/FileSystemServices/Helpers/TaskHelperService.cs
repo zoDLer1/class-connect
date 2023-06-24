@@ -10,10 +10,8 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
     private CommonQueries<string, FileEntity> _commonFileQueries;
     private CommonQueries<string, Work> _commonWorkQueries;
 
-    public TaskHelperService(
-        IHostEnvironment env,
-        ServiceResolver serviceAccessor,
-        Context context) : base(env, serviceAccessor, context)
+    public TaskHelperService(IHostEnvironment env, ServiceResolver serviceAccessor, Context context)
+        : base(env, serviceAccessor, context)
     {
         _commonTaskQueries = new CommonQueries<string, TaskEntity>(_context);
         _commonFileQueries = new CommonQueries<string, FileEntity>(_context);
@@ -49,11 +47,14 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Guid = folder.Guid,
             Path = folder.Path,
             Children = asChild ? null : folder.Children,
-            Data = new {
+            Data = new
+            {
                 CreationTime = folder.Data.CreationTime,
                 CreatorName = folder.Data.CreatorName,
                 Until = task?.Until,
-                Work = workConnection != null ? await GetWorkData(workConnection.ChildId, user) : null,
+                Work = workConnection != null
+                    ? await GetWorkData(workConnection.ChildId, user)
+                    : null,
             },
             Access = folder.Access,
             IsEditable = folder.IsEditable
@@ -68,7 +69,12 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
         await base.CheckIfCanCreateAsync(parentId, Type.Task, user);
     }
 
-    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    public async Task<(string, object)> CreateAsync(
+        string parentId,
+        string name,
+        User user,
+        Dictionary<string, object>? parameters = null
+    )
     {
         await CheckIfCanCreateAsync(parentId, user);
 
@@ -86,11 +92,7 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
         }
 
         var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Task, user);
-        var task = new TaskEntity
-        {
-            Id = item.Guid,
-            Until = until
-        };
+        var task = new TaskEntity { Id = item.Guid, Until = until };
         await _commonTaskQueries.CreateAsync(task);
         var parent = await TryGetItemAsync(parentId);
         return (itemPath, await _serviceAccessor(parent.TypeId).GetAsync(parentId, user, false));

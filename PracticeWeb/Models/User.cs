@@ -6,12 +6,16 @@ public class User : CommonModel<int>
 {
     [StringLength(30)]
     public string Name { get; set; } = null!;
+
     [StringLength(45)]
     public string Surname { get; set; } = null!;
+
     [StringLength(45)]
     public string? Patronymic { get; set; }
+
     [StringLength(50)]
     public string Email { get; set; } = null!;
+
     [StringLength(70)]
     public string Password { get; set; } = null!;
 

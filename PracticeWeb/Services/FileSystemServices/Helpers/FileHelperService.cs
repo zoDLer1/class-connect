@@ -9,10 +9,8 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
 {
     private CommonQueries<string, FileEntity> _commonFileQueries;
 
-    public FileHelperService(
-        IHostEnvironment env,
-        ServiceResolver serviceAccessor,
-        Context context) : base(env, serviceAccessor, context)
+    public FileHelperService(IHostEnvironment env, ServiceResolver serviceAccessor, Context context)
+        : base(env, serviceAccessor, context)
     {
         _commonFileQueries = new CommonQueries<string, FileEntity>(_context);
     }
@@ -39,13 +37,21 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (!asChild)
         {
             var pathItems = await GeneratePathAsync(item.Id);
-            var path = CombineWithFileSystemPath(string.Join(Path.DirectorySeparatorChar, pathItems));
+            var path = CombineWithFileSystemPath(
+                string.Join(Path.DirectorySeparatorChar, pathItems)
+            );
             if (!IsFilePathValid(path))
                 throw new ItemNotFoundException();
 
             var filestream = new FileStream(path, FileMode.Open);
-            var name = Path.GetExtension(item.Name) == fileEntity.Extension ? item.Name : item.Name + fileEntity.Extension;
-            return new FileStreamResult(filestream, fileEntity.MimeType) { FileDownloadName = name };
+            var name =
+                Path.GetExtension(item.Name) == fileEntity.Extension
+                    ? item.Name
+                    : item.Name + fileEntity.Extension;
+            return new FileStreamResult(filestream, fileEntity.MimeType)
+            {
+                FileDownloadName = name
+            };
         }
 
         var access = await HasAccessAsync(id, user, new List<string>());
@@ -55,7 +61,8 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Name = folderItem.Name,
             Type = folderItem.Type,
             Guid = folderItem.Guid,
-            Data = new {
+            Data = new
+            {
                 MimeType = fileEntity?.MimeType,
                 CreationTime = folderItem.Data.CreationTime,
                 CreatorName = folderItem.Data.CreatorName,
@@ -76,10 +83,20 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
             throw new AccessDeniedException();
     }
 
-    public async Task<(string, object)> CreateAsync(string parentId, string name, User user, Dictionary<string, object>? parameters=null)
+    public async Task<(string, object)> CreateAsync(
+        string parentId,
+        string name,
+        User user,
+        Dictionary<string, object>? parameters = null
+    )
     {
         await CheckIfCanCreateAsync(parentId, user);
-        var (itemPath, item) = await base.CreateAsync(parentId, name.Substring(0, Math.Min(70, name.Length)), Type.File, user);
+        var (itemPath, item) = await base.CreateAsync(
+            parentId,
+            name.Substring(0, Math.Min(70, name.Length)),
+            Type.File,
+            user
+        );
         var fileEntity = new FileEntity
         {
             Id = item.Guid,
@@ -101,7 +118,9 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
         if (parent.TypeId == Type.Work)
         {
-            var item = await _context.WorkItems.Include(w => w.Work).FirstOrDefaultAsync(w => w.Id == id);
+            var item = await _context.WorkItems
+                .Include(w => w.Work)
+                .FirstOrDefaultAsync(w => w.Id == id);
             if (item == null)
                 throw new AccessDeniedException();
 
