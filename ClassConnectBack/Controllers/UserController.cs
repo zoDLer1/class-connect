@@ -222,7 +222,7 @@ public class UserController : ControllerBase
     }
 
     [Authorize(Roles = "Administrator")]
-    [HttpPost("new")]
+    [HttpPost]
     public async Task<IActionResult> CreateAsync([FromBody] UserModel model)
     {
         var role = (UserRole) Enum.Parse(typeof(UserRole), model.Role);
@@ -235,7 +235,7 @@ public class UserController : ControllerBase
     }
 
     [Authorize(Roles = "Administrator")]
-    [HttpDelete("new")]
+    [HttpDelete]
     public async Task<IActionResult> DeleteAsync([FromBody] int id)
     {
         try
