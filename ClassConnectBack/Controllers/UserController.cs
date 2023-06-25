@@ -223,7 +223,7 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "Administrator")]
     [HttpPost("new")]
-    public async Task<IActionResult> NewUserAsync([FromBody] UserModel model)
+    public async Task<IActionResult> CreateAsync([FromBody] UserModel model)
     {
         var role = (UserRole) Enum.Parse(typeof(UserRole), model.Role);
         if (role == UserRole.Student)
@@ -232,5 +232,25 @@ public class UserController : ControllerBase
             );
 
         return await Signup(model, role);
+    }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpDelete("new")]
+    public async Task<IActionResult> DeleteAsync([FromBody] int id)
+    {
+        try
+        {
+            var user = await _userService.GetAsync(id);
+            if (user == null)
+                throw new UserNotFoundException();
+
+            await _userService.DeleteAsync(user.Id);
+        }
+        catch (Exception ex)
+        {
+            return ExceptionHandler.Handle(ex);
+        }
+
+        return Ok();
     }
 }
