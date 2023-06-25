@@ -53,25 +53,9 @@ public class FileSystemController : ControllerBase
                 return result;
             return new JsonResult(resultObject);
         }
-        catch (ItemTypeException)
+        catch (Exception ex)
         {
-            return BadRequest(new { errorText = "Неверный тип объекта" });
-        }
-        catch (ItemNotFoundException)
-        {
-            return NotFound(new { errorText = "Объект не найден" });
-        }
-        catch (FolderNotFoundException)
-        {
-            return NotFound(new { errorText = "Папка не найдена" });
-        }
-        catch (UserNotFoundException)
-        {
-            return BadRequest(new { errorText = "Пользователь не найден" });
-        }
-        catch (AccessDeniedException)
-        {
-            return Forbid();
+            return ExceptionHandler.Handle(ex);
         }
     }
 
@@ -101,72 +85,9 @@ public class FileSystemController : ControllerBase
             );
             return new JsonResult(item);
         }
-        catch (UserNotFoundException)
+        catch (Exception ex)
         {
-            return BadRequest(new { errorText = "Пользователь не найден" });
-        }
-        catch (TeacherNotFoundException)
-        {
-            return BadRequest(
-                new { Errors = new { TeacherId = new List<string> { "Преподаватель не найден" } } }
-            );
-        }
-        catch (InvalidDateException)
-        {
-            return BadRequest(
-                new { Errors = new { Until = new List<string> { "Некорректная дата" } } }
-            );
-        }
-        catch (ItemNotFoundException)
-        {
-            return NotFound(new { errorText = "Объект не найден" });
-        }
-        catch (FolderNotFoundException)
-        {
-            return NotFound(new { errorText = "Папка не найдена" });
-        }
-        catch (InvalidPathException)
-        {
-            return BadRequest(new { errorText = "Передан неправильный родитель" });
-        }
-        catch (InvalidGroupNameException)
-        {
-            return BadRequest(
-                new { Errors = new { Name = new List<string> { "Неправильное название группы" } } }
-            );
-        }
-        catch (InvalidSubjectNameException)
-        {
-            return BadRequest(
-                new
-                {
-                    Errors = new { Name = new List<string> { "Неправильное название предмета" } }
-                }
-            );
-        }
-        catch (InvalidUserRoleException)
-        {
-            return BadRequest(new { errorText = "Неправильная роль пользователя" });
-        }
-        catch (KeyNotFoundException)
-        {
-            return BadRequest(
-                new
-                {
-                    Errors = new
-                    {
-                        Type = new List<string> { "Некорректное значение параметра Type" }
-                    }
-                }
-            );
-        }
-        catch (NullReferenceException)
-        {
-            return BadRequest(new { errorText = "Недостаточно параметров" });
-        }
-        catch (AccessDeniedException)
-        {
-            return Forbid();
+            return ExceptionHandler.Handle(ex);
         }
     }
 
@@ -201,29 +122,9 @@ public class FileSystemController : ControllerBase
             }
             return new JsonResult(result);
         }
-        catch (UserNotFoundException)
+        catch (Exception ex)
         {
-            return BadRequest(new { errorText = "Пользователь не найден" });
-        }
-        catch (ItemNotFoundException)
-        {
-            return NotFound(new { errorText = "Объект не найден" });
-        }
-        catch (ItemTypeException)
-        {
-            return BadRequest(new { errorText = "Передан объект с неправильным типом" });
-        }
-        catch (FolderNotFoundException)
-        {
-            return NotFound(new { errorText = "Папка не найдена" });
-        }
-        catch (InvalidPathException)
-        {
-            return BadRequest(new { errorText = "Передан неправильный родитель" });
-        }
-        catch (AccessDeniedException)
-        {
-            return Forbid();
+            return ExceptionHandler.Handle(ex);
         }
     }
 
@@ -256,21 +157,9 @@ public class FileSystemController : ControllerBase
             }
             return new JsonResult(result);
         }
-        catch (UserNotFoundException)
+        catch (Exception ex)
         {
-            return BadRequest(new { errorText = "Пользователь не найден" });
-        }
-        catch (AccessDeniedException)
-        {
-            return Forbid();
-        }
-        catch (ItemNotFoundException)
-        {
-            return NotFound(new { errorText = "Объект не найден" });
-        }
-        catch (ItemTypeException)
-        {
-            return BadRequest(new { errorText = "Передан объект с неправильным типом" });
+            return ExceptionHandler.Handle(ex);
         }
     }
 
@@ -283,36 +172,9 @@ public class FileSystemController : ControllerBase
             var user = await GetUserAsync();
             await _fileSystemService.RenameAsync(model.Id, model.Name, user);
         }
-        catch (UserNotFoundException)
+        catch (Exception ex)
         {
-            return BadRequest(new { errorText = "Пользователь не найден" });
-        }
-        catch (ItemNotFoundException)
-        {
-            return NotFound(new { errorText = "Объект не найден" });
-        }
-        catch (InvalidGroupNameException)
-        {
-            return BadRequest(
-                new { Errors = new { Name = new List<string> { "Неправильное название группы" } } }
-            );
-        }
-        catch (InvalidSubjectNameException)
-        {
-            return BadRequest(
-                new
-                {
-                    Errors = new { Name = new List<string> { "Неправильное название предмета" } }
-                }
-            );
-        }
-        catch (InvalidPathException)
-        {
-            return BadRequest(new { errorText = "Передан неправильный айди" });
-        }
-        catch (AccessDeniedException)
-        {
-            return Forbid();
+            return ExceptionHandler.Handle(ex);
         }
 
         return Ok();
@@ -331,33 +193,9 @@ public class FileSystemController : ControllerBase
                 user
             );
         }
-        catch (UserNotFoundException)
+        catch (Exception ex)
         {
-            return BadRequest(new { errorText = "Пользователь не найден" });
-        }
-        catch (ItemNotFoundException)
-        {
-            return NotFound(new { errorText = "Объект не найден" });
-        }
-        catch (ItemTypeException)
-        {
-            return BadRequest(
-                new
-                {
-                    Errors = new
-                    {
-                        Type = new List<string> { "Некорректное значение параметра Type" }
-                    }
-                }
-            );
-        }
-        catch (InvalidPathException)
-        {
-            return BadRequest(new { errorText = "Передан неправильный айди" });
-        }
-        catch (AccessDeniedException)
-        {
-            return Forbid();
+            return ExceptionHandler.Handle(ex);
         }
 
         return Ok();
@@ -372,25 +210,9 @@ public class FileSystemController : ControllerBase
             var user = await GetUserAsync();
             await _fileSystemService.RemoveAsync(model.Id, user);
         }
-        catch (UserNotFoundException)
+        catch (Exception ex)
         {
-            return BadRequest(new { errorText = "Пользователь не найден" });
-        }
-        catch (ItemNotFoundException)
-        {
-            return NotFound(new { errorText = "Объект не найден" });
-        }
-        catch (FolderNotFoundException)
-        {
-            return NotFound(new { errorText = "Папка не найдена" });
-        }
-        catch (InvalidPathException)
-        {
-            return BadRequest(new { errorText = "Передан неправильный айди" });
-        }
-        catch (AccessDeniedException)
-        {
-            return Forbid();
+            return ExceptionHandler.Handle(ex);
         }
 
         return Ok();

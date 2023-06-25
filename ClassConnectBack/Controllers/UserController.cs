@@ -179,17 +179,9 @@ public class UserController : ControllerBase
                 }
             );
         }
-        catch (UserNotFoundException)
+        catch (Exception ex)
         {
-            return NotFound(
-                new { Errors = new { Email = new List<string> { "Пользователь не найден" } } }
-            );
-        }
-        catch (InvalidPasswordException)
-        {
-            return BadRequest(
-                new { Errors = new { Password = new List<string> { "Неправильный пароль" } } }
-            );
+            return ExceptionHandler.Handle(ex);
         }
     }
 

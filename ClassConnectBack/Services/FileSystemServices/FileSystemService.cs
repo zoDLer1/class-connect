@@ -271,7 +271,7 @@ public class FileSystemService : IFileSystemService
     )
     {
         if (type == Type.File)
-            throw new KeyNotFoundException();
+            throw new ItemTypeException() { PropertyName = "Type" };
         await CreateFileSystemIfNotExistsAsync();
         var parent = await TryGetItemAsync(parentId);
         var (path, item) = await _serviceAccessor(type)

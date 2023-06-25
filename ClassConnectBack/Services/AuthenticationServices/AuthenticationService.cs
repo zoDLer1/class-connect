@@ -17,11 +17,11 @@ public class AuthenticationService : IAuthenticationService
     {
         var user = await _userService.GetByEmailAsync(email);
         if (user is null)
-            throw new UserNotFoundException();
+            throw new UserNotFoundException() { PropertyName = "Email" };
 
         if (BCrypt.Net.BCrypt.Verify(password, user.Password))
             return user;
-        throw new InvalidPasswordException();
+        throw new InvalidPasswordException() { PropertyName = "Password" };
     }
 
     public async Task RegisterAsync(

@@ -129,7 +129,7 @@ builder.Services.AddTransient<ServiceResolver>(
                 case ClassConnect.Type.Work:
                     return GetService<WorkHelperService>();
                 default:
-                    throw new KeyNotFoundException();
+                    throw new ItemTypeException() { PropertyName = "Type" };
             }
         }
 );

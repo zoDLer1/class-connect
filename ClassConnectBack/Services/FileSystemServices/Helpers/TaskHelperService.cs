@@ -88,7 +88,7 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
 
             until = until?.ToLocalTime();
             if (until <= DateTime.Now.AddMinutes(20))
-                throw new InvalidDateException();
+                throw new InvalidDateException() { PropertyName = "Until" };
         }
 
         var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Task, user);

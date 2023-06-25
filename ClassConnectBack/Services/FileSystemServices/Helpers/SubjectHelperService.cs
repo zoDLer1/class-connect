@@ -117,15 +117,15 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             .Include(s => s.Item)
             .FirstOrDefault(s => s.Item.Name == name);
         if (anotherSubject != null)
-            throw new InvalidSubjectNameException();
+            throw new InvalidNameException() { PropertyName = "Name" };
 
         if (parameters?.ContainsKey("TeacherId") == false)
-            throw new NullReferenceException();
+            throw new IllegalStateException();
 
         int? teacherId = parameters?["TeacherId"] as int?;
         var teacher = _context.Users.Include(s => s.Role).FirstOrDefault(s => s.Id == teacherId);
         if (teacher == null)
-            throw new TeacherNotFoundException();
+            throw new TeacherNotFoundException() { PropertyName = "TeacherId" };
 
         if (teacher.Role.Id != UserRole.Teacher)
             throw new InvalidUserRoleException();
@@ -169,7 +169,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
             .Include(s => s.Item)
             .FirstOrDefault(s => s.Item.Name == newName);
         if (anotherSubject != null)
-            throw new InvalidSubjectNameException();
+            throw new InvalidNameException() { PropertyName = "Name" };
 
         var item = await base.UpdateAsync(id, newName, user);
         await _commonSubjectQueries.UpdateAsync(subject);

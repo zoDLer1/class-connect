@@ -147,15 +147,15 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             await _context.Groups.Include(g => g.Item).FirstOrDefaultAsync(g => g.Item.Name == name)
             != null
         )
-            throw new InvalidGroupNameException();
+            throw new InvalidNameException() { PropertyName = "Name" };
 
         if (parameters?.ContainsKey("TeacherId") == false)
-            throw new NullReferenceException();
+            throw new IllegalStateException();
 
         int? teacherId = parameters?["TeacherId"] as int?;
         var teacher = _context.Users.Include(s => s.Role).FirstOrDefault(s => s.Id == teacherId);
         if (teacher == null)
-            throw new TeacherNotFoundException();
+            throw new TeacherNotFoundException() { PropertyName = "TeacherId" };
 
         if (teacher.Role.Id != UserRole.Teacher)
             throw new InvalidUserRoleException();
@@ -191,7 +191,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
                 .Include(g => g.Item)
                 .FirstOrDefaultAsync(g => g.Item.Name == newName) != null
         )
-            throw new InvalidGroupNameException();
+            throw new InvalidNameException() { PropertyName = "Name" };
 
         var item = await base.UpdateAsync(id, newName, user);
         await _commonGroupQueries.UpdateAsync(group);
