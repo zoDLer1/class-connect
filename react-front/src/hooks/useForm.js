@@ -12,6 +12,7 @@ function useForm(InputsData, request = async () => null, statuses = {}) {
     const [send, waitingForResponse] = useRequest(request, { ...DEFAULT_STATUSES, ...statuses })
     const [inputs, setInputs] = useState(InputsData)
     const [errors, setErrors] = useState({})
+
     const addInput = (name, input_data) => {
         const newInputsData = { ...InputsData }
         newInputsData[name] = input_data
@@ -48,13 +49,13 @@ function useForm(InputsData, request = async () => null, statuses = {}) {
         }
         return true
     }
-
     const getInput = (inputName) => {
         return {
             value: inputs[inputName].value,
             error: errors[inputName],
             disabled: waitingForResponse,
             hidden: inputs[inputName].hidden,
+            options: inputs[inputName].options,
             validation_methods: {
                 rools: (newValue) => checkRools(inputName, newValue),
                 validate: () => validateInput(inputName),
@@ -113,7 +114,6 @@ function useForm(InputsData, request = async () => null, statuses = {}) {
             loading: waitingForResponse
         }
     }
-
     const InputHide = (inputName) => {
         setInputs((newInputsData) => {
             newInputsData[inputName].hidden = true
@@ -130,7 +130,6 @@ function useForm(InputsData, request = async () => null, statuses = {}) {
             return newInputsData
         })
     }
-
     const onSubmit = async () => {
         const validated_data = getValidatedData()
         if (Object.keys(validated_data).length) {

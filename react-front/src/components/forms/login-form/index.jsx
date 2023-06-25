@@ -6,7 +6,7 @@ import Link from 'components/UI/Link'
 import FormCheckbox from '../components/form-checkbox'
 import FormSubmit from '../components/form-submit'
 import useForm from 'hooks/useForm'
-import { MAX_LENGTH, IS_EMAIL, REQUIRED, MIN_LENGTH } from 'validation'
+import { MAX_LENGTH, REQUIRED, MIN_LENGTH } from 'validation'
 import AuthService from 'services/authService'
 import { useNavigate } from 'react-router-dom'
 
@@ -21,7 +21,7 @@ function LoginForm() {
     const { getSubmit, handleServerErrors, getInput } = useForm({
         email: {
             value: '',
-            validators: [REQUIRED(), IS_EMAIL(), MAX_LENGTH(50)],
+            validators: [REQUIRED(), MAX_LENGTH(50)],
 
         },
         password: {

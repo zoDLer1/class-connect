@@ -20,6 +20,7 @@ const FormFileInfo = ({ data, name, type, setFilesInfo, guid, update }) => {
                 </>
 
             }
+
         </div>
     )
 

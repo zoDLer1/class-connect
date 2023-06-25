@@ -1,23 +1,43 @@
-.block{
+.block {
     width: 100%;
     padding: 5px 24px;
     overflow-y: scroll;
-    
+
 }
 
 
-.header{
+.header {
     margin-bottom: 30px;
     display: flex;
     align-items: center;
     gap: 20px;
 }
-.title{
+
+.title {
     font-size: 26px;
     font-weight: 700;
+    max-width: 800px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
-.body{
+
+.body {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
+
+@keyframes animate {
+    from {
+        background-color: var(--faded-primary-color);
+
+    }
+
+    to {
+        background-color: var(--primary-color);
+        transform: scale(1.5);
+    }
+}
+
+

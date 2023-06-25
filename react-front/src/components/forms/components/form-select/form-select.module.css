@@ -38,3 +38,13 @@
     box-shadow: inset 0px 0px 8px var(--dark-op25-color);
     color: var(--light-gray-text-color);
 }
+.loader{
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    top: -50%;
+    z-index: 1;
+}
+.select{
+    position: relative;
+}

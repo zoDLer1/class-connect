@@ -4,14 +4,20 @@ import UploadedFile from './uploaded-file';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useId } from 'react';
 import useFileUploaderInput from 'hooks/useFileUploaderInput';
-
+import { useState, useEffect } from 'react';
 
 const FileUploader = ({ value, validation_methods, error, hidden = false, hideFileAdd = true, ...props }) => {
+
+    const [localHidden, setLocalHidden] = useState(hidden)
+
+    useEffect(()=>{
+        setLocalHidden(hidden)
+    }, [hidden])
 
     const id = useId()
     const { getProps, Remove } = useFileUploaderInput({ value, validation_methods })
 
-    if (!hidden) {
+    if (!localHidden) {
         return (
             <div className={css.block}>
                 <h4 className={css.title}>Загрузить:</h4>
