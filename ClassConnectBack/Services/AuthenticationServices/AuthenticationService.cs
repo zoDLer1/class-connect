@@ -1,15 +1,18 @@
 using ClassConnect.Exceptions;
 using ClassConnect.Models;
+using ClassConnect.Services.MailServices;
 using ClassConnect.Services.UserServices;
 
 namespace ClassConnect.Services.AuthenticationServices;
 
 public class AuthenticationService : IAuthenticationService
 {
+    private IMailService _mailService;
     private IUserService _userService;
 
-    public AuthenticationService(IUserService userService)
+    public AuthenticationService(IMailService mailService, IUserService userService)
     {
+        _mailService = mailService;
         _userService = userService;
     }
 

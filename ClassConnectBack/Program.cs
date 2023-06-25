@@ -11,6 +11,7 @@ using ClassConnect.Services;
 using ClassConnect.Services.AuthenticationServices;
 using ClassConnect.Services.FileSystemServices;
 using ClassConnect.Services.FileSystemServices.Helpers;
+using ClassConnect.Services.MailServices;
 using ClassConnect.Services.UserServices;
 
 string Ask(string question)
@@ -55,6 +56,8 @@ var connection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<Context>(
     options => options.UseMySql(connection, ServerVersion.AutoDetect(connection))
 );
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
@@ -94,6 +97,7 @@ builder.Services
     });
 builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddTransient<IFileSystemService, FileSystemService>();
+builder.Services.AddTransient<IMailService, MailService>();
 
 builder.Services.AddTransient<FileHelperService>();
 builder.Services.AddTransient<FolderHelperService>();
