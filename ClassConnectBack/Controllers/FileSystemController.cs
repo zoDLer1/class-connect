@@ -189,7 +189,7 @@ public class FileSystemController : ControllerBase
             var user = await GetUserAsync();
             await _fileSystemService.UpdateTypeAsync(
                 model.Id,
-                (Type)Enum.Parse(typeof(Type), model.Type),
+                (Type) Enum.Parse(typeof(Type), model.Type),
                 user
             );
         }

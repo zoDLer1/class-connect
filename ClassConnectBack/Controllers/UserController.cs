@@ -186,7 +186,10 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("signup")]
-    public async Task<IActionResult> Signup([FromBody] SignupModel model)
+    public async Task<IActionResult> Signup(
+        [FromBody] SignupModel model,
+        UserRole role = UserRole.Student
+    )
     {
         if (model.Patronymic != string.Empty && model.Patronymic.Length < 5)
             return BadRequest(
@@ -213,8 +216,21 @@ public class UserController : ControllerBase
             model.Patronymic,
             model.Email,
             model.Password,
-            UserRole.Student
+            role
         );
         return Ok();
+    }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpPost("new")]
+    public async Task<IActionResult> NewUserAsync([FromBody] UserModel model)
+    {
+        var role = (UserRole) Enum.Parse(typeof(UserRole), model.Role);
+        if (role == UserRole.Student)
+            return BadRequest(
+                new { Errors = new { Role = new List<string> { "Некорректная роль" } } }
+            );
+
+        return await Signup(model, role);
     }
 }
