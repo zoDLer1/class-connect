@@ -57,6 +57,7 @@ builder.Services.AddDbContext<Context>(
     options => options.UseMySql(connection, ServerVersion.AutoDetect(connection))
 );
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.Configure<Client>(builder.Configuration.GetSection("ClientSettings"));
 
 builder.Services.AddCors(options =>
 {

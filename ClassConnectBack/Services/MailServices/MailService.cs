@@ -33,5 +33,5 @@ public class MailService : IMailService
     }
 
     public void SendMail(string recipient, IMail mail) =>
-        SendMail(recipient, mail.Subject, mail.Subject);
+        SendMail(recipient, mail.Subject, mail.Body);
 }
