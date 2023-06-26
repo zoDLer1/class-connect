@@ -2,13 +2,14 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using ClassConnect.Exceptions;
 using ClassConnect.Models;
+using ClassConnect.Services.UserServices;
 
 namespace ClassConnect.Services.FileSystemServices.Helpers;
 
 public abstract class FileSystemQueriesHelper
 {
     protected Context _context;
-    protected CommonQueries<string, Item> _common;
+    protected CommonQueries<string, ItemEntity> _common;
     protected ServiceResolver _serviceAccessor;
     protected string? _rootGuid;
     private string _fileSystemPath;
@@ -21,7 +22,7 @@ public abstract class FileSystemQueriesHelper
     )
     {
         _context = context;
-        _common = new CommonQueries<string, Item>(_context);
+        _common = new CommonQueries<string, ItemEntity>(_context);
         _serviceAccessor = serviceAccessor;
         _fileSystemPath = Path.Combine(env.ContentRootPath, "Filesystem");
         if (IsFolderPathValid(_fileSystemPath))
@@ -31,7 +32,7 @@ public abstract class FileSystemQueriesHelper
         }
     }
 
-    protected async Task<Item> TryGetItemAsync(string id)
+    protected async Task<ItemEntity> TryGetItemAsync(string id)
     {
         var item = await _common.GetAsync(id, IncludeValues());
         if (item == null)
@@ -72,13 +73,13 @@ public abstract class FileSystemQueriesHelper
 
         foreach (var prop in typeof(TypeDependence).GetProperties())
         {
-            var dependence = prop.GetValue(null, null) as HashSet<Type>;
+            var dependence = prop.GetValue(null, null) as HashSet<Item>;
             if (dependence?.Contains(item.Type.Id) == false)
                 continue;
 
             try
             {
-                await _serviceAccessor((Type)Enum.Parse(typeof(Type), prop.Name))
+                await _serviceAccessor((Item)Enum.Parse(typeof(Item), prop.Name))
                     .CheckIfCanCreateAsync(item.Guid, user);
                 result.Add(prop.Name);
             }
@@ -126,7 +127,7 @@ public abstract class FileSystemQueriesHelper
 
     protected async Task<List<object>> PrepareChildrenAsync(List<string> itemIds, User user)
     {
-        var children = new List<(Type Type, string Name, object Child)>();
+        var children = new List<(Item Type, string Name, object Child)>();
         foreach (var id in itemIds)
         {
             try
@@ -154,7 +155,7 @@ public abstract class FileSystemQueriesHelper
             .ToList();
     }
 
-    public async virtual Task CheckIfCanCreateAsync(string parentId, Type type, User user)
+    public async virtual Task CheckIfCanCreateAsync(string parentId, Item type, User user)
     {
         var parent = await TryGetItemAsync(parentId);
         var access = await _serviceAccessor(parent.Type.Id)
@@ -166,7 +167,7 @@ public abstract class FileSystemQueriesHelper
         // Проверка допустимости типов
         var prop =
             typeof(TypeDependence).GetProperty(type.ToString())?.GetValue(null, null)
-            as HashSet<Type>;
+            as HashSet<Item>;
         if (prop == null || !prop.Contains(parent.TypeId))
             throw new InvalidPathException();
     }
@@ -181,7 +182,7 @@ public abstract class FileSystemQueriesHelper
         return access.Permission;
     }
 
-    public async virtual Task<Item> GetAsync(string id)
+    public async virtual Task<ItemEntity> GetAsync(string id)
     {
         return await TryGetItemAsync(id);
     }
@@ -194,7 +195,7 @@ public abstract class FileSystemQueriesHelper
     public async virtual Task<Folder> GetFolderAsync(string id, User user, Boolean asChild)
     {
         var item = await GetFolderInfoAsync(id);
-        if (item.Type.Id == Type.File)
+        if (item.Type.Id == Item.File)
             throw new ItemTypeException();
 
         var access = await _serviceAccessor(item.Type.Id)
@@ -300,12 +301,12 @@ public abstract class FileSystemQueriesHelper
     public async virtual Task<(string, FolderItem)> CreateAsync(
         string parentId,
         string name,
-        Type type,
+        Item type,
         User user
     )
     {
         var parent = await TryGetItemAsync(parentId);
-        var item = new Item
+        var item = new ItemEntity
         {
             Id = Guid.NewGuid().ToString(),
             TypeId = type,
@@ -325,7 +326,7 @@ public abstract class FileSystemQueriesHelper
         return (Path.Combine(path, item.Id), await PrepareItemAsync(item.Id));
     }
 
-    protected Boolean CanEdit(Item item, User user, Permission permission) =>
+    protected Boolean CanEdit(ItemEntity item, User user, Permission permission) =>
         !(
             permission < Permission.Write
             || !(user.Role.Id == UserRole.Administrator || item.CreatorId == user.Id)
@@ -347,7 +348,7 @@ public abstract class FileSystemQueriesHelper
         return await PrepareItemAsync(item.Id);
     }
 
-    public async virtual Task<FolderItem> UpdateTypeAsync(string id, Type newType, User user)
+    public async virtual Task<FolderItem> UpdateTypeAsync(string id, Item newType, User user)
     {
         var access = await HasUserAccessToParentAsync(id, user, new List<string>());
         var item = await TryGetItemAsync(id);
@@ -362,14 +363,14 @@ public abstract class FileSystemQueriesHelper
         // Считаем количество детей, которые являются работами
         var workChildrenCount = _context.Connections
             .Include(c => c.Child)
-            .Where(c => c.ParentId == id && c.Child.TypeId == Type.Work)
+            .Where(c => c.ParentId == id && c.Child.TypeId == Item.Work)
             .Count();
 
         // Изменяемый объект должен быть папкой или заданием, в которое ещё не сдали работы
-        if (item.TypeId != Type.Folder && !(item.TypeId == Type.Task && workChildrenCount == 0))
+        if (item.TypeId != Item.Folder && !(item.TypeId == Item.Task && workChildrenCount == 0))
             throw new ItemTypeException();
 
-        if (newType != Type.Folder && newType != Type.Task)
+        if (newType != Item.Folder && newType != Item.Task)
             throw new ItemTypeException();
 
         item.TypeId = newType;
@@ -395,7 +396,7 @@ public abstract class FileSystemQueriesHelper
             await RemoveConnectionRecursively(connection.ChildId);
         }
 
-        if (parent.TypeId == Type.File)
+        if (parent.TypeId == Item.File)
         {
             var file = await _context.Files.FirstOrDefaultAsync((e) => e.Id == parent.Id);
             if (file != null)
@@ -429,6 +430,6 @@ public abstract class FileSystemQueriesHelper
         return path;
     }
 
-    private IQueryable<Item> IncludeValues() =>
+    private IQueryable<ItemEntity> IncludeValues() =>
         _context.Items.Include(e => e.Type).Include(e => e.Creator);
 }

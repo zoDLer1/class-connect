@@ -1,5 +1,6 @@
 using ClassConnect.Exceptions;
 using ClassConnect.Models;
+using ClassConnect.Services.UserServices;
 
 namespace ClassConnect.Services.FileSystemServices.Helpers;
 
@@ -67,7 +68,7 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (parentId == _rootGuid)
             throw new InvalidPathException();
 
-        await base.CheckIfCanCreateAsync(parentId, Type.Folder, user);
+        await base.CheckIfCanCreateAsync(parentId, Item.Folder, user);
     }
 
     public async Task<(string, object)> CreateAsync(
@@ -78,7 +79,7 @@ public class FolderHelperService : FileSystemQueriesHelper, IFileSystemHelper
     )
     {
         await CheckIfCanCreateAsync(parentId, user);
-        var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Folder, user);
+        var (itemPath, item) = await base.CreateAsync(parentId, name, Item.Folder, user);
         var parent = await TryGetItemAsync(parentId);
         return (itemPath, await _serviceAccessor(parent.TypeId).GetAsync(parentId, user, false));
     }

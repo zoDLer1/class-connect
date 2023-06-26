@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using ClassConnect.Services.UserServices;
 
 namespace ClassConnect.Models;
 
 public class Context : DbContext
 {
-    public DbSet<Item> Items { get; set; } = null!;
+    public DbSet<ItemEntity> Items { get; set; } = null!;
     public DbSet<ItemType> ItemTypes { get; set; } = null!;
     public DbSet<FileEntity> Files { get; set; } = null!;
     public DbSet<Connection> Connections { get; set; } = null!;
@@ -72,12 +73,12 @@ public class Context : DbContext
         builder
             .Entity<ItemType>()
             .HasData(
-                new ItemType { Id = Type.Folder, Name = "Folder" },
-                new ItemType { Id = Type.File, Name = "File" },
-                new ItemType { Id = Type.Group, Name = "Group" },
-                new ItemType { Id = Type.Subject, Name = "Subject" },
-                new ItemType { Id = Type.Task, Name = "Task" },
-                new ItemType { Id = Type.Work, Name = "Work" }
+                new ItemType { Id = Item.Folder, Name = "Folder" },
+                new ItemType { Id = Item.File, Name = "File" },
+                new ItemType { Id = Item.Group, Name = "Group" },
+                new ItemType { Id = Item.Subject, Name = "Subject" },
+                new ItemType { Id = Item.Task, Name = "Task" },
+                new ItemType { Id = Item.Work, Name = "Work" }
             );
     }
 }

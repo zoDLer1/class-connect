@@ -1,6 +1,6 @@
 using ClassConnect.Models;
 
-namespace ClassConnect;
+namespace ClassConnect.Services.FileSystemServices;
 
 public class FolderItem
 {

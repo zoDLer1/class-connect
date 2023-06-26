@@ -14,11 +14,11 @@ public interface IFileSystemService
     Task<object> CreateFolderAsync(
         string parentId,
         string name,
-        Type type,
+        Item type,
         User user,
         Dictionary<string, object>? parameters
     );
     Task RenameAsync(string id, string newName, User user);
-    Task UpdateTypeAsync(string id, Type newType, User user);
+    Task UpdateTypeAsync(string id, Item newType, User user);
     Task RemoveAsync(string id, User user);
 }

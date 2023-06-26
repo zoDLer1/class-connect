@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ClassConnect.Exceptions;
 using ClassConnect.Models;
+using ClassConnect.Services.UserServices;
 
 namespace ClassConnect.Services.FileSystemServices.Helpers;
 
@@ -126,7 +127,7 @@ public class WorkHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (oldWork != null)
             throw new FolderNotFoundException();
 
-        var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Work, user);
+        var (itemPath, item) = await base.CreateAsync(parentId, name, Item.Work, user);
         var work = new Work { Id = item.Guid };
         await _commonWorkQueries.CreateAsync(work);
         var data = await GetWorkData(item.Guid, user);

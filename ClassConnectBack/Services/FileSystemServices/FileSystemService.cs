@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using ClassConnect.Exceptions;
 using ClassConnect.Models;
+using ClassConnect.Services.UserServices;
 
 namespace ClassConnect.Services.FileSystemServices;
 
@@ -10,7 +11,7 @@ public class FileSystemService : IFileSystemService
     public string? RootGuid { get; private set; }
     private string _fileSystemPath;
     protected Context _context;
-    private CommonQueries<string, Item> _commonItemQueries;
+    private CommonQueries<string, ItemEntity> _commonItemQueries;
     private CommonQueries<string, Work> _commonWorkQueries;
     private ServiceResolver _serviceAccessor;
     private Regex ReturnPattern = new Regex(@"\/\.\.(?![^\/])");
@@ -25,7 +26,7 @@ public class FileSystemService : IFileSystemService
             RootGuid = Path.GetFileName(rootPath);
         }
         _serviceAccessor = serviceAccessor;
-        _commonItemQueries = new CommonQueries<string, Item>(_context);
+        _commonItemQueries = new CommonQueries<string, ItemEntity>(_context);
         _commonWorkQueries = new CommonQueries<string, Work>(_context);
     }
 
@@ -40,10 +41,10 @@ public class FileSystemService : IFileSystemService
         CreateDirectory(path);
         if (await _commonItemQueries.GetAsync(rootGuid, _context.Items) == null)
         {
-            var item = new Item
+            var item = new ItemEntity
             {
                 Id = rootGuid,
-                TypeId = Type.Folder,
+                TypeId = Item.Folder,
                 Name = "Группы",
                 CreationTime = DateTime.Now,
                 CreatorId = 1,
@@ -105,7 +106,7 @@ public class FileSystemService : IFileSystemService
         }
     }
 
-    private async Task<Item> TryGetItemAsync(string id)
+    private async Task<ItemEntity> TryGetItemAsync(string id)
     {
         await CreateFileSystemIfNotExistsAsync();
 
@@ -151,7 +152,7 @@ public class FileSystemService : IFileSystemService
         if (parentConnection == null)
             throw new ItemNotFoundException();
 
-        return await _serviceAccessor(Type.Task).GetAsync(parentConnection.ParentId, user, false);
+        return await _serviceAccessor(Item.Task).GetAsync(parentConnection.ParentId, user, false);
     }
 
     public async Task<object> MarkWork(string id, int? mark, User user)
@@ -169,7 +170,7 @@ public class FileSystemService : IFileSystemService
         if (parent == null)
             throw new ItemNotFoundException();
 
-        if (parent.TypeId != Type.Task)
+        if (parent.TypeId != Item.Task)
             throw new ItemTypeException();
 
         var access = await _serviceAccessor(parent.TypeId)
@@ -194,7 +195,7 @@ public class FileSystemService : IFileSystemService
             work.Mark = mark;
         }
         await _commonWorkQueries.UpdateAsync(work);
-        return await _serviceAccessor(Type.Task).GetAsync(parentConnection.ParentId, user, false);
+        return await _serviceAccessor(Item.Task).GetAsync(parentConnection.ParentId, user, false);
     }
 
     public async Task<object> CreateWorkAsync(
@@ -213,7 +214,7 @@ public class FileSystemService : IFileSystemService
         // Если работа ещё не была создана, то создаём
         if (workConnection == null)
         {
-            var (path, item) = await _serviceAccessor(Type.Work)
+            var (path, item) = await _serviceAccessor(Item.Work)
                 .CreateAsync(parentId, name, user, null);
             CreateDirectory(path);
             id = Path.GetFileName(path);
@@ -244,13 +245,13 @@ public class FileSystemService : IFileSystemService
         var workItem = new WorkItem { Id = workItemId, WorkId = id };
         await _context.WorkItems.AddAsync(workItem);
         await _context.SaveChangesAsync();
-        return await _serviceAccessor(Type.Task).GetAsync(parentId, user, false);
+        return await _serviceAccessor(Item.Task).GetAsync(parentId, user, false);
     }
 
     public async Task<object> CreateFileAsync(string parentId, IFormFile file, User user)
     {
         await CreateFileSystemIfNotExistsAsync();
-        var (path, item) = await _serviceAccessor(Type.File)
+        var (path, item) = await _serviceAccessor(Item.File)
             .CreateAsync(parentId, file.FileName.Trim(), user);
         using (var fileStream = new FileStream(path, FileMode.Create))
             await file.CopyToAsync(fileStream);
@@ -265,12 +266,12 @@ public class FileSystemService : IFileSystemService
     public async Task<object> CreateFolderAsync(
         string parentId,
         string name,
-        Type type,
+        Item type,
         User user,
         Dictionary<string, object>? parameters
     )
     {
-        if (type == Type.File)
+        if (type == Item.File)
             throw new ItemTypeException() { PropertyName = "Type" };
         await CreateFileSystemIfNotExistsAsync();
         var parent = await TryGetItemAsync(parentId);
@@ -286,7 +287,7 @@ public class FileSystemService : IFileSystemService
         var newItem = await _serviceAccessor(item.Type.Id).UpdateAsync(id, newName.Trim(), user);
     }
 
-    public async Task UpdateTypeAsync(string id, Type newType, User user)
+    public async Task UpdateTypeAsync(string id, Item newType, User user)
     {
         var item = await TryGetItemAsync(id);
         var newItem = await _serviceAccessor(item.Type.Id).UpdateTypeAsync(id, newType, user);

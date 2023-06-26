@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ClassConnect.Exceptions;
 using ClassConnect.Models;
+using ClassConnect.Services.UserServices;
 
 namespace ClassConnect.Services.FileSystemServices.Helpers;
 
@@ -94,7 +95,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (user.RoleId != UserRole.Administrator)
             throw new AccessDeniedException();
 
-        await base.CheckIfCanCreateAsync(parentId, Type.Subject, user);
+        await base.CheckIfCanCreateAsync(parentId, Item.Subject, user);
 
         // Является ли родитель группой
         var group = await _commonGroupQueries.GetAsync(parentId, _context.Groups);
@@ -130,7 +131,7 @@ public class SubjectHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (teacher.Role.Id != UserRole.Teacher)
             throw new InvalidUserRoleException();
 
-        var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Subject, user);
+        var (itemPath, item) = await base.CreateAsync(parentId, name, Item.Subject, user);
         var subject = new Subject
         {
             Id = item.Guid,

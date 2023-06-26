@@ -4,9 +4,9 @@ namespace ClassConnect.Helpers;
 
 public class ClientLinkGenerator
 {
-    private IOptions<Client> _client;
+    private IOptions<ClientSettings> _client;
 
-    public ClientLinkGenerator(IOptions<Client> client)
+    public ClientLinkGenerator(IOptions<ClientSettings> client)
     {
         _client = client;
     }

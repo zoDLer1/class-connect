@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using ClassConnect.Controllers.Models;
 using ClassConnect.Exceptions;
@@ -21,18 +22,21 @@ public class UserController : ControllerBase
 {
     private Context _context;
     private CommonQueries<string, Group> _commonGroupQueries;
+    private IOptions<AuthSettings> _authSettings;
     private IAuthenticationService _authenticationService;
     private IFileSystemService _fileSystemService;
     private IUserService _userService;
 
     public UserController(
         Context context,
+        IOptions<AuthSettings> authSettings,
         IAuthenticationService authenticationService,
         IUserService userService,
         IFileSystemService fileSystemService
     )
     {
         _context = context;
+        _authSettings = authSettings;
         _commonGroupQueries = new CommonQueries<string, Group>(_context);
         _authenticationService = authenticationService;
         _fileSystemService = fileSystemService;
@@ -86,15 +90,15 @@ public class UserController : ControllerBase
     {
         var identity = GetIdentity(user);
         var now = DateTime.UtcNow;
-        var expires = now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME));
+        var expires = now.Add(TimeSpan.FromMinutes(_authSettings.Value.Lifetime));
         var jwt = new JwtSecurityToken(
-            issuer: AuthOptions.ISSUER,
-            audience: AuthOptions.AUDIENCE,
+            issuer: _authSettings.Value.Issuer,
+            audience: _authSettings.Value.Audience,
             notBefore: now,
             claims: identity.Claims,
             expires: expires,
             signingCredentials: new SigningCredentials(
-                AuthOptions.GetSymmetricSecurityKey(),
+                _authSettings.Value.GetSymmetricSecurityKey(),
                 SecurityAlgorithms.HmacSha256
             )
         );
@@ -225,7 +229,7 @@ public class UserController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateAsync([FromBody] UserModel model)
     {
-        var role = (UserRole) Enum.Parse(typeof(UserRole), model.Role);
+        var role = (UserRole)Enum.Parse(typeof(UserRole), model.Role);
         if (role == UserRole.Student)
             return BadRequest(
                 new { Errors = new { Role = new List<string> { "Некорректная роль" } } }

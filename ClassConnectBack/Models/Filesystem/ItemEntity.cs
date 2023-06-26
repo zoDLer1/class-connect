@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ClassConnect.Models;
 
-public class Item : CommonModel<string>
+public class ItemEntity : CommonModel<string>
 {
-    public Type TypeId { get; set; }
+    public Item TypeId { get; set; }
     public ItemType Type { get; set; } = null!;
 
     [StringLength(100)]

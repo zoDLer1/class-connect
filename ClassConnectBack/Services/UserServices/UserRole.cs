@@ -1,4 +1,4 @@
-namespace ClassConnect;
+namespace ClassConnect.Services.UserServices;
 
 public enum UserRole
 {

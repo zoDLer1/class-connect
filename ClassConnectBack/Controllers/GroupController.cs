@@ -29,7 +29,7 @@ public class GroupController : ControllerBase
     public IActionResult GetGroups()
     {
         var groups = _context.Items
-            .Where(i => i.TypeId == Type.Group)
+            .Where(i => i.TypeId == Item.Group)
             .Select(g => new { Id = g.Id, Name = g.Name });
         return new JsonResult(groups);
     }

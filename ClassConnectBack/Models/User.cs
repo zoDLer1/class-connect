@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using ClassConnect.Services.UserServices;
 
 namespace ClassConnect.Models;
 

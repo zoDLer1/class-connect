@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ClassConnect.Exceptions;
 using ClassConnect.Models;
+using ClassConnect.Services.UserServices;
 
 namespace ClassConnect.Services.FileSystemServices.Helpers;
 
@@ -103,6 +104,12 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         var item = await TryGetItemAsync(id);
         var group = await _commonGroupQueries.GetAsync(id, _context.Groups.Include(g => g.Teacher));
         var folder = await base.GetFolderAsync(id, user, asChild);
+
+        object? data = null;
+        if (group != null)
+            if (user.Role.Id != UserRole.Student)
+                data = GetGroupData(group, user, asChild);
+
         return new
         {
             Name = folder.Name,
@@ -110,9 +117,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
             Guid = folder.Guid,
             Path = folder.Path,
             Children = asChild ? null : folder.Children,
-            Data = user.Role.Id == UserRole.Student || group == null
-                ? null
-                : GetGroupData(group, user, asChild),
+            Data = data,
             Access = folder.Access,
             IsEditable = folder.IsEditable
         };
@@ -123,7 +128,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (user.RoleId != UserRole.Administrator)
             throw new AccessDeniedException();
 
-        await base.CheckIfCanCreateAsync(parentId, Type.Group, user);
+        await base.CheckIfCanCreateAsync(parentId, Item.Group, user);
 
         // Является ли родитель корнем
         if (
@@ -160,7 +165,7 @@ public class GroupHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (teacher.Role.Id != UserRole.Teacher)
             throw new InvalidUserRoleException();
 
-        var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Group, user);
+        var (itemPath, item) = await base.CreateAsync(parentId, name, Item.Group, user);
         var group = new Group { Id = item.Guid, TeacherId = teacher.Id, };
         await _commonGroupQueries.CreateAsync(group);
         var teacherAccess = new Access

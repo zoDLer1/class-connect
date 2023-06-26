@@ -9,7 +9,7 @@ public class FolderModel : ItemModel
     public string Name { get; set; } = null!;
 
     [Required(ErrorMessage = "Укажите тип объекта")]
-    [EnumDataType(typeof(Type), ErrorMessage = "Некорректное значение параметра Type")]
+    [EnumDataType(typeof(Item), ErrorMessage = "Некорректное значение параметра Type")]
     public string Type { get; set; } = null!;
 
     public int? TeacherId { get; set; }

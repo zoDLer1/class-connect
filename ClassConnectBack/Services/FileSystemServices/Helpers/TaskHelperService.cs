@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ClassConnect.Exceptions;
 using ClassConnect.Models;
+using ClassConnect.Services.UserServices;
 
 namespace ClassConnect.Services.FileSystemServices.Helpers;
 
@@ -66,7 +67,7 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (parentId == _rootGuid)
             throw new InvalidPathException();
 
-        await base.CheckIfCanCreateAsync(parentId, Type.Task, user);
+        await base.CheckIfCanCreateAsync(parentId, Item.Task, user);
     }
 
     public async Task<(string, object)> CreateAsync(
@@ -91,7 +92,7 @@ public class TaskHelperService : FileSystemQueriesHelper, IFileSystemHelper
                 throw new InvalidDateException() { PropertyName = "Until" };
         }
 
-        var (itemPath, item) = await base.CreateAsync(parentId, name, Type.Task, user);
+        var (itemPath, item) = await base.CreateAsync(parentId, name, Item.Task, user);
         var task = new TaskEntity { Id = item.Guid, Until = until };
         await _commonTaskQueries.CreateAsync(task);
         var parent = await TryGetItemAsync(parentId);

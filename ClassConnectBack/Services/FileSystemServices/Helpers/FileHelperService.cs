@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ClassConnect.Exceptions;
 using ClassConnect.Models;
+using ClassConnect.Services.UserServices;
 
 namespace ClassConnect.Services.FileSystemServices.Helpers;
 
@@ -27,7 +28,7 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
     {
         await HasAccessAsync(id, user, new List<string>());
         var item = await base.GetAsync(id);
-        if (item.Type.Id != Type.File)
+        if (item.Type.Id != Item.File)
             throw new ItemTypeException();
 
         var fileEntity = await _commonFileQueries.GetAsync(item.Id, _context.Files);
@@ -76,10 +77,10 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
         if (parentId == _rootGuid)
             throw new InvalidPathException();
 
-        await base.CheckIfCanCreateAsync(parentId, Type.File, user);
+        await base.CheckIfCanCreateAsync(parentId, Item.File, user);
         var parent = await TryGetItemAsync(parentId);
 
-        if (parent.TypeId == Type.Work && user.RoleId != UserRole.Student)
+        if (parent.TypeId == Item.Work && user.RoleId != UserRole.Student)
             throw new AccessDeniedException();
     }
 
@@ -94,7 +95,7 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
         var (itemPath, item) = await base.CreateAsync(
             parentId,
             name.Substring(0, Math.Min(70, name.Length)),
-            Type.File,
+            Item.File,
             user
         );
         var fileEntity = new FileEntity
@@ -116,7 +117,7 @@ public class FileHelperService : FileSystemQueriesHelper, IFileSystemHelper
         var parent = await TryGetItemAsync(parentConnection.ParentId);
         var path = await base.DeleteAsync(id, user);
 
-        if (parent.TypeId == Type.Work)
+        if (parent.TypeId == Item.Work)
         {
             var item = await _context.WorkItems
                 .Include(w => w.Work)

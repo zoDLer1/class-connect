@@ -79,7 +79,7 @@ public class FileSystemController : ControllerBase
             var item = await _fileSystemService.CreateFolderAsync(
                 model.Id,
                 model.Name,
-                (Type)Enum.Parse(typeof(Type), model.Type),
+                (Item)Enum.Parse(typeof(Item), model.Type),
                 user,
                 parameters
             );
@@ -189,7 +189,7 @@ public class FileSystemController : ControllerBase
             var user = await GetUserAsync();
             await _fileSystemService.UpdateTypeAsync(
                 model.Id,
-                (Type) Enum.Parse(typeof(Type), model.Type),
+                (Item) Enum.Parse(typeof(Item), model.Type),
                 user
             );
         }

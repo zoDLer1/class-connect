@@ -1,4 +1,4 @@
-namespace ClassConnect.Services.FileSystemServices.Helpers;
+namespace ClassConnect.Services.FileSystemServices;
 
 public class ItemAccess
 {

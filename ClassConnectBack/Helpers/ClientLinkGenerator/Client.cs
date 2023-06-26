@@ -1,6 +1,6 @@
 namespace ClassConnect.Helpers;
 
-public class Client
+public class ClientSettings
 {
     public string Url { get; set; } = null!;
 }

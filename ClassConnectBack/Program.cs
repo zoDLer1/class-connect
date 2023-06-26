@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -57,8 +58,9 @@ var connection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<Context>(
     options => options.UseMySql(connection, ServerVersion.AutoDetect(connection))
 );
+builder.Services.Configure<AuthSettings>(builder.Configuration.GetSection("AuthSettings"));
+builder.Services.Configure<ClientSettings>(builder.Configuration.GetSection("ClientSettings"));
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-builder.Services.Configure<Client>(builder.Configuration.GetSection("ClientSettings"));
 
 builder.Services.AddCors(options =>
 {
@@ -80,6 +82,8 @@ builder.Services
         options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
     });
 
+var provider = builder.Services.BuildServiceProvider();
+var auth = provider.GetRequiredService<IOptions<AuthSettings>>().Value;
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -88,12 +92,12 @@ builder.Services
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = AuthOptions.ISSUER,
+            ValidIssuer = auth.Issuer,
             ValidateAudience = true,
-            ValidAudience = AuthOptions.AUDIENCE,
+            ValidAudience = auth.Audience,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+            IssuerSigningKey = auth.GetSymmetricSecurityKey(),
             ClockSkew = TimeSpan.Zero
         };
     });
@@ -124,17 +128,17 @@ builder.Services.AddScoped<ServiceResolver>(
             ;
             switch (key)
             {
-                case ClassConnect.Type.File:
+                case ClassConnect.Item.File:
                     return GetService<FileHelperService>();
-                case ClassConnect.Type.Folder:
+                case ClassConnect.Item.Folder:
                     return GetService<FolderHelperService>();
-                case ClassConnect.Type.Group:
+                case ClassConnect.Item.Group:
                     return GetService<GroupHelperService>();
-                case ClassConnect.Type.Subject:
+                case ClassConnect.Item.Subject:
                     return GetService<SubjectHelperService>();
-                case ClassConnect.Type.Task:
+                case ClassConnect.Item.Task:
                     return GetService<TaskHelperService>();
-                case ClassConnect.Type.Work:
+                case ClassConnect.Item.Work:
                     return GetService<WorkHelperService>();
                 default:
                     throw new ItemTypeException() { PropertyName = "Type" };

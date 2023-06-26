@@ -1,4 +1,5 @@
 using ClassConnect.Models;
+using ClassConnect.Services.UserServices;
 
 namespace ClassConnect.Services.AuthenticationServices;
 

@@ -11,5 +11,5 @@ public class Subject : CommonModel<string>
     public string? Description { get; set; }
     public int TeacherId { get; set; }
     public User Teacher { get; set; } = null!;
-    public Item Item { get; set; } = null!;
+    public ItemEntity Item { get; set; } = null!;
 }
