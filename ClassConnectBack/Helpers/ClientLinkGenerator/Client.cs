@@ -1,4 +1,4 @@
-namespace ClassConnect;
+namespace ClassConnect.Helpers;
 
 public class Client
 {

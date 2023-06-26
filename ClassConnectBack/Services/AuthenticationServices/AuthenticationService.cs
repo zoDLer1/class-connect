@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Options;
 using ClassConnect.Exceptions;
+using ClassConnect.Helpers;
 using ClassConnect.Models;
 using ClassConnect.Services.MailServices;
 using ClassConnect.Services.MailServices.Presets;
@@ -9,17 +9,17 @@ namespace ClassConnect.Services.AuthenticationServices;
 
 public class AuthenticationService : IAuthenticationService
 {
-    private IOptions<Client> _client;
+    private GenerateLink _linkGenerator;
     private IMailService _mailService;
     private IUserService _userService;
 
     public AuthenticationService(
-        IOptions<Client> client,
+        GenerateLink linkGenerator,
         IMailService mailService,
         IUserService userService
     )
     {
-        _client = client;
+        _linkGenerator = linkGenerator;
         _mailService = mailService;
         _userService = userService;
     }
@@ -60,7 +60,7 @@ public class AuthenticationService : IAuthenticationService
         await _userService.CreateAsync(user);
         _mailService.SendMail(
             user.Email,
-            new ActivationMail(_client.Value.Url + "user/activate/" + user.ActivationLink)
+            new ActivationMail(_linkGenerator("user/activate/" + user.ActivationLink))
         );
     }
 }

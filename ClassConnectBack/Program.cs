@@ -5,8 +5,9 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ClassConnect;
-using ClassConnect.Models;
 using ClassConnect.Exceptions;
+using ClassConnect.Helpers;
+using ClassConnect.Models;
 using ClassConnect.Services;
 using ClassConnect.Services.AuthenticationServices;
 using ClassConnect.Services.FileSystemServices;
@@ -96,6 +97,8 @@ builder.Services
             ClockSkew = TimeSpan.Zero
         };
     });
+
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IFileSystemService, FileSystemService>();
 builder.Services.AddSingleton<IMailService, MailService>();
@@ -139,7 +142,11 @@ builder.Services.AddScoped<ServiceResolver>(
         }
 );
 
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddSingleton<ClientLinkGenerator>();
+builder.Services.AddSingleton<GenerateLink>(
+    s => s.GetRequiredService<ClientLinkGenerator>().GenerateLink
+);
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
