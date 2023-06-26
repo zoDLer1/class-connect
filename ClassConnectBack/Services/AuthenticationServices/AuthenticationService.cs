@@ -2,7 +2,7 @@ using ClassConnect.Exceptions;
 using ClassConnect.Helpers;
 using ClassConnect.Models;
 using ClassConnect.Services.MailServices;
-using ClassConnect.Services.MailServices.Presets;
+using ClassConnect.Services.MailServices.Templates;
 using ClassConnect.Services.UserServices;
 
 namespace ClassConnect.Services.AuthenticationServices;
@@ -44,6 +44,10 @@ public class AuthenticationService : IAuthenticationService
         UserRole roleId
     )
     {
+        var hasPassword = !string.IsNullOrWhiteSpace(password);
+        if (!hasPassword)
+            password = Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Substring(0, 10);
+
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
         var user = new User()
         {
@@ -58,9 +62,11 @@ public class AuthenticationService : IAuthenticationService
         };
 
         await _userService.CreateAsync(user);
+
+        var link = _linkGenerator("user/activate/" + user.ActivationLink);
         _mailService.SendMail(
             user.Email,
-            new ActivationMail(_linkGenerator("user/activate/" + user.ActivationLink))
+            hasPassword ? new ActivationMail(link) : new RegistrationMail(link, user.Email, password)
         );
     }
 }

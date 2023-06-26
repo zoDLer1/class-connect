@@ -2,7 +2,7 @@ using System.Text;
 using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Options;
-using ClassConnect.Services.MailServices.Presets;
+using ClassConnect.Services.MailServices.Templates;
 
 namespace ClassConnect.Services.MailServices;
 

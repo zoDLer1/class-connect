@@ -1,4 +1,4 @@
-namespace ClassConnect.Services.MailServices.Presets;
+namespace ClassConnect.Services.MailServices.Templates;
 
 public interface IMail
 {
