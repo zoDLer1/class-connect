@@ -2,6 +2,7 @@ using System.Text;
 using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Options;
+using ClassConnect.Services.MailServices.Presets;
 
 namespace ClassConnect.Services.MailServices;
 
@@ -24,9 +25,13 @@ public class MailService : IMailService
     {
         var message = new MailMessage(_settings.Value.Sender, recipient);
         message.Subject = subject;
+        message.SubjectEncoding = Encoding.UTF8;
         message.Body = body;
         message.BodyEncoding = Encoding.UTF8;
         message.IsBodyHtml = true;
         _client.Send(message);
     }
+
+    public void SendMail(string recipient, IMail mail) =>
+        SendMail(recipient, mail.Subject, mail.Subject);
 }

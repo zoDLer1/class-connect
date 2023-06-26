@@ -1,3 +1,5 @@
+using ClassConnect.Services.MailServices.Presets;
+
 namespace ClassConnect.Services.MailServices;
 
 /// <summary>
@@ -5,5 +7,6 @@ namespace ClassConnect.Services.MailServices;
 /// </summary>
 public interface IMailService
 {
-    public void SendMail(string recipient, string subject, string text);
+    void SendMail(string recipient, string subject, string text);
+    void SendMail(string recipient, IMail mail);
 }
