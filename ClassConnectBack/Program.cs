@@ -96,18 +96,18 @@ builder.Services
             ClockSkew = TimeSpan.Zero
         };
     });
-builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
-builder.Services.AddTransient<IFileSystemService, FileSystemService>();
-builder.Services.AddTransient<IMailService, MailService>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IFileSystemService, FileSystemService>();
+builder.Services.AddSingleton<IMailService, MailService>();
 
-builder.Services.AddTransient<FileHelperService>();
-builder.Services.AddTransient<FolderHelperService>();
-builder.Services.AddTransient<GroupHelperService>();
-builder.Services.AddTransient<SubjectHelperService>();
-builder.Services.AddTransient<TaskHelperService>();
-builder.Services.AddTransient<WorkHelperService>();
+builder.Services.AddScoped<FileHelperService>();
+builder.Services.AddScoped<FolderHelperService>();
+builder.Services.AddScoped<GroupHelperService>();
+builder.Services.AddScoped<SubjectHelperService>();
+builder.Services.AddScoped<TaskHelperService>();
+builder.Services.AddScoped<WorkHelperService>();
 
-builder.Services.AddTransient<ServiceResolver>(
+builder.Services.AddScoped<ServiceResolver>(
     serviceProvider =>
         key =>
         {
@@ -139,7 +139,7 @@ builder.Services.AddTransient<ServiceResolver>(
         }
 );
 
-builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
