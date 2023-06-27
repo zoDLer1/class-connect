@@ -18,7 +18,7 @@ namespace ClassConnect.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class UserController : ControllerBase
+public class UserController : Controller
 {
     private Context _context;
     private CommonQueries<string, Group> _commonGroupQueries;
@@ -34,6 +34,7 @@ public class UserController : ControllerBase
         IUserService userService,
         IFileSystemService fileSystemService
     )
+        : base(userService)
     {
         _context = context;
         _authSettings = authSettings;
@@ -45,22 +46,30 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "Administrator")]
     [HttpGet("teachers")]
-    public IActionResult GetTeachers()
+    public async Task<IActionResult> GetTeachersAsync()
     {
-        var teachers = _context.Users
-            .Include(u => u.Role)
-            .Where(u => u.RoleId == UserRole.Teacher)
-            .Select(
-                u =>
-                    new
-                    {
-                        Id = u.Id,
-                        FirstName = u.Name,
-                        LastName = u.Surname,
-                        Patronymic = u.Patronymic
-                    }
-            );
-        return new JsonResult(teachers);
+        try
+        {
+            await GetUserAsync();
+            var teachers = _context.Users
+                .Include(u => u.Role)
+                .Where(u => u.RoleId == UserRole.Teacher)
+                .Select(
+                    u =>
+                        new
+                        {
+                            Id = u.Id,
+                            FirstName = u.Name,
+                            LastName = u.Surname,
+                            Patronymic = u.Patronymic
+                        }
+                );
+            return new JsonResult(teachers);
+        }
+        catch (Exception ex)
+        {
+            return ExceptionHandler.Handle(ex);
+        }
     }
 
     private async Task<bool> IsEmailUsedAsync(string email)
@@ -123,7 +132,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("refreshToken")]
-    public async Task<IActionResult> RefreshToken([FromBody] TokenModel? model)
+    public async Task<IActionResult> RefreshTokenAsync([FromBody] TokenModel? model)
     {
         if (model == null)
             return BadRequest(new { errorText = "Неверный RefreshToken" });
@@ -145,7 +154,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginModel model)
+    public async Task<IActionResult> LoginAsync([FromBody] LoginModel model)
     {
         try
         {
@@ -190,7 +199,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("signup")]
-    public async Task<IActionResult> Signup(
+    public async Task<IActionResult> SignupAsync(
         [FromBody] SignupModel model,
         UserRole role = UserRole.Student
     )
@@ -229,13 +238,21 @@ public class UserController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateAsync([FromBody] UserModel model)
     {
-        var role = (UserRole)Enum.Parse(typeof(UserRole), model.Role);
-        if (role == UserRole.Student)
-            return BadRequest(
-                new { Errors = new { Role = new List<string> { "Некорректная роль" } } }
-            );
+        try
+        {
+            await GetUserAsync();
+            var role = (UserRole)Enum.Parse(typeof(UserRole), model.Role);
+            if (role == UserRole.Student)
+                return BadRequest(
+                    new { Errors = new { Role = new List<string> { "Некорректная роль" } } }
+                );
 
-        return await Signup(model, role);
+            return await SignupAsync(model, role);
+        }
+        catch (Exception ex)
+        {
+            return ExceptionHandler.Handle(ex);
+        }
     }
 
     [Authorize(Roles = "Administrator")]
@@ -244,6 +261,7 @@ public class UserController : ControllerBase
     {
         try
         {
+            await GetUserAsync();
             var user = await _userService.GetAsync(id);
             if (user == null)
                 throw new UserNotFoundException();
@@ -263,6 +281,7 @@ public class UserController : ControllerBase
     {
         try
         {
+            await GetUserAsync();
             var user = await _context.Users.FirstOrDefaultAsync(u => u.ActivationLink == link);
             if (user == null)
                 throw new UserNotFoundException();

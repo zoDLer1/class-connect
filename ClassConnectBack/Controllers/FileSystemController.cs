@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ClassConnect.Controllers.Models;
@@ -11,10 +10,9 @@ namespace ClassConnect.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class FileSystemController : ControllerBase
+public class FileSystemController : Controller
 {
     private IFileSystemService _fileSystemService;
-    private IUserService _userService;
     private Context _context;
 
     public FileSystemController(
@@ -22,26 +20,10 @@ public class FileSystemController : ControllerBase
         IUserService userService,
         Context context
     )
+        : base(userService)
     {
         _fileSystemService = fileSystemService;
-        _userService = userService;
         _context = context;
-    }
-
-    private async Task<User> GetUserAsync()
-    {
-        var email = User.FindFirst(ClaimTypes.Email)?.Value;
-        if (email == null)
-            throw new UserNotFoundException();
-
-        var user = await _userService.GetByEmailAsync(email);
-        if (user == null)
-            throw new UserNotFoundException();
-
-        if (!user.IsActivated)
-            throw new AccessDeniedException();
-
-        return user;
     }
 
     [Authorize]
@@ -133,7 +115,7 @@ public class FileSystemController : ControllerBase
 
     [Authorize]
     [HttpPost("mark")]
-    public async Task<IActionResult> MarkWork([FromBody] WorkModel model)
+    public async Task<IActionResult> MarkWorkAsync([FromBody] WorkModel model)
     {
         try
         {
@@ -192,7 +174,7 @@ public class FileSystemController : ControllerBase
             var user = await GetUserAsync();
             await _fileSystemService.UpdateTypeAsync(
                 model.Id,
-                (Item) Enum.Parse(typeof(Item), model.Type),
+                (Item)Enum.Parse(typeof(Item), model.Type),
                 user
             );
         }
