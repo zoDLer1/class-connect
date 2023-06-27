@@ -45,15 +45,47 @@ public class UserController : Controller
     }
 
     [Authorize(Roles = "Administrator")]
-    [HttpGet("teachers")]
-    public async Task<IActionResult> GetTeachersAsync()
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetAsync(int id)
     {
         try
         {
             await GetUserAsync();
-            var teachers = _context.Users
+            var user = await _context.Users
                 .Include(u => u.Role)
-                .Where(u => u.RoleId == UserRole.Teacher)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null)
+                throw new UserNotFoundException();
+
+            return new JsonResult(
+                new
+                {
+                    Id = user.Id,
+                    FirstName = user.Name,
+                    LastName = user.Surname,
+                    Patronymic = user.Patronymic,
+                    Role = user.Role.Name
+                }
+            );
+        }
+        catch (Exception ex)
+        {
+            return ExceptionHandler.Handle(ex);
+        }
+    }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpGet("{role}")]
+    public async Task<IActionResult> GetByRoleAsync(UserRole role)
+    {
+        try
+        {
+            await GetUserAsync();
+            var users = _context.Users
+                .Include(u => u.Role)
+                .Where(u => u.RoleId == role)
+                .OrderBy(u => u.Name)
                 .Select(
                     u =>
                         new
@@ -61,15 +93,113 @@ public class UserController : Controller
                             Id = u.Id,
                             FirstName = u.Name,
                             LastName = u.Surname,
-                            Patronymic = u.Patronymic
+                            Patronymic = u.Patronymic,
+                            Role = u.Role.Name
                         }
                 );
-            return new JsonResult(teachers);
+            return new JsonResult(users);
         }
         catch (Exception ex)
         {
             return ExceptionHandler.Handle(ex);
         }
+    }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpGet()]
+    public async Task<IActionResult> GetAllAsync()
+    {
+        try
+        {
+            await GetUserAsync();
+            var users = _context.Users
+                .Include(u => u.Role)
+                .OrderByDescending(u => u.RoleId)
+                .ThenBy(u => u.Name)
+                .Select(
+                    u =>
+                        new
+                        {
+                            Id = u.Id,
+                            FirstName = u.Name,
+                            LastName = u.Surname,
+                            Patronymic = u.Patronymic,
+                            Role = u.Role.Name
+                        }
+                );
+            return new JsonResult(users);
+        }
+        catch (Exception ex)
+        {
+            return ExceptionHandler.Handle(ex);
+        }
+    }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpPost]
+    public async Task<IActionResult> CreateAsync([FromBody] UserModel model)
+    {
+        try
+        {
+            await GetUserAsync();
+            var role = (UserRole)Enum.Parse(typeof(UserRole), model.Role);
+            if (role == UserRole.Student)
+                return BadRequest(
+                    new { Errors = new { Role = new List<string> { "Некорректная роль" } } }
+                );
+
+            return await SignupAsync(model, role);
+        }
+        catch (Exception ex)
+        {
+            return ExceptionHandler.Handle(ex);
+        }
+    }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpDelete]
+    public async Task<IActionResult> DeleteAsync([FromBody] int id)
+    {
+        try
+        {
+            await GetUserAsync();
+            var user = await _userService.GetAsync(id);
+            if (user == null)
+                throw new UserNotFoundException();
+
+            await _userService.DeleteAsync(user.Id);
+        }
+        catch (Exception ex)
+        {
+            return ExceptionHandler.Handle(ex);
+        }
+
+        return Ok();
+    }
+
+    [HttpPost("activate")]
+    public async Task<IActionResult> ActivateAsync([FromBody] string link)
+    {
+        try
+        {
+            await GetUserAsync();
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.ActivationLink == link);
+            if (user == null)
+                throw new UserNotFoundException();
+
+            if (user.IsActivated)
+                return BadRequest(new { errorText = "Аккаунт уже активирован" });
+
+            user.IsActivated = true;
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            return ExceptionHandler.Handle(ex);
+        }
+
+        return Ok();
     }
 
     private async Task<bool> IsEmailUsedAsync(string email)
@@ -231,73 +361,6 @@ public class UserController : Controller
             model.Password,
             role
         );
-        return Ok();
-    }
-
-    [Authorize(Roles = "Administrator")]
-    [HttpPost]
-    public async Task<IActionResult> CreateAsync([FromBody] UserModel model)
-    {
-        try
-        {
-            await GetUserAsync();
-            var role = (UserRole)Enum.Parse(typeof(UserRole), model.Role);
-            if (role == UserRole.Student)
-                return BadRequest(
-                    new { Errors = new { Role = new List<string> { "Некорректная роль" } } }
-                );
-
-            return await SignupAsync(model, role);
-        }
-        catch (Exception ex)
-        {
-            return ExceptionHandler.Handle(ex);
-        }
-    }
-
-    [Authorize(Roles = "Administrator")]
-    [HttpDelete]
-    public async Task<IActionResult> DeleteAsync([FromBody] int id)
-    {
-        try
-        {
-            await GetUserAsync();
-            var user = await _userService.GetAsync(id);
-            if (user == null)
-                throw new UserNotFoundException();
-
-            await _userService.DeleteAsync(user.Id);
-        }
-        catch (Exception ex)
-        {
-            return ExceptionHandler.Handle(ex);
-        }
-
-        return Ok();
-    }
-
-    [HttpPost("activate")]
-    public async Task<IActionResult> ActivateAsync([FromBody] string link)
-    {
-        try
-        {
-            await GetUserAsync();
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.ActivationLink == link);
-            if (user == null)
-                throw new UserNotFoundException();
-
-            if (user.IsActivated)
-                return BadRequest(new { errorText = "Аккаунт уже активирован" });
-
-            user.IsActivated = true;
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            return ExceptionHandler.Handle(ex);
-        }
-
         return Ok();
     }
 }
