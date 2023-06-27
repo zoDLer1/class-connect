@@ -257,4 +257,28 @@ public class UserController : ControllerBase
 
         return Ok();
     }
+
+    [HttpPost("activate")]
+    public async Task<IActionResult> ActivateAsync([FromBody] string link)
+    {
+        try
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.ActivationLink == link);
+            if (user == null)
+                throw new UserNotFoundException();
+
+            if (user.IsActivated)
+                return BadRequest(new { errorText = "Аккаунт уже активирован" });
+
+            user.IsActivated = true;
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            return ExceptionHandler.Handle(ex);
+        }
+
+        return Ok();
+    }
 }

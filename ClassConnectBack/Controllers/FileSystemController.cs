@@ -38,6 +38,9 @@ public class FileSystemController : ControllerBase
         if (user == null)
             throw new UserNotFoundException();
 
+        if (!user.IsActivated)
+            throw new AccessDeniedException();
+
         return user;
     }
 
